@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="40" height="40">
+  <!-- ABM Tech — "The Stack Ascending". Standalone: no CSS vars, no gradient
+       ids, safe as a favicon, PWA icon and schema.org logo. -->
+  <rect width="40" height="40" rx="9" fill="#0d0e12"/>
+  <path d="M6 30.5 L10.6 30.5 L14.4 20.8 L9.8 20.8 Z" fill="#ff4500"/>
+  <path d="M14.1 30.5 L18.7 30.5 L24.2 15.6 L19.6 15.6 Z" fill="#ff6a00"/>
+  <path d="M22.2 30.5 L26.8 30.5 L34 10.4 L29.4 10.4 Z" fill="#ff8c00"/>
+  <rect x="6" y="32.3" width="28" height="1.4" rx="0.4" fill="#ff4500" opacity="0.45"/>
+  <rect x="32.6" y="6.8" width="2.8" height="2.8" rx="0.7" fill="#00f5d4"/>
+</svg>
