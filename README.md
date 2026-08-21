@@ -80,14 +80,28 @@ Type: **Syne** (headings) · **Inter** (body) · **JetBrains Mono** (small label
 `src/components/sections/Showcase.tsx`, driven by
 `src/lib/content/showcase.ts`.
 
+**One large frame plus a tab strip**, not a peeking scroll-snap row. The
+scroll-snap version had real problems: `mandatory` snapping combined with large
+edge padding made the first and last cards awkward to rest on, partial cards at
+the viewport edge read as clipped rather than as a hint, and dimming inactive
+cards looked like a rendering fault. A single frame also gives a screenshot the
+full width instead of two-thirds.
+
+Trade-off: no swipe gesture. Acceptable — the controls are explicit and the tab
+strip scrolls horizontally on a phone. Switching is a state change with a CSS
+crossfade; no JS animation loop.
+
 **Adding a screenshot:**
 
 1. Drop the image in `public/showcase/`
 2. Set `image: "/showcase/your-file.webp"` on that slide
 
-Recommended **1600×1000 (16:10), WebP, under 250 KB**. Until a slide has an
-image it renders a labelled placeholder frame — so the section looks
-intentional while you gather assets rather than looking broken.
+Recommended **1600×1000 (16:10), WebP, under 250 KB**.
+
+Until a slide has an image it renders **designed placeholder art** — browser
+chrome, the product name set large, a soft brand wash and skeleton rows. Six
+empty grey boxes read as a broken build; six of these read as a section pending
+its assets.
 
 Slides currently queued, awaiting screenshots:
 
@@ -99,11 +113,6 @@ Slides currently queued, awaiting screenshots:
 | Pharmacare | screenshot |
 | Herbal Care | screenshot + confirm the real product name |
 | Billing web app | screenshot |
-
-JS in the carousel does three things, none of them per-frame: `scrollIntoView`
-on control click, a throttled read of which card is centred, and arrow keys.
-
----
 
 ## Content
 

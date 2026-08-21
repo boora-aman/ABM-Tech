@@ -301,25 +301,6 @@
   animation-play-state: paused;
 }
 
-/* Carousel viewport — native scroll snap. No JS animation loop, so it is as
-   smooth as the browser's own scrolling because it IS the browser's own
-   scrolling. */
-.snap-row {
-  display: flex;
-  gap: 1.25rem;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  scroll-behavior: smooth;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-  overscroll-behavior-x: contain;
-}
-.snap-row::-webkit-scrollbar { display: none; }
-.snap-item {
-  scroll-snap-align: center;
-  flex: 0 0 auto;
-}
-
 /* Below-the-fold sections skip layout/paint until near the viewport. */
 .defer-paint {
   content-visibility: auto;

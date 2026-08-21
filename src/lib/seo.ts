@@ -85,10 +85,18 @@ export function organizationLd(): Json {
     ],
     address: {
       "@type": "PostalAddress",
+      ...(site.address.street ? { streetAddress: site.address.street } : {}),
       addressLocality: site.address.locality,
       addressRegion: site.address.region,
+      ...(site.address.postalCode ? { postalCode: site.address.postalCode } : {}),
       addressCountry: site.address.country,
     },
+    geo: {
+      "@type": "GeoCoordinates",
+      latitude: site.address.lat,
+      longitude: site.address.lng,
+    },
+    ...(site.address.mapsUrl ? { hasMap: site.address.mapsUrl } : {}),
   };
 }
 

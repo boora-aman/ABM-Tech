@@ -1,212 +1,186 @@
 "use client";
 
-import Link from "next/link";
 import Image from "next/image";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { Label, Chip } from "@/components/ui/Panel";
-import { Arrow } from "@/components/ui/Button";
+import { useCallback, useState } from "react";
+import { Card, Label, Chip, Tick } from "@/components/ui/Panel";
+import { ButtonLink, Arrow } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 import type { Slide } from "@/lib/content/showcase";
 
 /* ==========================================================================
-   SHOWCASE CAROUSEL
+   SHOWCASE
 
-   Built on native CSS scroll-snap rather than a JS transform loop. That is a
-   performance decision: the browser scrolls the track itself, on the
-   compositor, with real momentum and real trackpad/touch feel. A JS carousel
-   animating `translateX` every frame is exactly the kind of thing that made
-   the previous build feel heavy.
+   ONE large frame plus a tab strip, rather than a peeking scroll-snap row.
 
-   JS here does only three things, none of them per-frame:
-     • scrollIntoView on arrow/dot click
-     • read which card is centred (throttled to one rAF per scroll burst)
-     • keyboard arrows
+   The scroll-snap version had real problems: `scroll-snap-type: x mandatory`
+   combined with large asymmetric edge padding made the first and last cards
+   awkward to rest on, partial cards at the viewport edge read as clipped
+   rather than as a hint, and dimming the inactive cards looked like a
+   rendering fault instead of a deliberate focus effect.
 
-   Accessibility: it is a labelled region with a live index readout, the track
-   is keyboard-scrollable, and every control has a real accessible name.
+   A single frame is also simply better for screenshots: the product gets the
+   full width instead of two-thirds of it.
+
+   Cost: no swipe gesture. Acceptable, because the controls are explicit and
+   the tab strip is itself horizontally scrollable on a phone. Switching slides
+   is a state change with a CSS crossfade — no JS animation loop, nothing
+   per-frame.
    ========================================================================== */
 
 export function Showcase({ slides }: { slides: Slide[] }) {
-  const trackRef = useRef<HTMLDivElement>(null);
-  const [index, setIndex] = useState(0);
-  const frame = useRef(0);
+  const [i, setI] = useState(0);
+  const active = slides[i];
 
-  /** Which card is nearest the centre of the viewport. */
-  const measure = useCallback(() => {
-    const track = trackRef.current;
-    if (!track) return;
-    const mid = track.scrollLeft + track.clientWidth / 2;
-    let best = 0;
-    let bestDist = Infinity;
-    Array.from(track.children).forEach((child, i) => {
-      const el = child as HTMLElement;
-      const c = el.offsetLeft + el.offsetWidth / 2;
-      const d = Math.abs(c - mid);
-      if (d < bestDist) {
-        bestDist = d;
-        best = i;
-      }
-    });
-    setIndex(best);
-  }, []);
+  const step = useCallback(
+    (dir: 1 | -1) => setI((v) => (v + dir + slides.length) % slides.length),
+    [slides.length],
+  );
 
-  // One passive listener, coalesced to a single rAF — never a setState per
-  // scroll event.
-  useEffect(() => {
-    const track = trackRef.current;
-    if (!track) return;
-    const onScroll = () => {
-      if (frame.current) return;
-      frame.current = requestAnimationFrame(() => {
-        frame.current = 0;
-        measure();
-      });
-    };
-    track.addEventListener("scroll", onScroll, { passive: true });
-    measure();
-    return () => {
-      track.removeEventListener("scroll", onScroll);
-      if (frame.current) cancelAnimationFrame(frame.current);
-    };
-  }, [measure]);
-
-  const goTo = useCallback((i: number) => {
-    const track = trackRef.current;
-    if (!track) return;
-    const el = track.children[i] as HTMLElement | undefined;
-    if (!el) return;
-    track.scrollTo({
-      left: el.offsetLeft - (track.clientWidth - el.offsetWidth) / 2,
-      behavior: "smooth",
-    });
-  }, []);
-
-  const step = (dir: 1 | -1) =>
-    goTo(Math.min(slides.length - 1, Math.max(0, index + dir)));
+  if (!active) return null;
 
   return (
-    <section id="showcase" className="defer-paint py-20 sm:py-24">
-      <div className="page-x">
-        <div className="bay mb-10 flex flex-wrap items-end justify-between gap-6">
+    <section id="showcase" className="defer-paint page-x py-20 sm:py-24">
+      <div className="bay">
+        {/* ------------------------------ Heading ---------------------------- */}
+        <div className="mb-9 flex flex-wrap items-end justify-between gap-6">
           <div>
             <Label className="mb-4">What we&apos;ve built</Label>
             <h2 className="t-h1 max-w-xl">
-              Products already running for
+              Products already running
               <br />
-              <span className="brand-text">real businesses.</span>
+              <span className="brand-text">for real businesses.</span>
             </h2>
           </div>
 
-          {/* Transport controls */}
           <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={() => step(-1)}
-              disabled={index === 0}
               aria-label="Previous product"
-              className="grid size-10 place-items-center rounded-sm border border-line text-ink-dim transition-colors hover:border-line-strong hover:text-ink disabled:opacity-35 disabled:hover:border-line"
+              className="grid size-10 place-items-center rounded-sm border border-line text-ink-dim transition-colors hover:border-line-strong hover:text-ink"
             >
               <Chevron dir="left" />
             </button>
-            <span
-              className="label tabular-nums"
-              aria-live="polite"
-              aria-atomic="true"
-            >
-              {String(index + 1).padStart(2, "0")} / {String(slides.length).padStart(2, "0")}
+            <span className="label tabular-nums" aria-live="polite" aria-atomic="true">
+              {String(i + 1).padStart(2, "0")} / {String(slides.length).padStart(2, "0")}
             </span>
             <button
               type="button"
               onClick={() => step(1)}
-              disabled={index === slides.length - 1}
               aria-label="Next product"
-              className="grid size-10 place-items-center rounded-sm border border-line text-ink-dim transition-colors hover:border-line-strong hover:text-ink disabled:opacity-35 disabled:hover:border-line"
+              className="grid size-10 place-items-center rounded-sm border border-line text-ink-dim transition-colors hover:border-line-strong hover:text-ink"
             >
               <Chevron dir="right" />
             </button>
           </div>
         </div>
-      </div>
 
-      {/* The track. Bleeds to the viewport edge so partial cards signal
-          scrollability without a hint needing to say so. */}
-      <div
-        ref={trackRef}
-        role="region"
-        aria-label="Product showcase — scroll or use arrow keys"
-        tabIndex={0}
-        onKeyDown={(e) => {
-          if (e.key === "ArrowRight") { e.preventDefault(); step(1); }
-          if (e.key === "ArrowLeft") { e.preventDefault(); step(-1); }
-        }}
-        className="snap-row px-[max(1.125rem,calc((100vw-78rem)/2+1.125rem))] pb-4 sm:px-[max(4rem,calc((100vw-78rem)/2))]"
-      >
-        {slides.map((s, i) => (
-          <article
-            key={s.id}
-            aria-roledescription="slide"
-            aria-label={`${i + 1} of ${slides.length}: ${s.title}`}
-            className={cn(
-              "snap-item card-lift lift w-[min(88vw,42rem)] overflow-hidden",
-              i !== index && "opacity-70 transition-opacity duration-500",
-              i === index && "opacity-100 transition-opacity duration-500",
-            )}
-          >
-            {/* Frame */}
-            <div className="relative aspect-[16/10] border-b border-line bg-page">
-              {s.image ? (
+        {/* ------------------------------- Tabs ------------------------------ */}
+        <div
+          role="tablist"
+          aria-label="Products"
+          className="mb-6 flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        >
+          {slides.map((s, idx) => (
+            <button
+              key={s.id}
+              role="tab"
+              id={`tab-${s.id}`}
+              aria-selected={idx === i}
+              aria-controls="showcase-panel"
+              onClick={() => setI(idx)}
+              onKeyDown={(e) => {
+                if (e.key === "ArrowRight") { e.preventDefault(); step(1); }
+                if (e.key === "ArrowLeft") { e.preventDefault(); step(-1); }
+              }}
+              className={cn(
+                "shrink-0 rounded-sm border px-4 py-2.5 text-[0.875rem] font-medium transition-colors",
+                idx === i
+                  ? "border-brand bg-tint text-brand-ink"
+                  : "border-line text-ink-dim hover:border-line-strong hover:text-ink",
+              )}
+            >
+              {s.title}
+            </button>
+          ))}
+        </div>
+
+        {/* ------------------------------ The panel -------------------------- */}
+        <Card
+          raised
+          id="showcase-panel"
+          role="tabpanel"
+          aria-labelledby={`tab-${active.id}`}
+          className="overflow-hidden"
+        >
+          <div className="grid lg:grid-cols-[1.35fr_1fr]">
+            {/* Frame — keyed so React remounts it and the CSS fade replays */}
+            <div
+              key={active.id}
+              className="fade relative aspect-[16/10] border-b border-line bg-page lg:border-r lg:border-b-0"
+            >
+              {active.image ? (
                 <Image
-                  src={s.image}
-                  alt={`${s.title} — ${s.kicker}`}
+                  src={active.image}
+                  alt={`${active.title} — ${active.kicker}`}
                   fill
-                  sizes="(max-width: 640px) 88vw, 42rem"
+                  sizes="(max-width: 1024px) 100vw, 55vw"
                   className="object-cover"
                   priority={i === 0}
                 />
               ) : (
-                <Placeholder title={s.title} />
+                <Placeholder slide={active} />
               )}
             </div>
 
-            {/* Body */}
-            <div className="p-6 sm:p-7">
-              <div className="mb-3 flex flex-wrap items-center gap-2">
-                {s.tags.slice(0, 4).map((t) => (
+            {/* Copy */}
+            <div key={`${active.id}-copy`} className="fade flex flex-col p-6 sm:p-8">
+              <div className="mb-4 flex flex-wrap gap-2">
+                {active.tags.map((t) => (
                   <Chip key={t}>{t}</Chip>
                 ))}
               </div>
-              <h3 className="t-h3 mb-1.5">{s.title}</h3>
-              <p className="label mb-4 normal-case tracking-normal! text-ink-faint!">
-                {s.kicker}
-              </p>
-              <p className="mb-6 text-[0.9375rem] leading-relaxed text-ink-dim">
-                {s.summary}
-              </p>
-              <Link
-                href={`/services/${s.serviceSlug}`}
-                className="group/btn inline-flex items-center gap-2 text-[0.875rem] font-medium brand-text"
-              >
-                How we build this
-                <Arrow />
-              </Link>
-            </div>
-          </article>
-        ))}
-      </div>
 
-      {/* Dots */}
-      <div className="page-x mt-4">
-        <div className="bay flex items-center gap-2">
-          {slides.map((s, i) => (
+              <h3 className="t-h3 mb-2">{active.title}</h3>
+              <p className="mb-5 text-[0.875rem] font-medium brand-text">
+                {active.kicker}
+              </p>
+              <p className="mb-7 text-[0.9375rem] leading-relaxed text-ink-dim">
+                {active.summary}
+              </p>
+
+              <div className="mt-auto flex flex-wrap items-center gap-3 border-t border-line pt-6">
+                <ButtonLink
+                  href={`/services/${active.serviceSlug}`}
+                  variant="outline"
+                  size="sm"
+                >
+                  How we build this
+                  <Arrow />
+                </ButtonLink>
+                {active.liveUrl && (
+                  <ButtonLink href={active.liveUrl} variant="ghost" size="sm" external>
+                    Visit live
+                    <Arrow />
+                  </ButtonLink>
+                )}
+              </div>
+            </div>
+          </div>
+        </Card>
+
+        {/* Progress dots */}
+        <div className="mt-5 flex items-center gap-2">
+          {slides.map((s, idx) => (
             <button
               key={s.id}
               type="button"
-              onClick={() => goTo(i)}
-              aria-label={`Go to ${s.title}`}
-              aria-current={i === index}
+              onClick={() => setI(idx)}
+              aria-label={`Show ${s.title}`}
+              aria-current={idx === i}
               className={cn(
                 "h-1.5 rounded-full transition-all duration-300",
-                i === index ? "w-7 bg-brand" : "w-1.5 bg-line-strong hover:bg-ink-faint",
+                idx === i ? "w-8 bg-brand" : "w-1.5 bg-line-strong hover:bg-ink-faint",
               )}
             />
           ))}
@@ -217,33 +191,62 @@ export function Showcase({ slides }: { slides: Slide[] }) {
 }
 
 /**
- * Placeholder frame for slides without a screenshot yet. Deliberately looks
- * like an intentional empty state — a labelled window chrome — rather than a
- * broken image, so the section is presentable before the assets arrive.
+ * Placeholder art for slides awaiting a screenshot.
+ *
+ * Deliberately designed rather than an empty grey box: a browser-chrome frame
+ * with the product name set large, a soft brand wash, and the feature list
+ * rendered as skeleton rows. Six empty boxes read as a broken build; six of
+ * these read as a section that is simply pending its assets.
  */
-function Placeholder({ title }: { title: string }) {
+function Placeholder({ slide }: { slide: Slide }) {
   return (
-    <div className="absolute inset-0 flex flex-col">
-      <div className="flex items-center gap-2 border-b border-line px-4 py-3">
+    <div className="absolute inset-0 flex flex-col overflow-hidden">
+      {/* Window chrome */}
+      <div className="flex items-center gap-2 border-b border-line bg-surface px-4 py-3">
         <span className="flex gap-1.5" aria-hidden>
-          <span className="size-2.5 rounded-full bg-line-strong" />
+          <span className="size-2.5 rounded-full bg-brand/45" />
           <span className="size-2.5 rounded-full bg-line-strong" />
           <span className="size-2.5 rounded-full bg-line-strong" />
         </span>
-        <span className="label ml-1 truncate">{title}</span>
+        <span className="label ml-1 truncate normal-case tracking-normal!">
+          {slide.title}
+        </span>
       </div>
-      <div className="grid flex-1 place-items-center p-6">
-        <div className="text-center">
-          <svg
-            width="34" height="34" viewBox="0 0 24 24" fill="none" aria-hidden
-            className="mx-auto mb-3 text-ink-faint"
-          >
-            <rect x="3" y="4" width="18" height="14" rx="2" stroke="currentColor" strokeWidth="1.4" />
-            <path d="M3 14.5l4.5-4 3.5 3 3.5-4L21 14" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
-            <circle cx="9" cy="8.5" r="1.2" fill="currentColor" />
-          </svg>
-          <p className="label">Screenshot coming</p>
+
+      {/* Body */}
+      <div
+        className="relative flex flex-1 flex-col justify-between p-5 sm:p-7"
+        style={{
+          background:
+            "linear-gradient(140deg, var(--t-tint), transparent 55%), var(--t-page)",
+        }}
+      >
+        <div>
+          <p className="font-display text-2xl leading-tight font-semibold sm:text-3xl">
+            {slide.title}
+          </p>
+          <p className="mt-2 max-w-sm text-[0.875rem] text-ink-dim">
+            {slide.kicker}
+          </p>
         </div>
+
+        {/* Skeleton rows — suggest an interface without inventing a fake one */}
+        <div className="my-5 space-y-2.5" aria-hidden>
+          {[92, 74, 84, 60].map((w, n) => (
+            <div key={n} className="flex items-center gap-2.5">
+              <span className="size-4 shrink-0 rounded-[3px] border border-line bg-surface" />
+              <span
+                className="h-2 rounded-full bg-line-strong/60"
+                style={{ width: `${w}%`, maxWidth: "22rem" }}
+              />
+            </div>
+          ))}
+        </div>
+
+        <p className="label flex items-center gap-2">
+          <Tick className="size-3.5!" />
+          Screenshot coming soon
+        </p>
       </div>
     </div>
   );
@@ -254,7 +257,8 @@ function Chevron({ dir }: { dir: "left" | "right" }) {
     <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden>
       <path
         d={dir === "left" ? "M10 3 5 8l5 5" : "M6 3l5 5-5 5"}
-        stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"
+        stroke="currentColor" strokeWidth="1.6"
+        strokeLinecap="round" strokeLinejoin="round"
       />
     </svg>
   );

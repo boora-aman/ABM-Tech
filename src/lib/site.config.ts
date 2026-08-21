@@ -31,7 +31,7 @@ export const site = {
   founded: "2024",
 
   contact: {
-    email: or(process.env.NEXT_PUBLIC_CONTACT_EMAIL, "b00raaman@gmail.com"),
+    email: or(process.env.NEXT_PUBLIC_CONTACT_EMAIL, "contact@abmtech.in"),
     phoneE164: or(process.env.NEXT_PUBLIC_PHONE_E164, "+919119756710"),
     phoneDisplay: or(process.env.NEXT_PUBLIC_PHONE_DISPLAY, "+91 91197 56710"),
     whatsapp: or(process.env.NEXT_PUBLIC_WHATSAPP, "919119756710"),
@@ -39,11 +39,18 @@ export const site = {
       "Hi ABM Tech — I'd like to discuss a system for my business.",
   },
 
+  /** Keep byte-identical to your Google Business Profile — mismatched NAP
+   *  across your site, schema and listings actively suppresses local ranking. */
   address: {
+    street: or(process.env.NEXT_PUBLIC_ADDR_STREET, ""), // TODO: street + area
     locality: or(process.env.NEXT_PUBLIC_ADDR_CITY, "Dehradun"),
     region: or(process.env.NEXT_PUBLIC_ADDR_REGION, "Uttarakhand"),
+    postalCode: or(process.env.NEXT_PUBLIC_ADDR_POSTAL, "248001"),
     country: "IN",
     countryName: "India",
+    lat: Number(or(process.env.NEXT_PUBLIC_GEO_LAT, "30.3165")),
+    lng: Number(or(process.env.NEXT_PUBLIC_GEO_LNG, "78.0322")),
+    mapsUrl: or(process.env.NEXT_PUBLIC_MAPS_URL, ""), // TODO: GBP share link
   },
 
   hours: [
@@ -52,11 +59,14 @@ export const site = {
 
   serviceAreas: ["India", "Remote / Worldwide"],
 
+  /** Leave a URL empty and that icon is simply not rendered — no dead links. */
   socials: [
     { key: "linkedin", label: "LinkedIn", url: or(process.env.NEXT_PUBLIC_LINKEDIN, "") },
-    { key: "github", label: "GitHub", url: or(process.env.NEXT_PUBLIC_GITHUB, "") },
     { key: "instagram", label: "Instagram", url: or(process.env.NEXT_PUBLIC_INSTAGRAM, "") },
+    { key: "facebook", label: "Facebook", url: or(process.env.NEXT_PUBLIC_FACEBOOK, "") },
     { key: "x", label: "X", url: or(process.env.NEXT_PUBLIC_X, "") },
+    { key: "youtube", label: "YouTube", url: or(process.env.NEXT_PUBLIC_YOUTUBE, "") },
+    { key: "github", label: "GitHub", url: or(process.env.NEXT_PUBLIC_GITHUB, "") },
   ] as const,
 
   verification: {
