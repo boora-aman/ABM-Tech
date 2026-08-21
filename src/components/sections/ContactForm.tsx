@@ -2,10 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { Field, TextArea, Select, Segments } from "@/components/ui/Field";
 import { Button, ButtonLink, Arrow } from "@/components/ui/Button";
-import { Panel, Datum, Rule } from "@/components/ui/Panel";
+import { Card, Rule } from "@/components/ui/Panel";
 import { leadSchema } from "@/lib/validators";
 import { whatsappLink } from "@/lib/site.config";
 import { services } from "@/lib/content/services";
@@ -32,7 +31,6 @@ type State =
   | { kind: "error"; message: string };
 
 export function ContactForm() {
-  const reduce = useReducedMotion();
   const params = useSearchParams();
   const formRef = useRef<HTMLFormElement>(null);
   const renderedAt = useRef(0);
@@ -115,15 +113,10 @@ export function ContactForm() {
 
   if (state.kind === "sent") {
     return (
-      <Panel marks className="p-7 sm:p-10">
-        <motion.div
-          initial={reduce ? undefined : { opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          role="status"
-          aria-live="polite"
-        >
+      <Card raised className="p-7 sm:p-10">
+        <div className="rise" role="status" aria-live="polite">
           <div className="mb-6 flex items-center gap-2.5">
-            <Datum className="pulse-dot" />
+            <span aria-hidden className="size-1.5 rounded-full bg-brand" />
             <span className="meta-bright">Received</span>
           </div>
           <h2 className="t-h2 mb-4 font-display">That&apos;s in.</h2>
@@ -136,24 +129,24 @@ export function ContactForm() {
           {state.note && <p className="meta mb-6">{state.note}</p>}
           <Rule className="my-7" />
           <div className="flex flex-wrap gap-3">
-            <ButtonLink href={whatsappLink()} variant="flare" size="lg" external>
+            <ButtonLink href={whatsappLink()} variant="primary" size="lg" external>
               Continue on WhatsApp
               <Arrow />
             </ButtonLink>
-            <Button variant="glass" size="lg" onClick={() => setState({ kind: "idle" })}>
+            <Button variant="outline" size="lg" onClick={() => setState({ kind: "idle" })}>
               Send another
             </Button>
           </div>
-        </motion.div>
-      </Panel>
+        </div>
+      </Card>
     );
   }
 
   return (
-    <Panel marks as="div" className="p-6 sm:p-8">
+    <Card raised className="p-6 sm:p-8">
       <form ref={formRef} onSubmit={onSubmit} noValidate>
         <div className="mb-7 flex items-center gap-2.5">
-          <Datum className="pulse-dot" />
+          <span aria-hidden className="size-1.5 rounded-full bg-brand" />
           <span className="meta-bright">Project enquiry</span>
         </div>
 
@@ -195,24 +188,16 @@ export function ContactForm() {
           <input id="website-hp" name="website" type="text" tabIndex={-1} autoComplete="off" />
         </div>
 
-        <AnimatePresence>
-          {state.kind === "error" && (
-            <motion.p
-              role="alert"
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              className="mt-6 overflow-hidden"
-            >
-              <span className="block rounded-tight border border-hair-warm bg-flare/8 px-4 py-3 text-[0.875rem] leading-relaxed text-flare-hi">
-                {state.message}
-              </span>
-            </motion.p>
-          )}
-        </AnimatePresence>
+        {state.kind === "error" && (
+          <p role="alert" className="rise mt-6">
+            <span className="block rounded-sm border border-brand/35 bg-tint px-4 py-3 text-[0.875rem] leading-relaxed brand-text">
+              {state.message}
+            </span>
+          </p>
+        )}
 
         <div className="mt-8 flex flex-wrap items-center gap-3">
-          <Button type="submit" variant="flare" size="lg" disabled={state.kind === "sending"}>
+          <Button type="submit" variant="primary" size="lg" disabled={state.kind === "sending"}>
             {state.kind === "sending" ? (
               <>
                 <Spinner />
@@ -225,7 +210,7 @@ export function ContactForm() {
               </>
             )}
           </Button>
-          <ButtonLink href={whatsappLink()} variant="glass" size="lg" external>
+          <ButtonLink href={whatsappLink()} variant="outline" size="lg" external>
             Or WhatsApp instead
           </ButtonLink>
         </div>
@@ -235,23 +220,18 @@ export function ContactForm() {
           no resale, no third-party CRM sync. Deleted on request.
         </p>
       </form>
-    </Panel>
+    </Card>
   );
 }
 
 function Spinner() {
   return (
-    <motion.svg
-      width="15"
-      height="15"
-      viewBox="0 0 16 16"
-      fill="none"
-      aria-hidden
-      animate={{ rotate: 360 }}
-      transition={{ duration: 0.9, repeat: Infinity, ease: "linear" }}
+    <svg
+      width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden
+      className="animate-spin"
     >
       <circle cx="8" cy="8" r="6" stroke="currentColor" strokeWidth="2" opacity="0.3" />
       <path d="M14 8a6 6 0 0 0-6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-    </motion.svg>
+    </svg>
   );
 }

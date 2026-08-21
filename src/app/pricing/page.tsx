@@ -2,13 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { PageHead } from "@/components/sections/PageHead";
 import { Faq } from "@/components/sections/Faq";
-import { Panel, Rule, SectionLabel, Tag, Datum } from "@/components/ui/Panel";
-import { Reveal, Stagger, StaggerItem } from "@/components/motion";
+import { Card, Rule, Label, Chip, Tick } from "@/components/ui/Panel";
 import { ButtonLink, Arrow } from "@/components/ui/Button";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { services } from "@/lib/content/services";
 import { pageMeta, graph, breadcrumbLd, faqLd, serviceLd } from "@/lib/seo";
 import { inr, inrShort } from "@/lib/utils";
+import { Reveal, Stagger, StaggerItem } from "@/components/motion";
 
 export const metadata: Metadata = pageMeta({
   title: "Pricing — every service, every figure, in the open",
@@ -69,7 +69,6 @@ export default function PricingPage() {
       />
 
       <PageHead
-        index="02"
         label="Pricing"
         title="Published, itemised,"
         titleAccent="and exclusive of hand-waving."
@@ -79,10 +78,10 @@ export default function PricingPage() {
           { name: "Pricing", path: "/pricing" },
         ]}
         aside={
-          <Panel marks className="p-6">
+          <Card className="p-6">
             <div className="mb-4 flex items-center gap-2.5">
-              <Datum className="pulse-dot" />
-              <span className="meta-bright">Entry point</span>
+              <span aria-hidden className="size-1.5 rounded-full bg-brand" />
+              <span className="label">Entry point</span>
             </div>
             <div className="mb-2 font-display text-4xl tracking-[-0.03em]">
               {inr(floor.from)}
@@ -93,14 +92,14 @@ export default function PricingPage() {
             </p>
             <ButtonLink
               href={`/services/${floor.slug}`}
-              variant="flare"
+              variant="primary"
               size="md"
               className="w-full"
             >
               See what it includes
               <Arrow />
             </ButtonLink>
-          </Panel>
+          </Card>
         }
       />
 
@@ -110,9 +109,9 @@ export default function PricingPage() {
       <section className="page-x py-16">
         <div className="bay">
           <Reveal>
-            <SectionLabel index="A" className="mb-8">
+            <Label  className="mb-8">
               All services at a glance
-            </SectionLabel>
+            </Label>
           </Reveal>
 
           <Reveal delay={0.05}>
@@ -124,11 +123,11 @@ export default function PricingPage() {
                 </caption>
                 <thead>
                   <tr className="border-b border-hair">
-                    <th scope="col" className="meta py-3.5 pr-4">Service</th>
-                    <th scope="col" className="meta py-3.5 pr-4">From</th>
-                    <th scope="col" className="meta py-3.5 pr-4">Billing</th>
-                    <th scope="col" className="meta py-3.5 pr-4">Timeline</th>
-                    <th scope="col" className="meta py-3.5">Best for</th>
+                    <th scope="col" className="label py-3.5 pr-4">Service</th>
+                    <th scope="col" className="label py-3.5 pr-4">From</th>
+                    <th scope="col" className="label py-3.5 pr-4">Billing</th>
+                    <th scope="col" className="label py-3.5 pr-4">Timeline</th>
+                    <th scope="col" className="label py-3.5">Best for</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -181,26 +180,26 @@ export default function PricingPage() {
       <section className="page-x py-16 sm:py-20">
         <div className="bay">
           <Reveal>
-            <SectionLabel index="B" className="mb-9">
+            <Label  className="mb-9">
               What each figure buys
-            </SectionLabel>
+            </Label>
           </Reveal>
 
           <Stagger className="grid gap-5 md:grid-cols-2 xl:grid-cols-3" step={0.05}>
             {services.map((s) => (
               <StaggerItem key={s.slug} className="h-full">
-                <Panel leak className="flex h-full flex-col p-6">
+                <Card leak className="flex h-full flex-col p-6">
                   <div className="mb-5 flex items-start justify-between gap-3">
                     <span className="font-mono text-[0.625rem] tabular-nums text-flare/70">
                       [{s.index}]
                     </span>
-                    <Tag hot={s.priceMode !== "quote"}>
+                    <Chip brand={s.priceMode !== "quote"}>
                       {s.priceMode === "retainer"
                         ? "Monthly"
                         : s.priceMode === "quote"
                           ? "Quote"
                           : "One-off"}
-                    </Tag>
+                    </Chip>
                   </div>
 
                   <h3 className="t-h3 mb-3 font-display">{s.title}</h3>
@@ -209,7 +208,7 @@ export default function PricingPage() {
                     <span className="font-display text-3xl tracking-[-0.03em] tabular-nums">
                       {s.from > 0 ? inrShort(s.from) : "—"}
                     </span>
-                    <span className="meta">
+                    <span className="label">
                       {s.from > 0 ? "starting" : "after audit"}
                     </span>
                   </div>
@@ -221,12 +220,12 @@ export default function PricingPage() {
                   <ul className="mb-5 flex-1 space-y-2">
                     {s.deliverables.slice(0, 5).map((d) => (
                       <li key={d} className="flex gap-2.5 text-[0.8125rem] leading-snug">
-                        <Datum className="mt-1.5 shrink-0" />
+                        <Tick />
                         <span className="text-ink-dim">{d}</span>
                       </li>
                     ))}
                     {s.deliverables.length > 5 && (
-                      <li className="meta pl-4">
+                      <li className="label pl-4">
                         +{s.deliverables.length - 5} more
                       </li>
                     )}
@@ -234,28 +233,28 @@ export default function PricingPage() {
 
                   {s.excludes && s.excludes.length > 0 && (
                     <p className="mb-5 text-[0.75rem] leading-relaxed text-ink-faint">
-                      <span className="meta">Excludes: </span>
+                      <span className="label">Excludes: </span>
                       {s.excludes.join(" · ")}
                     </p>
                   )}
 
                   <ButtonLink
                     href={`/services/${s.slug}`}
-                    variant="glass"
+                    variant="outline"
                     size="sm"
                     className="w-full"
                   >
                     Full detail
                     <Arrow />
                   </ButtonLink>
-                </Panel>
+                </Card>
               </StaggerItem>
             ))}
           </Stagger>
 
           <Reveal delay={0.08}>
-            <Panel className="mt-8 p-6 sm:p-8">
-              <SectionLabel className="mb-5">Where projects actually land</SectionLabel>
+            <Card className="mt-8 p-6 sm:p-8">
+              <Label className="mb-5">Where projects actually land</Label>
               <p className="max-w-3xl text-[0.9375rem] leading-relaxed text-ink-dim">
                 The figures above are genuine floors, not bait. A ₹15,000 ERP is a
                 single-location system with inventory, billing and reporting; a
@@ -266,7 +265,7 @@ export default function PricingPage() {
                 We tell you which bracket you are in on the first call — before
                 you have spent anything.
               </p>
-            </Panel>
+            </Card>
           </Reveal>
         </div>
       </section>
@@ -274,7 +273,7 @@ export default function PricingPage() {
       <Rule />
       <Faq
         items={PRICING_FAQS}
-        index="C"
+        
         label="Pricing FAQ"
         title="About the money"
         lead="The commercial questions, answered before you have to ask them."

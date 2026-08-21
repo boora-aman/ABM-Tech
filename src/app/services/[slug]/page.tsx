@@ -3,8 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PageHead } from "@/components/sections/PageHead";
 import { Faq } from "@/components/sections/Faq";
-import { Panel, Rule, SectionLabel, Tag, Datum } from "@/components/ui/Panel";
-import { Reveal, Stagger, StaggerItem } from "@/components/motion";
+import { Card, Rule, Label, Chip } from "@/components/ui/Panel";
 import { ButtonLink, Arrow } from "@/components/ui/Button";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { services, serviceBySlug } from "@/lib/content/services";
@@ -12,6 +11,7 @@ import { projects } from "@/lib/content/work";
 import { pageMeta, graph, breadcrumbLd, serviceLd, faqLd } from "@/lib/seo";
 import { inr, inrShort } from "@/lib/utils";
 import { whatsappLink } from "@/lib/site.config";
+import { Reveal, Stagger, StaggerItem } from "@/components/motion";
 
 type RouteParams = { params: Promise<{ slug: string }> };
 
@@ -54,7 +54,6 @@ export default async function ServicePage({ params }: RouteParams) {
       />
 
       <PageHead
-        index={s.index}
         label="Service"
         title={s.title}
         lead={s.summary}
@@ -64,17 +63,17 @@ export default async function ServicePage({ params }: RouteParams) {
           { name: s.short, path: `/services/${s.slug}` },
         ]}
         aside={
-          <Panel marks className="p-6">
+          <Card className="p-6">
             <div className="mb-5 flex items-center gap-2.5">
-              <Datum className="pulse-dot" />
-              <span className="meta-bright">At a glance</span>
+              <span aria-hidden className="size-1.5 rounded-full bg-brand" />
+              <span className="label">At a glance</span>
             </div>
 
             <div className="mb-5">
               <div className="font-display text-4xl tracking-[-0.03em] tabular-nums">
                 {s.from > 0 ? inr(s.from) : "On request"}
               </div>
-              <div className="meta mt-2">
+              <div className="label mt-2">
                 {s.priceMode === "retainer"
                   ? "per month, ex-GST"
                   : s.priceMode === "quote"
@@ -90,14 +89,14 @@ export default async function ServicePage({ params }: RouteParams) {
             </dl>
 
             <div className="mb-6 border-t border-hair pt-4">
-              <span className="meta mb-2 block">Best for</span>
+              <span className="label mb-2 block">Best for</span>
               <p className="text-[0.8125rem] leading-relaxed">{s.bestFor}</p>
             </div>
 
             <div className="flex flex-col gap-2">
               <ButtonLink
                 href={`/contact?service=${s.slug}`}
-                variant="flare"
+                variant="primary"
                 size="md"
                 className="w-full"
               >
@@ -106,7 +105,7 @@ export default async function ServicePage({ params }: RouteParams) {
               </ButtonLink>
               <ButtonLink
                 href={whatsappLink(`Hi ABM Tech — I'm interested in ${s.title}.`)}
-                variant="glass"
+                variant="outline"
                 size="md"
                 external
                 className="w-full"
@@ -114,7 +113,7 @@ export default async function ServicePage({ params }: RouteParams) {
                 WhatsApp
               </ButtonLink>
             </div>
-          </Panel>
+          </Card>
         }
       />
 
@@ -129,14 +128,14 @@ export default async function ServicePage({ params }: RouteParams) {
             </p>
           </Reveal>
           <Reveal delay={0.08}>
-            <Panel className="p-6">
-              <SectionLabel className="mb-5">Typical stack</SectionLabel>
+            <Card className="p-6">
+              <Label className="mb-5">Typical stack</Label>
               <div className="flex flex-wrap gap-1.5">
                 {s.stack.map((t) => (
-                  <Tag key={t}>{t}</Tag>
+                  <Chip key={t}>{t}</Chip>
                 ))}
               </div>
-            </Panel>
+            </Card>
           </Reveal>
         </div>
       </section>
@@ -147,9 +146,9 @@ export default async function ServicePage({ params }: RouteParams) {
       <section className="page-x py-16 sm:py-20">
         <div className="bay">
           <Reveal>
-            <SectionLabel index="A" className="mb-9">
+            <Label  className="mb-9">
               What you get
-            </SectionLabel>
+            </Label>
           </Reveal>
           <div className="grid gap-10 lg:grid-cols-[1.3fr_1fr] lg:gap-14">
             <Stagger className="border-t border-hair" step={0.03}>
@@ -169,8 +168,8 @@ export default async function ServicePage({ params }: RouteParams) {
 
             {s.excludes && s.excludes.length > 0 && (
               <Reveal delay={0.08}>
-                <Panel className="p-6">
-                  <SectionLabel className="mb-5">Not included</SectionLabel>
+                <Card className="p-6">
+                  <Label className="mb-5">Not included</Label>
                   <ul className="space-y-3">
                     {s.excludes.map((e) => (
                       <li
@@ -190,7 +189,7 @@ export default async function ServicePage({ params }: RouteParams) {
                     Listed as plainly as the inclusions. Anything here can be
                     scoped on top — quoted before it starts, never assumed.
                   </p>
-                </Panel>
+                </Card>
               </Reveal>
             )}
           </div>
@@ -203,14 +202,14 @@ export default async function ServicePage({ params }: RouteParams) {
       <section className="page-x py-16 sm:py-20">
         <div className="bay">
           <Reveal>
-            <SectionLabel index="B" className="mb-9">
+            <Label  className="mb-9">
               How it works
-            </SectionLabel>
+            </Label>
           </Reveal>
           <Stagger className="grid gap-5 md:grid-cols-2" step={0.05}>
             {s.capabilities.map((c, i) => (
               <StaggerItem key={c.title} className="h-full">
-                <Panel leak className="flex h-full flex-col p-6">
+                <Card leak className="flex h-full flex-col p-6">
                   <span className="mb-4 font-mono text-[0.625rem] tabular-nums text-flare/70">
                     [{String(i + 1).padStart(2, "0")}]
                   </span>
@@ -218,7 +217,7 @@ export default async function ServicePage({ params }: RouteParams) {
                   <p className="text-[0.875rem] leading-[1.7] text-ink-dim">
                     {c.body}
                   </p>
-                </Panel>
+                </Card>
               </StaggerItem>
             ))}
           </Stagger>
@@ -231,19 +230,19 @@ export default async function ServicePage({ params }: RouteParams) {
       <section className="page-x py-16 sm:py-20">
         <div className="bay">
           <Reveal>
-            <SectionLabel index="C" className="mb-9">
+            <Label  className="mb-9">
               Delivery sequence
-            </SectionLabel>
+            </Label>
           </Reveal>
           <ol className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
             {s.phases.map((p, i) => (
               <Reveal as="li" key={p.step} delay={0.05 * i}>
-                <Panel className="flex h-full flex-col p-6">
+                <Card className="flex h-full flex-col p-6">
                   <div className="mb-5 flex items-center justify-between gap-3">
                     <span className="flare-fill grid size-8 place-items-center rounded-tight font-mono text-[0.625rem] font-semibold tabular-nums">
                       {String(i + 1).padStart(2, "0")}
                     </span>
-                    <span className="meta whitespace-nowrap">{p.when}</span>
+                    <span className="label whitespace-nowrap">{p.when}</span>
                   </div>
                   <h3 className="mb-3 font-display text-[1.0625rem] tracking-[-0.01em]">
                     {p.step}
@@ -251,7 +250,7 @@ export default async function ServicePage({ params }: RouteParams) {
                   <p className="text-[0.8125rem] leading-relaxed text-ink-dim">
                     {p.detail}
                   </p>
-                </Panel>
+                </Card>
               </Reveal>
             ))}
           </ol>
@@ -265,17 +264,17 @@ export default async function ServicePage({ params }: RouteParams) {
           <section className="page-x py-16 sm:py-20">
             <div className="bay">
               <Reveal>
-                <SectionLabel index="D" className="mb-9">
+                <Label  className="mb-9">
                   Delivered with this service
-                </SectionLabel>
+                </Label>
               </Reveal>
               <div className="grid gap-5 md:grid-cols-2">
                 {related.map((p) => (
                   <Reveal key={p.slug}>
-                    <Panel leak className="h-full p-6">
+                    <Card leak className="h-full p-6">
                       <div className="mb-4 flex flex-wrap items-center gap-2">
-                        <Tag hot>{p.sector}</Tag>
-                        <Tag>{p.year}</Tag>
+                        <Chip brand>{p.sector}</Chip>
+                        <Chip>{p.year}</Chip>
                       </div>
                       <h3 className="t-h3 mb-3 font-display">{p.title}</h3>
                       <p className="mb-6 text-[0.875rem] leading-relaxed text-ink-dim">
@@ -287,16 +286,16 @@ export default async function ServicePage({ params }: RouteParams) {
                             <dd className="font-display text-base text-flare-hi">
                               {o.value}
                             </dd>
-                            <dt className="meta mt-1">{o.metric}</dt>
+                            <dt className="label mt-1">{o.metric}</dt>
                           </div>
                         ))}
                       </dl>
-                    </Panel>
+                    </Card>
                   </Reveal>
                 ))}
               </div>
               <Reveal delay={0.06}>
-                <ButtonLink href="/work" variant="glass" className="mt-6">
+                <ButtonLink href="/work" variant="outline" className="mt-6">
                   All engagements
                   <Arrow />
                 </ButtonLink>
@@ -309,7 +308,7 @@ export default async function ServicePage({ params }: RouteParams) {
       <Rule />
       <Faq
         items={s.faqs}
-        index="E"
+        
         label={`${s.short} FAQ`}
         title="Straight answers"
         lead="Including where the honest answer is 'no' or 'buy something else'."
@@ -320,7 +319,7 @@ export default async function ServicePage({ params }: RouteParams) {
       <section className="page-x py-14">
         <div className="bay">
           <Reveal>
-            <SectionLabel className="mb-7">Other services</SectionLabel>
+            <Label className="mb-7">Other services</Label>
           </Reveal>
           <div className="flex flex-wrap gap-2">
             {others.map((o) => (
@@ -333,7 +332,7 @@ export default async function ServicePage({ params }: RouteParams) {
                   {o.index}
                 </span>
                 <span className="text-[0.875rem]">{o.short}</span>
-                <span className="meta">
+                <span className="label">
                   {o.from > 0 ? `${inrShort(o.from)}+` : "Quote"}
                 </span>
                 <Arrow />
@@ -349,7 +348,7 @@ export default async function ServicePage({ params }: RouteParams) {
 function Row({ k, v }: { k: string; v: string }) {
   return (
     <div className="flex items-baseline justify-between gap-3 border-b border-hair pb-2.5 last:border-0 last:pb-0">
-      <dt className="meta">{k}</dt>
+      <dt className="label">{k}</dt>
       <dd className="text-right text-[0.8125rem]">{v}</dd>
     </div>
   );

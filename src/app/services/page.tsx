@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { PageHead } from "@/components/sections/PageHead";
-import { ServiceMatrix } from "@/components/sections/ServiceMatrix";
+import { ServiceGrid } from "@/components/sections/ServiceGrid";
 import { Faq } from "@/components/sections/Faq";
-import { Panel, Rule, Datum } from "@/components/ui/Panel";
+import { Card, Rule } from "@/components/ui/Panel";
 import { ButtonLink, Arrow } from "@/components/ui/Button";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { services } from "@/lib/content/services";
@@ -49,7 +49,6 @@ export default function ServicesPage() {
       />
 
       <PageHead
-        index="01"
         label="Services"
         title="What we build,"
         titleAccent="and what it costs."
@@ -59,30 +58,29 @@ export default function ServicesPage() {
           { name: "Services", path: "/services" },
         ]}
         aside={
-          <Panel marks className="p-6">
+          <Card className="p-6">
             <div className="mb-4 flex items-center gap-2.5">
-              <Datum className="pulse-dot" />
-              <span className="meta-bright">Not sure which?</span>
+              <span aria-hidden className="size-1.5 rounded-full bg-brand" />
+              <span className="label">Not sure which?</span>
             </div>
             <p className="mb-5 text-[0.8125rem] leading-relaxed text-ink-dim">
               Describe the manual work costing you the most hours. We&apos;ll
               tell you which of these removes it — including when the answer is
               &ldquo;none of them yet&rdquo;.
             </p>
-            <ButtonLink href="/contact" variant="flare" size="md" className="w-full">
+            <ButtonLink href="/contact" variant="primary" size="md" className="w-full">
               Describe the problem
               <Arrow />
             </ButtonLink>
-          </Panel>
+          </Card>
         }
       />
 
       <Rule />
-      <ServiceMatrix services={services} />
+      <ServiceGrid services={services} />
       <Rule />
       <Faq
         items={globalFaqs}
-        index="02"
         label="Questions"
         title="Before you enquire"
         lead="The questions that come up on almost every first call."

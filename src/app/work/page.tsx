@@ -1,16 +1,16 @@
 import type { Metadata } from "next";
 import { PageHead } from "@/components/sections/PageHead";
-import { XRayShowcase } from "@/components/sections/XRayShowcase";
-import { Panel, Rule, Datum, SectionLabel } from "@/components/ui/Panel";
-import { Reveal } from "@/components/motion";
-import { ButtonLink, Arrow } from "@/components/ui/Button";
+import { Showcase } from "@/components/sections/Showcase";
+import { Cta } from "@/components/sections/Cta";
+import { Card, Rule, Label } from "@/components/ui/Panel";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { projects } from "@/lib/content/work";
+import { slides } from "@/lib/content/showcase";
 import { pageMeta, graph, breadcrumbLd } from "@/lib/seo";
 import { absoluteUrl } from "@/lib/site.config";
 
 export const metadata: Metadata = pageMeta({
-  title: "Work — four systems, in production",
+  title: "Our work — systems running for real businesses",
   description:
     "A pharmacy ERP on batch-level inventory, a field-service CRM with an offline technician app, multi-site billing with shift reconciliation, and an invoice extraction pipeline with human review.",
   path: "/work",
@@ -18,7 +18,6 @@ export const metadata: Metadata = pageMeta({
     "software development case studies india",
     "erp implementation case study",
     "crm case study india",
-    "ai automation case study",
   ],
 });
 
@@ -33,7 +32,7 @@ export default function WorkPage() {
           ]),
           {
             "@type": "ItemList",
-            name: "Engagements",
+            name: "Projects",
             numberOfItems: projects.length,
             itemListElement: projects.map((p, i) => ({
               "@type": "ListItem",
@@ -46,60 +45,71 @@ export default function WorkPage() {
       />
 
       <PageHead
-        index="03"
-        label="Work"
-        title="Four systems,"
-        titleAccent="all of them running."
-        lead="Described by capability and outcome rather than by client name. Hover any showcase to dissolve the interface and read the structure underneath."
+        label="Our work"
+        title="Systems already running"
+        titleAccent="for real businesses."
+        lead="Client names are withheld where the engagement is under NDA, but the systems, the numbers and the technology are real."
         breadcrumb={[
           { name: "Home", path: "/" },
           { name: "Work", path: "/work" },
         ]}
-        aside={
-          <Panel marks className="p-6">
-            <div className="mb-5 flex items-center gap-2.5">
-              <Datum className="pulse-dot" />
-              <span className="meta-bright">On client detail</span>
-            </div>
-            <p className="text-[0.8125rem] leading-relaxed text-ink-dim">
-              Commercial engagements are under NDA, so clients are anonymised
-              and the interfaces shown are abstract rather than fabricated
-              screenshots. The architecture is real — that is what the X-ray
-              view exposes, and a table list gives nothing away.
-            </p>
-          </Panel>
-        }
       />
 
-      <Rule />
-      <XRayShowcase projects={projects} />
+      <Showcase slides={slides} />
       <Rule />
 
-      <section className="page-x py-16">
+      {/* Case detail — plain, readable, no interaction required */}
+      <section className="defer-paint page-x py-20 sm:py-24">
         <div className="bay">
-          <Reveal>
-            <Panel className="blueprint grid gap-8 p-7 sm:p-10 lg:grid-cols-[1.4fr_auto] lg:items-center">
-              <div>
-                <SectionLabel className="mb-5">Your turn</SectionLabel>
-                <h2 className="t-h2 mb-4">
-                  Every one of these started as
-                  <br />
-                  <span className="flare-text">a spreadsheet and a complaint.</span>
-                </h2>
-                <p className="t-lead max-w-xl">
-                  Describe the manual work that costs you the most hours. We
-                  quote the system that removes it, or tell you plainly that a
-                  tool you can buy would do the job better.
+          <Label className="mb-10">Case detail</Label>
+          <div className="grid gap-5 lg:grid-cols-2">
+            {projects.map((p) => (
+              <Card as="article" key={p.slug} lift className="flex flex-col p-6 sm:p-7">
+                <div className="mb-4 flex flex-wrap items-center gap-2 text-[0.75rem] text-ink-faint">
+                  <span>{p.sector}</span>
+                  <span aria-hidden>·</span>
+                  <span>{p.year}</span>
+                </div>
+
+                <h3 className="t-h3 mb-3">{p.title}</h3>
+                <p className="mb-6 text-[0.9375rem] leading-relaxed text-ink-dim">
+                  {p.summary}
                 </p>
-              </div>
-              <ButtonLink href="/contact" variant="flare" size="lg">
-                Start a project
-                <Arrow />
-              </ButtonLink>
-            </Panel>
-          </Reveal>
+
+                <div className="mb-6 space-y-4">
+                  <div>
+                    <p className="label mb-1.5">The problem</p>
+                    <p className="text-[0.875rem] leading-relaxed text-ink-dim">
+                      {p.problem}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="label mb-1.5">What we built</p>
+                    <p className="text-[0.875rem] leading-relaxed text-ink-dim">
+                      {p.built}
+                    </p>
+                  </div>
+                </div>
+
+                <dl className="mt-auto grid grid-cols-2 gap-4 border-t border-line pt-5">
+                  {p.outcomes.slice(0, 4).map((o) => (
+                    <div key={o.metric}>
+                      <dd className="font-display text-[1.0625rem] font-semibold brand-text">
+                        {o.value}
+                      </dd>
+                      <dt className="label mt-1 normal-case tracking-normal!">
+                        {o.metric}
+                      </dt>
+                    </div>
+                  ))}
+                </dl>
+              </Card>
+            ))}
+          </div>
         </div>
       </section>
+
+      <Cta />
     </>
   );
 }

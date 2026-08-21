@@ -1,72 +1,109 @@
 @import "tailwindcss";
 
 /* ==========================================================================
-   ABM TECH — "KINETIC STRUCTURE" DESIGN SYSTEM
-   --------------------------------------------------------------------------
-   Deliberately not the default AI-agency look. Three rules do the work:
+   ABM TECH — design system
 
-   1. STRUCTURE OVER DECORATION. Layout is an asymmetric multi-axis grid with
-      visible rails, tick marks and hairline dividers. Nothing is centred by
-      default. Emptiness is load-bearing.
-   2. GLASS IS ARCHITECTURAL, NOT GLOWY. Panels are sheets of dark glass that
-      catch a warm light along their top-left edge and go cool on the opposite
-      edge — the way real glazing behaves. No neon rims, no drop-shadow blur
-      halos, no purple.
-   3. ONE HOT COLOUR, ONE COLD PIXEL. A volcanic orange-red gradient carries
-      every action. Electric teal appears ONLY at single-pixel data points and
-      success markers — if teal ever fills an area, it has been misused.
+   A professional business site: clean, light-first, generously spaced. Warm
+   neutral ground, one brand orange, real borders and honest shadows.
+
+   PERFORMANCE IS A DESIGN CONSTRAINT HERE. The previous iteration was laggy
+   for four specific reasons, all of which are now banned:
+
+     1. `backdrop-filter` on every card. It forces a full-surface readback per
+        painted element. It now appears on ONE element: the fixed header.
+     2. `background-attachment: fixed` on a gradient body. That repaints the
+        whole viewport on every scroll frame. Gone — the background is flat.
+     3. Timers driving layout (setInterval + layout animations). Gone.
+     4. setState on scroll. Reduced to a single passive listener that flips
+        one boolean.
+
+   Motion is now overwhelmingly CSS transitions on transform/opacity only —
+   properties the compositor can animate without touching layout or paint.
    ========================================================================== */
 
 @theme {
-  /* ---- Type ---- */
   --font-display: var(--font-syne), ui-sans-serif, system-ui, sans-serif;
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-jetbrains), ui-monospace, monospace;
 
-  /* ---- Ground ---- */
-  --color-obsidian: #0d0e12;
-  --color-obsidian-lift: #12141a;
-  --color-slate: #161820;
+  /* Brand — constant across themes */
+  --color-brand: #f4501a;
+  --color-brand-hi: #ff8c00;
+  --color-brand-deep: #d63c0c;
 
-  /* ---- Kinetic identity ---- */
-  --color-flare: #ff4500;
-  --color-flare-hi: #ff8c00;
-  /* Cold data accent. Single pixels only. */
-  --color-signal: #00f5d4;
+  /* Semantic tokens, re-pointed per theme below */
+  --color-page: var(--t-page);
+  --color-surface: var(--t-surface);
+  --color-raised: var(--t-raised);
+  --color-line: var(--t-line);
+  --color-line-strong: var(--t-line-strong);
+  --color-ink: var(--t-ink);
+  --color-ink-dim: var(--t-ink-dim);
+  --color-ink-faint: var(--t-ink-faint);
+  --color-brand-ink: var(--t-brand-ink);
+  --color-tint: var(--t-tint);
 
-  /* ---- Ink ---- */
-  --color-ink: #f4f5f7;
-  --color-ink-dim: #9ba1ad;
-  --color-ink-faint: #6b7280;
-  --color-hair: rgba(255, 255, 255, 0.07);
-  --color-hair-warm: rgba(255, 69, 0, 0.22);
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
 
-  /* ---- Motion ---- */
-  --ease-kinetic: cubic-bezier(0.16, 1, 0.3, 1);
-  --ease-mech: cubic-bezier(0.65, 0, 0.35, 1);
-
-  /* ---- Radii: tight and machined, never pill-soft ---- */
-  --radius-panel: 12px;
-  --radius-bay: 18px;
-  --radius-tight: 6px;
+  --radius-card: 14px;
+  --radius-lg: 20px;
+  --radius-sm: 8px;
 }
 
-:root {
+/* --------------------------- LIGHT (default) ---------------------------- */
+:root,
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  --t-page: #f6f5f2;
+  --t-surface: #ffffff;
+  --t-raised: #ffffff;
+  --t-line: rgba(20, 22, 26, 0.1);
+  --t-line-strong: rgba(20, 22, 26, 0.16);
+
+  --t-ink: #14161a;
+  --t-ink-dim: #4c525b;
+  --t-ink-faint: #7b828c;
+
+  /* Brand text colour that clears AA on the page tone */
+  --t-brand-ink: #c23a0c;
+  --t-tint: rgba(244, 80, 26, 0.07);
+
+  --shadow-sm: 0 1px 2px rgba(20, 22, 26, 0.05);
+  --shadow-md: 0 2px 4px rgba(20, 22, 26, 0.04), 0 8px 24px -12px rgba(20, 22, 26, 0.12);
+  --shadow-lg: 0 4px 8px rgba(20, 22, 26, 0.05), 0 20px 48px -20px rgba(20, 22, 26, 0.2);
+}
+
+/* ------------------------------- DARK ---------------------------------- */
+:root[data-theme="dark"] {
   color-scheme: dark;
 
-  /* Glass recipe, defined once */
-  --glass-fill: rgba(22, 24, 30, 0.55);
-  --glass-fill-solid: rgba(18, 20, 26, 0.92);
-  --glass-blur: blur(20px) saturate(140%);
+  --t-page: #0f1115;
+  --t-surface: #161a20;
+  --t-raised: #1c2128;
+  --t-line: rgba(255, 255, 255, 0.1);
+  --t-line-strong: rgba(255, 255, 255, 0.18);
 
-  /* The grid pitch the whole layout snaps to */
-  --pitch: 8px;
+  --t-ink: #f4f6f8;
+  --t-ink-dim: #a8b0bb;
+  --t-ink-faint: #78808b;
+
+  --t-brand-ink: #ff8c42;
+  --t-tint: rgba(244, 80, 26, 0.12);
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 2px 6px rgba(0, 0, 0, 0.4), 0 10px 28px -14px rgba(0, 0, 0, 0.7);
+  --shadow-lg: 0 4px 10px rgba(0, 0, 0, 0.45), 0 24px 56px -24px rgba(0, 0, 0, 0.8);
 }
+
+/* Light stays the default even on dark-OS machines. Dark is opt-in via the
+   toggle, which stamps data-theme="dark". No prefers-color-scheme override —
+   that is what makes "light by default" actually true. */
 
 /* ------------------------------- BASE ---------------------------------- */
 @layer base {
   * {
-    border-color: var(--color-hair);
+    border-color: var(--t-line);
     min-width: 0;
   }
 
@@ -77,397 +114,221 @@
   }
 
   body {
-    background-color: var(--color-obsidian);
-    color: var(--color-ink);
+    /* Flat. No fixed attachment, no gradient — nothing to repaint on scroll. */
+    background-color: var(--t-page);
+    color: var(--t-ink);
     font-family: var(--font-sans);
+    font-size: 1rem;
+    line-height: 1.6;
     -webkit-font-smoothing: antialiased;
     overflow-x: hidden;
-    /* A single vast off-axis warm bloom anchored top-right. Not a "glow" —
-       a light source, so every panel edge below it is lit consistently. */
-    background-image:
-      radial-gradient(
-        900px 620px at 88% -8%,
-        rgba(255, 69, 0, 0.13),
-        transparent 62%
-      ),
-      radial-gradient(
-        700px 500px at 6% 12%,
-        rgba(255, 140, 0, 0.05),
-        transparent 60%
-      );
-    background-attachment: fixed;
   }
 
-  h1,
-  h2,
-  h3,
-  h4 {
+  h1, h2, h3, h4 {
     font-family: var(--font-display);
-    /* Thin weights at large sizes — the structural, expanded look */
-    font-weight: 400;
-    letter-spacing: -0.02em;
-    line-height: 1.02;
+    font-weight: 600;
+    letter-spacing: -0.022em;
+    line-height: 1.1;
     text-wrap: balance;
+    color: var(--t-ink);
   }
 
-  p {
-    text-wrap: pretty;
-  }
+  p { text-wrap: pretty; }
 
   ::selection {
-    background: var(--color-flare);
+    background: var(--color-brand);
     color: #fff;
   }
 
   :focus-visible {
-    outline: 1px solid var(--color-flare-hi);
-    outline-offset: 3px;
+    outline: 2px solid var(--color-brand);
+    outline-offset: 2px;
+    border-radius: 4px;
   }
 
-  input,
-  textarea,
-  select,
-  button {
-    font: inherit;
-    color: inherit;
-  }
+  input, textarea, select, button { font: inherit; color: inherit; }
 
-  ::-webkit-scrollbar {
-    width: 10px;
-  }
-  ::-webkit-scrollbar-track {
-    background: #08090c;
-  }
+  img, svg, video { display: block; max-width: 100%; }
+
+  ::-webkit-scrollbar { width: 12px; }
+  ::-webkit-scrollbar-track { background: var(--t-page); }
   ::-webkit-scrollbar-thumb {
-    background: #23262f;
-    border: 2px solid #08090c;
+    background: var(--t-line-strong);
+    border: 3px solid var(--t-page);
+    border-radius: 99px;
   }
-  ::-webkit-scrollbar-thumb:hover {
-    background: var(--color-flare);
-  }
+  ::-webkit-scrollbar-thumb:hover { background: var(--color-brand); }
 }
 
-/* ------------------------------ UTILITIES ------------------------------ */
+/* ----------------------------- UTILITIES ------------------------------- */
 
-/* THE core surface. Dual-tone border mimics architectural glass catching a
-   warm light on its upper-left edge and reflecting cool sky on the other. */
-@utility panel {
-  position: relative;
-  background: var(--glass-fill);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border-top: 1px solid rgba(255, 69, 0, 0.24);
-  border-left: 1px solid rgba(255, 69, 0, 0.13);
-  border-right: 1px solid rgba(255, 255, 255, 0.035);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.035);
-  border-radius: var(--radius-panel);
-  box-shadow: 0 24px 50px -12px rgba(0, 0, 0, 0.72);
+/* Cards are opaque surfaces with a real border and an honest shadow. No blur:
+   an opaque fill composites for free where a blur costs a readback. */
+@utility card {
+  background: var(--t-surface);
+  border: 1px solid var(--t-line);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-sm);
 }
 
-/* Opaque variant for anything sitting over another panel */
-@utility panel-solid {
-  position: relative;
-  background: var(--glass-fill-solid);
-  border-top: 1px solid rgba(255, 69, 0, 0.2);
-  border-left: 1px solid rgba(255, 69, 0, 0.1);
-  border-right: 1px solid rgba(255, 255, 255, 0.03);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-  border-radius: var(--radius-panel);
+@utility card-lift {
+  background: var(--t-surface);
+  border: 1px solid var(--t-line);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-md);
 }
 
-/* Flat inset — for wells, code blocks, input fields */
-@utility inset-panel {
-  background: rgba(8, 9, 12, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: var(--radius-tight);
-}
-
-/* Technical micro-data voice */
-@utility meta {
-  font-family: var(--font-mono);
-  font-size: 0.6875rem;
-  line-height: 1.4;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
-  color: var(--color-ink-faint);
-}
-@utility meta-bright {
-  font-family: var(--font-mono);
-  font-size: 0.6875rem;
-  line-height: 1.4;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
-  color: var(--color-ink-dim);
-}
-
-/* The hot gradient, as text and as fill */
-@utility flare-text {
-  background: linear-gradient(
-    100deg,
-    var(--color-flare) 0%,
-    var(--color-flare-hi) 100%
-  );
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-@utility flare-fill {
-  background: linear-gradient(
-    100deg,
-    var(--color-flare) 0%,
-    var(--color-flare-hi) 100%
-  );
-  color: #fff;
-}
-
-/* Layout rails */
 @utility page-x {
-  padding-inline: clamp(1rem, 4vw, 4.5rem);
+  padding-inline: clamp(1.125rem, 5vw, 4rem);
 }
 @utility bay {
-  max-width: 90rem;
+  max-width: 78rem;
+  margin-inline: auto;
+}
+@utility bay-narrow {
+  max-width: 52rem;
   margin-inline: auto;
 }
 
-/* Type scale. Expanded, thin, structural. */
-@utility t-mega {
-  font-size: clamp(2.5rem, 6.6vw, 6.25rem);
-  line-height: 0.98;
-  letter-spacing: -0.03em;
+/* Small uppercase label. Restrained: this is a business site, not a console. */
+@utility label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--t-ink-faint);
+}
+
+@utility brand-text { color: var(--t-brand-ink); }
+
+@utility brand-fill {
+  background: var(--color-brand);
+  color: #fff;
+}
+
+/* Type scale — comfortable, not gigantic */
+@utility t-hero {
+  font-size: clamp(2.25rem, 5vw, 4rem);
+  line-height: 1.06;
+  letter-spacing: -0.028em;
 }
 @utility t-h1 {
-  font-size: clamp(2.125rem, 4.6vw, 3.75rem);
-  line-height: 1.02;
-  letter-spacing: -0.025em;
+  font-size: clamp(1.875rem, 3.6vw, 2.875rem);
+  line-height: 1.1;
+  letter-spacing: -0.024em;
 }
 @utility t-h2 {
-  font-size: clamp(1.625rem, 3vw, 2.5rem);
-  line-height: 1.06;
+  font-size: clamp(1.5rem, 2.6vw, 2.125rem);
+  line-height: 1.15;
   letter-spacing: -0.02em;
 }
 @utility t-h3 {
-  font-size: clamp(1.125rem, 1.7vw, 1.375rem);
-  line-height: 1.25;
-  letter-spacing: -0.01em;
+  font-size: clamp(1.125rem, 1.5vw, 1.3125rem);
+  line-height: 1.3;
+  letter-spacing: -0.012em;
 }
 @utility t-lead {
-  font-size: clamp(1rem, 1.15vw, 1.125rem);
-  line-height: 1.65;
-  color: var(--color-ink-dim);
+  font-size: clamp(1.0625rem, 1.2vw, 1.1875rem);
+  line-height: 1.68;
+  color: var(--t-ink-dim);
 }
 
-/* A single-pixel teal data point. The ONLY place teal is allowed. */
-@utility datum {
-  width: 3px;
-  height: 3px;
-  border-radius: 1px;
-  background: var(--color-signal);
-  box-shadow: 0 0 6px rgba(0, 245, 212, 0.8);
+/* ------------------------------ EFFECTS -------------------------------- */
+
+/* Entrance. Pure CSS, compositor-only properties, runs from server HTML with
+   no hydration and no observer — so content can never be stranded invisible. */
+@keyframes rise {
+  from { opacity: 0; transform: translate3d(0, 14px, 0); }
+  to   { opacity: 1; transform: none; }
+}
+.rise {
+  animation: rise 0.6s var(--ease-out-soft) both;
 }
 
-/* -------------------------------- RULES -------------------------------- */
-
-/* Hairline with a warm ignition point at its start — reads as a measurement
-   rule rather than a decorative divider. */
-.rule {
-  position: relative;
-  height: 1px;
-  background: linear-gradient(
-    to right,
-    rgba(255, 69, 0, 0.5),
-    rgba(255, 255, 255, 0.06) 18%,
-    rgba(255, 255, 255, 0.02)
-  );
+@keyframes fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
+.fade { animation: fade 0.7s var(--ease-out-soft) both; }
 
-/* Vertical structural rail with tick marks */
-.rail {
-  background-image: linear-gradient(
-    to bottom,
-    rgba(255, 255, 255, 0.09),
-    rgba(255, 255, 255, 0.09)
-  );
-  background-size: 1px 100%;
-  background-repeat: no-repeat;
-  background-position: center;
-}
-
-/* Engineering blueprint grid, used sparingly behind hero and CTA blocks */
-.blueprint {
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.028) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.028) 1px, transparent 1px);
-  background-size: calc(var(--pitch) * 8) calc(var(--pitch) * 8);
-}
-
-/* ------------------------------- EFFECTS ------------------------------- */
-
-/* LIGHT LEAK. A warm band that travels along a panel's top edge on hover.
-   This is the signature motion of the brand: light moving across glass. */
-.leak::before {
-  content: "";
-  position: absolute;
-  top: -1px;
-  left: 0;
-  height: 1px;
-  width: 100%;
-  border-radius: inherit;
-  opacity: 0;
-  transition: opacity 0.45s var(--ease-kinetic);
-  background: linear-gradient(
-    90deg,
-    transparent,
-    var(--color-flare) 35%,
-    var(--color-flare-hi) 55%,
-    transparent
-  );
-}
-.leak:hover::before,
-.leak:focus-within::before {
-  opacity: 1;
-}
-
-/* X-RAY. Hovering a showcase dissolves the finished interface and exposes the
-   schema underneath — the claim being made is "we built what you're looking
-   at", so the proof has to be literally beneath it. */
-.xray .xray-skin {
+/* Hover lift for cards. transform + box-shadow only. */
+.lift {
   transition:
-    opacity 0.5s var(--ease-kinetic),
-    filter 0.5s var(--ease-kinetic);
-}
-.xray .xray-guts {
-  opacity: 0;
-  transition: opacity 0.5s var(--ease-kinetic);
+    transform 0.28s var(--ease-out-soft),
+    box-shadow 0.28s var(--ease-out-soft),
+    border-color 0.28s var(--ease-out-soft);
+  will-change: transform;
 }
 @media (hover: hover) and (pointer: fine) {
-  .xray:hover .xray-skin {
-    opacity: 0.06;
-    filter: blur(2px);
+  .lift:hover {
+    transform: translate3d(0, -3px, 0);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--t-line-strong);
   }
-  .xray:hover .xray-guts {
-    opacity: 1;
-  }
-}
-/* Touch: a toggled class does the same job, set in JS */
-.xray[data-open="true"] .xray-skin {
-  opacity: 0.06;
-  filter: blur(2px);
-}
-.xray[data-open="true"] .xray-guts {
-  opacity: 1;
 }
 
-/* Corner registration marks — the "engineered" tell on key panels */
-.regmarks::after {
+/* Underline that draws in on hover — one transform, no layout */
+.ul-draw {
+  position: relative;
+}
+.ul-draw::after {
   content: "";
   position: absolute;
-  inset: 6px;
-  border-radius: inherit;
-  pointer-events: none;
-  background:
-    linear-gradient(var(--color-flare), var(--color-flare)) 0 0 / 7px 1px,
-    linear-gradient(var(--color-flare), var(--color-flare)) 0 0 / 1px 7px,
-    linear-gradient(var(--color-flare), var(--color-flare)) 100% 100% / 7px 1px,
-    linear-gradient(var(--color-flare), var(--color-flare)) 100% 100% / 1px 7px;
-  background-repeat: no-repeat;
-  opacity: 0.45;
+  left: 0;
+  bottom: -2px;
+  height: 1.5px;
+  width: 100%;
+  background: var(--color-brand);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.32s var(--ease-out-soft);
 }
+.ul-draw:hover::after { transform: scaleX(1); }
 
-/* Data ticker for the telemetry rail */
-@keyframes tick-up {
-  from {
-    transform: translateY(6px);
-    opacity: 0;
-  }
-  to {
-    transform: none;
-    opacity: 1;
-  }
-}
-
-@keyframes scan-y {
-  0% {
-    transform: translateY(-100%);
-  }
-  100% {
-    transform: translateY(1000%);
-  }
-}
-
-@keyframes pulse-dot {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.25;
-  }
-}
-.pulse-dot {
-  animation: pulse-dot 2.4s var(--ease-mech) infinite;
-}
-
-@keyframes marquee-x {
-  from {
-    transform: translate3d(0, 0, 0);
-  }
-  to {
-    transform: translate3d(-50%, 0, 0);
-  }
+/* Ticker — CSS only, pauses on hover */
+@keyframes marquee {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(-50%, 0, 0); }
 }
 .ticker-track {
   display: flex;
   width: max-content;
-  animation: marquee-x var(--ticker-duration, 200s) linear infinite;
-  will-change: transform;
+  animation: marquee var(--ticker-duration, 60s) linear infinite;
 }
 .ticker:hover .ticker-track,
 .ticker:focus-within .ticker-track {
   animation-play-state: paused;
 }
 
-/* Word-by-word headline reveal. CSS, not JS: headlines are the most important
-   text on the page and must never depend on hydration to become visible. */
-@keyframes word-in {
-  from {
-    transform: translateY(0.65em);
-    opacity: 0;
-  }
-  to {
-    transform: none;
-    opacity: 1;
-  }
+/* Carousel viewport — native scroll snap. No JS animation loop, so it is as
+   smooth as the browser's own scrolling because it IS the browser's own
+   scrolling. */
+.snap-row {
+  display: flex;
+  gap: 1.25rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  overscroll-behavior-x: contain;
 }
-.word-in {
-  display: inline-block;
-  animation: word-in 0.8s var(--ease-kinetic) both;
+.snap-row::-webkit-scrollbar { display: none; }
+.snap-item {
+  scroll-snap-align: center;
+  flex: 0 0 auto;
 }
 
-/* View transitions between routes */
-::view-transition-old(root) {
-  animation: vt-out 0.26s var(--ease-mech) both;
-}
-::view-transition-new(root) {
-  animation: vt-in 0.38s var(--ease-kinetic) both;
-}
-@keyframes vt-out {
-  to {
-    opacity: 0;
-    transform: translateY(-4px);
-  }
-}
-@keyframes vt-in {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
+/* Below-the-fold sections skip layout/paint until near the viewport. */
+.defer-paint {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 700px;
 }
 
 /* --------------------------- REDUCED MOTION ---------------------------- */
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  *, *::before, *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
@@ -477,18 +338,10 @@
     transition-delay: 0s !important;
     scroll-behavior: auto !important;
   }
-  ::view-transition-old(root),
-  ::view-transition-new(root) {
-    animation: none !important;
-  }
+  .snap-row { scroll-behavior: auto; }
 }
 
 @media print {
-  body {
-    background: #fff !important;
-    color: #000 !important;
-  }
-  .no-print {
-    display: none !important;
-  }
+  .no-print { display: none !important; }
+  body { background: #fff; color: #000; }
 }

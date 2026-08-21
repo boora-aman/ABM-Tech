@@ -31,17 +31,17 @@ export const site = {
   founded: "2024",
 
   contact: {
-    email: or(process.env.NEXT_PUBLIC_CONTACT_EMAIL, "TODO@abmtech.in"),
-    phoneE164: or(process.env.NEXT_PUBLIC_PHONE_E164, "+910000000000"),
-    phoneDisplay: or(process.env.NEXT_PUBLIC_PHONE_DISPLAY, "+91 00000 00000"),
-    whatsapp: or(process.env.NEXT_PUBLIC_WHATSAPP, "910000000000"),
+    email: or(process.env.NEXT_PUBLIC_CONTACT_EMAIL, "b00raaman@gmail.com"),
+    phoneE164: or(process.env.NEXT_PUBLIC_PHONE_E164, "+919119756710"),
+    phoneDisplay: or(process.env.NEXT_PUBLIC_PHONE_DISPLAY, "+91 91197 56710"),
+    whatsapp: or(process.env.NEXT_PUBLIC_WHATSAPP, "919119756710"),
     whatsappPrefill:
       "Hi ABM Tech — I'd like to discuss a system for my business.",
   },
 
   address: {
-    locality: or(process.env.NEXT_PUBLIC_ADDR_CITY, "TODO: City"),
-    region: or(process.env.NEXT_PUBLIC_ADDR_REGION, "TODO: State"),
+    locality: or(process.env.NEXT_PUBLIC_ADDR_CITY, "Dehradun"),
+    region: or(process.env.NEXT_PUBLIC_ADDR_REGION, "Uttarakhand"),
     country: "IN",
     countryName: "India",
   },
@@ -63,12 +63,13 @@ export const site = {
     google: or(process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION, ""),
   },
 
-  /** Telemetry rail readouts. Structural, not boastful — update as real. */
-  telemetry: [
-    { k: "Engagements shipped", v: "20+" },
-    { k: "Fixed-price delivery", v: "100%" },
-    { k: "Code ownership", v: "Client" },
-    { k: "Avg. first milestone", v: "7 days" },
+  /** Trust points shown under the hero and on /about. Deliberately facts
+   *  about how we work rather than unverifiable counts. */
+  proof: [
+    { k: "Pricing", v: "Fixed", note: "Written scope, no hourly meter" },
+    { k: "Code ownership", v: "Yours", note: "Your Git org, from commit one" },
+    { k: "First milestone", v: "7 days", note: "Something real to click" },
+    { k: "Lock-in", v: "None", note: "Cancel with 30 days notice" },
   ],
 } as const;
 

@@ -1,19 +1,15 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { SplitText } from "@/components/motion/SplitText";
-import { Reveal } from "@/components/motion";
-import { Rule, Tag } from "@/components/ui/Panel";
+import { Label, Chip } from "@/components/ui/Panel";
 import { cn } from "@/lib/utils";
 
 /* ==========================================================================
    PAGE MASTHEAD
-   Shared across interior routes. Keeps the hero's structural language — a
-   bracketed index, a crawlable breadcrumb rail, a kinetic headline and an
-   optional right-hand data column — without repeating the live viewport.
+   Shared across interior routes. Server component; entrance is CSS with
+   staggered delays, so nothing depends on hydration or an observer.
    ========================================================================== */
 
 export function PageHead({
-  index,
   label,
   title,
   titleAccent,
@@ -23,7 +19,6 @@ export function PageHead({
   aside,
   className,
 }: {
-  index?: string;
   label: string;
   title: string;
   titleAccent?: string;
@@ -34,27 +29,24 @@ export function PageHead({
   className?: string;
 }) {
   return (
-    <header className={cn("page-x pt-28 pb-14 sm:pt-36 sm:pb-16", className)}>
+    <header className={cn("page-x pt-32 pb-12 sm:pt-40 sm:pb-16", className)}>
       <div className="bay">
         {breadcrumb && breadcrumb.length > 0 && (
-          <nav aria-label="Breadcrumb" className="mb-8">
-            <ol className="flex flex-wrap items-center gap-2">
+          <nav aria-label="Breadcrumb" className="mb-7">
+            <ol className="flex flex-wrap items-center gap-2 text-[0.8125rem]">
               {breadcrumb.map((c, i) => (
                 <li key={c.path} className="flex items-center gap-2">
                   {i > 0 && (
-                    <span aria-hidden className="meta opacity-45">
+                    <span aria-hidden className="text-ink-faint">
                       /
                     </span>
                   )}
                   {i === breadcrumb.length - 1 ? (
-                    <span className="meta" aria-current="page">
+                    <span className="text-ink-faint" aria-current="page">
                       {c.name}
                     </span>
                   ) : (
-                    <Link
-                      href={c.path}
-                      className="meta transition-colors hover:text-flare-hi"
-                    >
+                    <Link href={c.path} className="text-ink-dim hover:text-brand-ink">
                       {c.name}
                     </Link>
                   )}
@@ -67,62 +59,43 @@ export function PageHead({
         <div
           className={cn(
             "grid gap-10",
-            Boolean(aside) && "lg:grid-cols-[1.5fr_minmax(0,22rem)] lg:items-end",
+            Boolean(aside) && "lg:grid-cols-[1.5fr_minmax(0,21rem)] lg:items-end",
           )}
         >
           <div className="min-w-0">
-            <Reveal immediate>
-              <div className="mb-6 flex items-center gap-3">
-                {index && (
-                  <span className="meta-bright flex items-center gap-1.5">
-                    <span className="text-flare">[</span>
-                    <span className="tabular-nums">{index}</span>
-                    <span className="text-flare">]</span>
-                  </span>
-                )}
-                <span className="meta-bright">{label}</span>
-                <Rule className="w-16" />
-              </div>
-            </Reveal>
+            <div className="rise mb-5" style={{ animationDelay: "0.04s" }}>
+              <Label>{label}</Label>
+            </div>
 
-            <h1 className="t-h1 mb-6 font-display">
-              <SplitText text={title} />
+            <h1 className="t-h1 rise mb-5" style={{ animationDelay: "0.1s" }}>
+              {title}
               {titleAccent && (
                 <>
                   <br />
-                  {/* Per-word gradient — see the note in Hero.tsx: a wrapper
-                      with background-clip:text renders invisible through
-                      SplitText's animated spans. */}
-                  <SplitText
-                    text={titleAccent}
-                    delay={0.16}
-                    wordClassName="flare-text"
-                  />
+                  <span className="brand-text">{titleAccent}</span>
                 </>
               )}
             </h1>
 
             {lead && (
-              <Reveal immediate delay={0.24}>
-                <p className="t-lead max-w-2xl">{lead}</p>
-              </Reveal>
+              <p className="t-lead rise max-w-2xl" style={{ animationDelay: "0.16s" }}>
+                {lead}
+              </p>
             )}
 
             {tags && tags.length > 0 && (
-              <Reveal immediate delay={0.32}>
-                <div className="mt-7 flex flex-wrap gap-2">
-                  {tags.map((t) => (
-                    <Tag key={t}>{t}</Tag>
-                  ))}
-                </div>
-              </Reveal>
+              <div className="rise mt-6 flex flex-wrap gap-2" style={{ animationDelay: "0.22s" }}>
+                {tags.map((t) => (
+                  <Chip key={t}>{t}</Chip>
+                ))}
+              </div>
             )}
           </div>
 
           {aside && (
-            <Reveal immediate delay={0.18}>
+            <div className="rise" style={{ animationDelay: "0.14s" }}>
               {aside}
-            </Reveal>
+            </div>
           )}
         </div>
       </div>

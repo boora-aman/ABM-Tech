@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
 import { Hero } from "@/components/sections/Hero";
-import { ServiceMatrix } from "@/components/sections/ServiceMatrix";
-import { XRayShowcase } from "@/components/sections/XRayShowcase";
-import { Commitments } from "@/components/sections/Commitments";
+import { Showcase } from "@/components/sections/Showcase";
+import { ServiceGrid } from "@/components/sections/ServiceGrid";
+import { Approach } from "@/components/sections/Approach";
 import { Faq } from "@/components/sections/Faq";
-import { ScrollSpine } from "@/components/shell/ScrollSpine";
+import { Cta } from "@/components/sections/Cta";
 import { Rule } from "@/components/ui/Panel";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { services } from "@/lib/content/services";
-import { projects } from "@/lib/content/work";
+import { slides } from "@/lib/content/showcase";
 import { globalFaqs } from "@/lib/content/faq";
 import { pageMeta, graph, breadcrumbLd, faqLd, serviceLd } from "@/lib/seo";
 import { site } from "@/lib/site.config";
@@ -37,25 +37,20 @@ export default function HomePage() {
         )}
       />
 
-      <ScrollSpine
-        sections={["Intro", "Services", "Work", "Method", "FAQ"]}
-      />
-
       <Hero />
+      <Showcase slides={slides} />
       <Rule />
-      <ServiceMatrix services={services} />
+      <ServiceGrid services={services} />
       <Rule />
-      <XRayShowcase projects={projects} />
-      <Rule />
-      <Commitments />
+      <Approach />
       <Rule />
       <Faq
         items={globalFaqs}
-        index="04"
-        label="Questions"
-        title="Before you enquire"
+        label="Common questions"
+        title="Questions, answered"
         lead="Including the ones where the honest answer costs us the project."
       />
+      <Cta />
     </>
   );
 }

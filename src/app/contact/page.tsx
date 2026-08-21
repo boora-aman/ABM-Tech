@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { PageHead } from "@/components/sections/PageHead";
 import { ContactForm } from "@/components/sections/ContactForm";
 import { Faq } from "@/components/sections/Faq";
-import { Panel, Rule, SectionLabel, Datum } from "@/components/ui/Panel";
+import { Card, Rule, Label } from "@/components/ui/Panel";
 import { ButtonLink, Arrow } from "@/components/ui/Button";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { pageMeta, graph, breadcrumbLd, organizationLd, faqLd } from "@/lib/seo";
@@ -58,7 +58,6 @@ export default function ContactPage() {
       />
 
       <PageHead
-        index="05"
         label="Contact"
         title="Describe the problem."
         titleAccent="We'll quote the system."
@@ -68,23 +67,23 @@ export default function ContactPage() {
           { name: "Contact", path: "/contact" },
         ]}
         aside={
-          <Panel marks className="p-6">
+          <Card className="p-6">
             <div className="mb-5 flex items-center gap-2.5">
-              <Datum className="pulse-dot" />
-              <span className="meta-bright">Fastest route</span>
+              <span aria-hidden className="size-1.5 rounded-full bg-brand" />
+              <span className="label">Fastest route</span>
             </div>
             <p className="mb-5 text-[0.8125rem] leading-relaxed text-ink-dim">
               WhatsApp gets the quickest reply during working hours. The form is
               better if you want to describe something properly.
             </p>
             <div className="flex flex-col gap-2">
-              <ButtonLink href={whatsappLink()} variant="flare" size="md" external className="w-full">
+              <ButtonLink href={whatsappLink()} variant="primary" size="md" external className="w-full">
                 WhatsApp us
                 <Arrow />
               </ButtonLink>
               <ButtonLink
                 href={`tel:${site.contact.phoneE164}`}
-                variant="glass"
+                variant="outline"
                 size="md"
                 external
                 className="w-full"
@@ -92,7 +91,7 @@ export default function ContactPage() {
                 {site.contact.phoneDisplay}
               </ButtonLink>
             </div>
-          </Panel>
+          </Card>
         }
       />
 
@@ -102,17 +101,17 @@ export default function ContactPage() {
         <div className="bay grid gap-6 lg:grid-cols-[1.4fr_1fr] lg:items-start">
           <Suspense
             fallback={
-              <Panel className="p-8">
-                <span className="meta">Loading form…</span>
-              </Panel>
+              <Card className="p-8">
+                <span className="label">Loading form…</span>
+              </Card>
             }
           >
             <ContactForm />
           </Suspense>
 
           <div className="flex flex-col gap-5">
-            <Panel className="p-6">
-              <SectionLabel className="mb-6">Direct lines</SectionLabel>
+            <Card className="p-6">
+              <Label className="mb-6">Direct lines</Label>
               <ul className="space-y-4">
                 <Line label="Phone" value={site.contact.phoneDisplay} href={`tel:${site.contact.phoneE164}`} />
                 <Line label="Email" value={site.contact.email} href={`mailto:${site.contact.email}`} />
@@ -128,10 +127,10 @@ export default function ContactPage() {
                 )}
                 <Line label="Serving" value={site.serviceAreas.join(" · ")} />
               </ul>
-            </Panel>
+            </Card>
 
-            <Panel className="p-6">
-              <SectionLabel className="mb-5">What we&apos;ll ask</SectionLabel>
+            <Card className="p-6">
+              <Label className="mb-5">What we&apos;ll ask</Label>
               <ol className="space-y-3.5">
                 {[
                   "What the manual work is, and roughly how many hours a week it takes.",
@@ -149,7 +148,7 @@ export default function ContactPage() {
                   </li>
                 ))}
               </ol>
-            </Panel>
+            </Card>
           </div>
         </div>
       </section>
@@ -157,7 +156,6 @@ export default function ContactPage() {
       <Rule />
       <Faq
         items={CONTACT_FAQS}
-        index="06"
         label="Before you send"
         title="What to expect"
         lead="Including where the honest answer costs us the project."
@@ -169,7 +167,7 @@ export default function ContactPage() {
 function Line({ label, value, href }: { label: string; value: string; href?: string }) {
   const body = (
     <>
-      <span className="meta shrink-0">{label}</span>
+      <span className="label shrink-0">{label}</span>
       <span className="text-right text-[0.8125rem] break-words">{value}</span>
     </>
   );

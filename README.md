@@ -1,167 +1,120 @@
 # ABM Tech
 
-Marketing site for an engineering studio building CRM, ERP, billing platforms,
-admin-driven websites and AI automation for Indian businesses.
+Professional business site for a studio that builds CRM, ERP, billing systems,
+business websites and AI automation for Indian companies.
 
-Next.js 16 (App Router) · React 19 · Tailwind v4 · Motion · MongoDB (optional)
-
----
-
-## Running it
+Next.js 16 (App Router) · React 19 · Tailwind v4 · MongoDB (optional)
 
 ```bash
 npm install
 npm run dev
 ```
 
-**No configuration required.** The site is static content in typed files; the
-database and email provider exist only to handle contact-form enquiries, and
-without them a lead is still emailed or written to the deployment log.
+No configuration required to run it.
 
-```bash
-npm run build      # production build
-npm run start      # serve the build
-npm run typecheck
-npm run lint
-```
+---
 
-## Configuration
+## Performance is a design constraint
 
-Copy `.env.example` to `.env.local`. Everything is optional:
+The first iteration of this site was laggy. The causes were specific, and all
+four are now banned by the design system:
 
-| Variable | Enables |
+| Cause | Fix |
 | --- | --- |
-| `MONGODB_URI` | Storing enquiries. Without it they go to email + logs |
-| `RESEND_API_KEY` + `RESEND_FROM` | Email notification on new enquiries |
-| `NEXT_PUBLIC_*` | Overriding business details per environment |
+| `backdrop-filter: blur(20px)` on **every** card — forces a full-surface readback per painted element | Cards are opaque. Blur appears on exactly one element: the fixed header |
+| `background-attachment: fixed` on a gradient body — repaints the whole viewport every scroll frame | Background is a flat colour |
+| Three `setInterval` timers driving layout animations | Removed |
+| `setState` on every scroll event (progress ring, scroll spine, telemetry) | One passive listener flipping one boolean |
+| Framer Motion on ~50 elements, each with its own intersection observer | **Dependency removed entirely.** Entrances are CSS |
 
-Values marked `TODO` in **`src/lib/site.config.ts`** are placeholders — phone,
-email, city. That file is the only place any of it is stored, and it feeds the
-header, footer, contact page, Organization JSON-LD, sitemap, OG cards, llms.txt
-and the email templates.
+Result: **no animation library in the bundle**, 146 KB of JS transferred on the
+home page (almost all of it the React/Next runtime), and only 7 client
+components on the whole site. Everything else is a server component.
 
-> `site.telemetry` currently reads "20+ engagements shipped". **Confirm or
-> change that figure before launch** — it is the one unverified claim on the
-> site.
+Two structural helpers do the rest:
+
+- `.defer-paint` — `content-visibility: auto` on below-fold sections, so the
+  browser skips their layout and paint until they are near the viewport.
+- `.snap-row` — the carousel is **native CSS scroll-snap**. The browser scrolls
+  it on the compositor with real momentum, so it is as smooth as ordinary page
+  scrolling because it *is* ordinary page scrolling.
+
+### Rules to keep it fast
+
+- No `backdrop-filter` outside the header.
+- No `background-attachment: fixed`, ever.
+- Animate only `transform` and `opacity` — properties the compositor handles
+  without touching layout or paint.
+- No timers driving visuals.
+- Any new scroll listener must be `{ passive: true }` and must not call
+  `setState` more than once per rAF.
+- Prefer a server component. Reach for `"use client"` only when there is real
+  interaction.
 
 ---
 
-## Design system — "Kinetic Structure"
+## Theme
 
-Built to avoid the default AI-agency look (dark navy, purple neon, bento grid,
-floating abstract shapes). Three rules do the work:
+**Light is the default for everyone**, including on dark-OS machines — there is
+deliberately no `prefers-color-scheme` override, which is what makes "light by
+default" actually true. Dark is opt-in via the header toggle and remembered in
+`localStorage`. An inline `<head>` script stamps `data-theme` before first
+paint, so there is no flash.
 
-1. **Structure over decoration.** Asymmetric multi-axis grids with visible
-   rails, bracketed index numerals and hairline rules. Nothing is centred by
-   default; emptiness is load-bearing.
-2. **Glass is architectural, not glowy.** Panels are sheets of dark glass with a
-   dual-tone border — warm on the top-left edge, cool on the opposite — the way
-   real glazing behaves under a single light source. One vast warm bloom is
-   anchored top-right, so every panel edge below it is lit consistently.
-3. **One hot colour, one cold pixel.** The volcanic gradient
-   (`#ff4500 → #ff8c00`) carries every action. Electric teal `#00f5d4` appears
-   *only* at single-pixel data points and success markers — if teal ever fills
-   an area, it has been misused.
+Both themes come from one set of custom properties, so switching re-materialises
+every surface without a single component re-render.
 
-| Token | Value |
+| Token | Light | Dark |
+| --- | --- | --- |
+| Page | `#f6f5f2` | `#0f1115` |
+| Card | `#ffffff` | `#161a20` |
+| Ink | `#14161a` | `#f4f6f8` |
+| Brand | `#f4501a` → `#ff8c00` | same |
+
+Type: **Syne** (headings) · **Inter** (body) · **JetBrains Mono** (small labels).
+
+---
+
+## The carousel
+
+`src/components/sections/Showcase.tsx`, driven by
+`src/lib/content/showcase.ts`.
+
+**Adding a screenshot:**
+
+1. Drop the image in `public/showcase/`
+2. Set `image: "/showcase/your-file.webp"` on that slide
+
+Recommended **1600×1000 (16:10), WebP, under 250 KB**. Until a slide has an
+image it renders a labelled placeholder frame — so the section looks
+intentional while you gather assets rather than looking broken.
+
+Slides currently queued, awaiting screenshots:
+
+| Slide | Waiting on |
 | --- | --- |
-| Ground | `#0d0e12` |
-| Panel fill | `rgba(22,24,30,0.55)` + `blur(20px) saturate(140%)` |
-| Hot | `#ff4500` → `#ff8c00` |
-| Cold datum | `#00f5d4` |
-| Ink / dim / faint | `#f4f5f7` / `#9ba1ad` / `#6b7280` |
+| Frappe CRM | screenshot |
+| ERPNext deployment | screenshot |
+| MoveEasy — movers platform | screenshot |
+| Pharmacare | screenshot |
+| Herbal Care | screenshot + confirm the real product name |
+| Billing web app | screenshot |
 
-**Type:** Syne (display) · Inter (body) · JetBrains Mono (all technical
-micro-data). Syne stands in for Monument Extended — the closest freely-licensed
-structural grotesque.
-
-**Dark only.** The direction is explicitly obsidian; a light mode would fight
-the entire light-source premise.
-
-### Utilities worth knowing
-
-`panel` `panel-solid` `inset-panel` · `meta` `meta-bright` · `flare-text`
-`flare-fill` · `rule` `rail` `blueprint` · `leak` `xray` `regmarks` · `datum` ·
-`t-mega` `t-h1` `t-h2` `t-h3` `t-lead`
-
----
-
-## Signature interactions
-
-- **Command Center hero** — a three-column multi-axis grid: telemetry rail,
-  headline, and a live pipeline viewport that *overlaps* the type so the layout
-  reads as layered planes rather than stacked rows.
-- **Live pipeline viewport** (`Viewport.tsx`) — a working miniature CRM board
-  where cards advance between stages on a timer and the chart reflects the same
-  data. Built rather than screenshotted because the claim is "we build systems
-  like this", and it is the only honest way to show product when every client
-  deployment is under NDA.
-- **X-ray showcase** (`XRayShowcase.tsx`) — hovering or tapping a showcase
-  dissolves the interface and exposes the real collections, endpoints and
-  scheduled jobs underneath. A screenshot asks to be believed; a schema can be
-  evaluated — and a table list gives nothing away about the client.
-- **Light leak** (`.leak`) — a warm band travelling along a panel's top edge on
-  hover. The brand's core motion: light moving across glass.
-- **Scroll spine** — the grid's third axis made permanent: a fixed right-hand
-  rail with a progress filament, section names and a percentage readout.
-- **Commitments rail** — one scroll-driven value fills a filament and latches
-  each station in turn, so the section reads as one mechanism rather than six
-  independent triggers.
-
----
-
-## Motion rules encoded here
-
-Each of these exists because the alternative broke something:
-
-- **`SplitText` is a server component using a CSS animation.** Headlines are the
-  most important text on a page; a JS- or scroll-driven reveal that fails leaves
-  a blank gap where the title should be.
-- **The accent gradient is applied per WORD, not on a wrapper.**
-  `background-clip: text` does not survive `SplitText`'s nested
-  `overflow-hidden` + animated spans — each animated span establishes its own
-  paint context and swallows the parent's clip, rendering the line invisible.
-- **`Reveal` takes `immediate`.** Above-the-fold content animates on mount, not
-  on scroll-into-view.
-- **`Ticker` is pure CSS.** A `requestAnimationFrame` loop writing transforms
-  janks scrolling. It pauses on hover and focus-within.
-- **`Magnetic` is gated on `useFinePointer()`**, which subscribes via
-  `useSyncExternalStore`. On touch, pointer-following fires on tap and makes
-  controls shift under the finger.
-- **`Counter` initialises to its target**, so the server HTML carries the real
-  figure and crawlers never read "0+".
-- **Reduced motion zeroes delays as well as durations.** Collapsing only the
-  duration leaves staggered elements holding their `from` state for the full
-  delay — which renders as missing content.
-- **Responsive visibility is switched on wrapper elements**, never by adding
-  `hidden` to a component that already sets its own `display`. Two competing
-  display utilities on one element resolve by stylesheet order, not by which you
-  wrote last — which silently renders both variants at once.
-
-## Brand mark
-
-`src/components/brand/Logo.tsx` — three sheared bars ascending, reading as a
-layered stack, a growth curve and the diagonal of an "A", with one teal datum at
-the apex.
-
-Uses **no `<defs>` and no gradient ids.** SVG ids are document-global and the
-mark renders several times per page; a shared gradient id collides and every
-reference resolves to whichever instance appears first — possibly one inside a
-`display:none` responsive wrapper, leaving an unfilled mark. The gradient is
-reproduced by stepping three flat fills instead, which is also crisper at
-favicon size.
+JS in the carousel does three things, none of them per-frame: `scrollIntoView`
+on control click, a throttled read of which card is centred, and arrow keys.
 
 ---
 
 ## Content
 
-Eight services and four engagements live in typed files under
-`src/lib/content/`. No CMS: this content changes a few times a year, and a
-database round-trip to render a price list buys nothing. Edit and redeploy.
+Everything lives in typed files under `src/lib/content/` — no CMS, because this
+changes a few times a year and a database round-trip to render a price list
+buys nothing.
 
 ```
-services.ts   8 services — tiers, capabilities, phases, FAQs, keywords
-work.ts       4 engagements, anonymised, each with its `guts` for the X-ray
+services.ts   8 services — deliverables, capabilities, phases, FAQs, keywords
+showcase.ts   carousel slides
+work.ts       4 case studies
 faq.ts        site-wide FAQs + the six delivery commitments
 ```
 
@@ -169,45 +122,52 @@ faq.ts        site-wide FAQs + the six delivery commitments
 
 | Service | From | Billing |
 | --- | --- | --- |
+| Google Maps profile & SEO | ₹5,000 | monthly |
 | Static business website | ₹6,000 | one-off |
 | Custom CRM | ₹12,000 | one-off |
-| Dynamic website + admin | ₹15,000 | one-off |
+| Dynamic website + admin panel | ₹15,000 | one-off |
 | ERP system | ₹15,000 | one-off |
 | AI automation | ₹15,000 | one-off |
 | Website + billing app + mobile app | ₹20,000 | one-off |
-| Google Maps profile & SEO | ₹5,000 | monthly |
 | Business digitisation | Quote | after audit |
 
-Each service page states plainly where a real project lands **above** its floor
-— a ₹15,000 ERP is single-location; multi-branch is ₹40,000–1,50,000. Publishing
-a floor without that caveat is bait, and it poisons the first call.
+Each service page states where a real project lands **above** its floor — a
+₹15,000 ERP is single-location; multi-branch is ₹40,000–1,50,000. Publishing a
+floor without that caveat is bait and poisons the first call.
 
----
+## Configuration
 
-## SEO / GEO
+Contact details default to the established ones in
+`src/lib/site.config.ts` (`+91 91197 56710`, `b00raaman@gmail.com`, Dehradun).
+Any of them can be overridden per environment with the matching
+`NEXT_PUBLIC_*` variable — see `.env.example`.
 
-- One connected `@graph` per page: `Organization`, `WebSite`, `Service` +
-  `Offer` + `PriceSpecification`, `FAQPage`, `BreadcrumbList`, `ContactPage` —
-  interlinked by `@id`.
-- `robots.txt` **allows** AI crawlers deliberately: for a services business a
-  citation is a qualified referral.
-- `/llms.txt` is generated from the same content modules the pages render from,
-  so it cannot drift. Includes a full price table and explicit notes on what we
-  do *not* guarantee.
-- Per-page OG cards at `/api/og`.
-- Dynamic `sitemap.xml` with priorities weighted to commercial intent.
+> Env vars **must** be read as static literals (`process.env.NEXT_PUBLIC_FOO`).
+> Next only inlines them into the client bundle when it can see the key as a
+> literal at build time; a dynamic `process.env[key]` lookup works on the server
+> and silently returns `undefined` in every client component.
+
+Optional: `MONGODB_URI` to store enquiries, `RESEND_API_KEY` to email them.
+Without either, a lead is still written to the deployment log — a missing
+integration never loses a lead.
+
+## SEO
+
+One connected `@graph` per page (`Organization`, `WebSite`, `Service` + `Offer`,
+`FAQPage`, `BreadcrumbList`), a generated `/llms.txt` built from the same
+content modules the pages render from so it cannot drift, per-page OG cards at
+`/api/og`, and a dynamic sitemap. `robots.txt` allows AI crawlers deliberately —
+for a services business a citation is a qualified referral.
 
 ## Security
 
-- Contact form: zod on both sides with the server as authority, a honeypot, a
-  time-to-submit floor, and per-IP rate limiting. No CAPTCHA — those cost real
-  users more than they cost bots.
-- The rate limit is in-memory and per-instance: a speed bump, not a guarantee.
-  Move it to Upstash Redis or the Vercel Firewall if it is ever targeted.
-- No admin surface, so there is no auth surface to attack. If you later want a
-  leads inbox, that is a small addition — ask.
+The contact form validates with the same zod schema on both sides (server is the
+authority), plus a honeypot, a time-to-submit floor and per-IP rate limiting. No
+CAPTCHA — those cost real users more than they cost bots. The rate limit is
+in-memory and per-instance: a speed bump, not a guarantee. Move it to Upstash or
+the Vercel Firewall if it is ever targeted.
 
 ## Deploying
 
-Built for Vercel. Push, import, add environment variables, deploy. Everything
-except `/api/lead` and `/api/og` is statically prerendered.
+Vercel. Push, import, add env vars. Everything except `/api/lead` and `/api/og`
+is statically prerendered.

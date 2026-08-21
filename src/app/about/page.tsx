@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
 import { PageHead } from "@/components/sections/PageHead";
-import { Commitments } from "@/components/sections/Commitments";
+import { Approach } from "@/components/sections/Approach";
 import { Faq } from "@/components/sections/Faq";
-import { Panel, Rule, SectionLabel, Datum, Tag } from "@/components/ui/Panel";
-import { Reveal } from "@/components/motion";
+import { Card, Rule, Label, Chip, Tick } from "@/components/ui/Panel";
 import { ButtonLink, Arrow } from "@/components/ui/Button";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { pageMeta, graph, breadcrumbLd, organizationLd, faqLd } from "@/lib/seo";
 import { site } from "@/lib/site.config";
 import { services } from "@/lib/content/services";
+import { Reveal } from "@/components/motion";
 
 export const metadata: Metadata = pageMeta({
   title: "About — an engineering studio, not an agency",
@@ -52,7 +52,6 @@ export default function AboutPage() {
       />
 
       <PageHead
-        index="04"
         label="About"
         title="An engineering studio,"
         titleAccent="not an agency."
@@ -62,10 +61,10 @@ export default function AboutPage() {
           { name: "About", path: "/about" },
         ]}
         aside={
-          <Panel marks className="p-6">
+          <Card className="p-6">
             <div className="mb-5 flex items-center gap-2.5">
-              <Datum className="pulse-dot" />
-              <span className="meta-bright">Studio</span>
+              <span aria-hidden className="size-1.5 rounded-full bg-brand" />
+              <span className="label">Studio</span>
             </div>
             <dl className="space-y-3.5">
               {[
@@ -79,12 +78,12 @@ export default function AboutPage() {
                   key={r.k}
                   className="flex items-baseline justify-between gap-3 border-b border-hair pb-2.5 last:border-0 last:pb-0"
                 >
-                  <dt className="meta">{r.k}</dt>
+                  <dt className="label">{r.k}</dt>
                   <dd className="text-right text-[0.8125rem]">{r.v}</dd>
                 </div>
               ))}
             </dl>
-          </Panel>
+          </Card>
         }
       />
 
@@ -95,12 +94,12 @@ export default function AboutPage() {
         <div className="bay">
           <Reveal>
             <dl className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-              {site.telemetry.map((t) => (
+              {site.proof.map((t) => (
                 <div key={t.k} className="border-t border-hair pt-5">
                   <dd className="font-display text-3xl tracking-[-0.03em] text-flare-hi sm:text-4xl">
                     {t.v}
                   </dd>
-                  <dt className="meta mt-2.5">{t.k}</dt>
+                  <dt className="label mt-2.5">{t.k}</dt>
                 </div>
               ))}
             </dl>
@@ -115,9 +114,9 @@ export default function AboutPage() {
         <div className="bay grid gap-12 lg:grid-cols-[1.35fr_1fr] lg:gap-16">
           <div>
             <Reveal>
-              <SectionLabel index="A" className="mb-8">
+              <Label  className="mb-8">
                 Why this exists
-              </SectionLabel>
+              </Label>
             </Reveal>
             <Reveal delay={0.05}>
               <h2 className="t-h2 mb-7">The gap between a tool and a system.</h2>
@@ -155,8 +154,8 @@ export default function AboutPage() {
           </div>
 
           <Reveal delay={0.12}>
-            <Panel className="p-6 sm:p-8">
-              <SectionLabel className="mb-6">What we are not</SectionLabel>
+            <Card className="p-6 sm:p-8">
+              <Label className="mb-6">What we are not</Label>
               <ul className="space-y-4">
                 {[
                   "Not a reseller. We do not take vendor commissions, so a recommendation is never bought.",
@@ -165,7 +164,7 @@ export default function AboutPage() {
                   "Not a template shop. If a page builder would do the job, we will tell you to use one.",
                 ].map((t) => (
                   <li key={t} className="flex gap-3 text-[0.875rem] leading-relaxed">
-                    <Datum className="mt-2 shrink-0" />
+                    <Tick />
                     <span className="text-ink-dim">{t}</span>
                   </li>
                 ))}
@@ -174,23 +173,22 @@ export default function AboutPage() {
               <div className="flex flex-wrap gap-2">
                 {["Fixed price", "Written scope", "Your Git org", "30-day fixes", "No lock-in"].map(
                   (t) => (
-                    <Tag key={t} hot>
+                    <Chip key={t} brand>
                       {t}
-                    </Tag>
+                    </Chip>
                   ),
                 )}
               </div>
-            </Panel>
+            </Card>
           </Reveal>
         </div>
       </section>
 
       <Rule />
-      <Commitments />
+      <Approach />
       <Rule />
       <Faq
         items={ABOUT_FAQS}
-        index="05"
         label="About us"
         title="The questions about us, not the work"
         lead="Including why the pricing looks the way it does."
@@ -199,7 +197,7 @@ export default function AboutPage() {
       <section className="page-x pb-20">
         <div className="bay">
           <Reveal>
-            <Panel className="blueprint flex flex-wrap items-center justify-between gap-6 p-7 sm:p-10">
+            <Card className="blueprint flex flex-wrap items-center justify-between gap-6 p-7 sm:p-10">
               <div>
                 <h2 className="t-h3 mb-2 font-display">
                   Start with the problem, not the product.
@@ -208,11 +206,11 @@ export default function AboutPage() {
                   One call, a written scope, a fixed price.
                 </p>
               </div>
-              <ButtonLink href="/contact" variant="flare" size="lg">
+              <ButtonLink href="/contact" variant="primary" size="lg">
                 Get in touch
                 <Arrow />
               </ButtonLink>
-            </Panel>
+            </Card>
           </Reveal>
         </div>
       </section>

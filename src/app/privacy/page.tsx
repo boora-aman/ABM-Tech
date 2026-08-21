@@ -82,7 +82,7 @@ export default function PrivacyPage() {
       <Rule />
       <div className="page-x py-14">
         <div className="bay max-w-3xl">
-          <p className="meta mb-10">Last updated: 6 August 2026</p>
+          <p className="label mb-10">Last updated: 6 August 2026</p>
           <Markdown source={BODY} />
         </div>
       </div>
