@@ -1,5 +1,5 @@
 import { Card, Label, Tick } from "@/components/ui/Panel";
-import { ButtonLink, Arrow } from "@/components/ui/Button";
+import { ButtonLink, Arrow, WhatsAppGlyph } from "@/components/ui/Button";
 import { site, whatsappLink } from "@/lib/site.config";
 
 /** Closing call to action. Server component, no motion. */
@@ -39,7 +39,8 @@ export function Cta() {
               Get a free quote
               <Arrow />
             </ButtonLink>
-            <ButtonLink href={whatsappLink()} variant="outline" size="lg" external className="w-full">
+            <ButtonLink href={whatsappLink()} variant="whatsapp" size="lg" external className="w-full">
+              <WhatsAppGlyph />
               WhatsApp us
             </ButtonLink>
             <ButtonLink

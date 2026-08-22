@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Field, TextArea, Select, Segments } from "@/components/ui/Field";
-import { Button, ButtonLink, Arrow } from "@/components/ui/Button";
+import { Button, ButtonLink, Arrow, WhatsAppGlyph } from "@/components/ui/Button";
 import { Card, Rule } from "@/components/ui/Panel";
 import { leadSchema } from "@/lib/validators";
 import { whatsappLink } from "@/lib/site.config";
@@ -129,7 +129,8 @@ export function ContactForm() {
           {state.note && <p className="meta mb-6">{state.note}</p>}
           <Rule className="my-7" />
           <div className="flex flex-wrap gap-3">
-            <ButtonLink href={whatsappLink()} variant="primary" size="lg" external>
+            <ButtonLink href={whatsappLink()} variant="whatsapp" size="lg" external>
+              <WhatsAppGlyph />
               Continue on WhatsApp
               <Arrow />
             </ButtonLink>
@@ -210,7 +211,8 @@ export function ContactForm() {
               </>
             )}
           </Button>
-          <ButtonLink href={whatsappLink()} variant="outline" size="lg" external>
+          <ButtonLink href={whatsappLink()} variant="whatsapp" size="lg" external>
+            <WhatsAppGlyph />
             Or WhatsApp instead
           </ButtonLink>
         </div>

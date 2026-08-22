@@ -4,7 +4,7 @@ import { PageHead } from "@/components/sections/PageHead";
 import { ContactForm } from "@/components/sections/ContactForm";
 import { Faq } from "@/components/sections/Faq";
 import { Card, Rule, Label } from "@/components/ui/Panel";
-import { ButtonLink, Arrow } from "@/components/ui/Button";
+import { ButtonLink, Arrow, WhatsAppGlyph } from "@/components/ui/Button";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { pageMeta, graph, breadcrumbLd, organizationLd, faqLd } from "@/lib/seo";
 import { site, whatsappLink, isPlaceholder } from "@/lib/site.config";
@@ -77,7 +77,8 @@ export default function ContactPage() {
               better if you want to describe something properly.
             </p>
             <div className="flex flex-col gap-2">
-              <ButtonLink href={whatsappLink()} variant="primary" size="md" external className="w-full">
+              <ButtonLink href={whatsappLink()} variant="whatsapp" size="md" external className="w-full">
+                <WhatsAppGlyph />
                 WhatsApp us
                 <Arrow />
               </ButtonLink>

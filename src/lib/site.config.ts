@@ -59,14 +59,35 @@ export const site = {
 
   serviceAreas: ["India", "Remote / Worldwide"],
 
-  /** Leave a URL empty and that icon is simply not rendered — no dead links. */
+  /** Leave a URL empty and that icon is simply not rendered — no dead links.
+   *  These also feed `sameAs` in Organization schema, which is how search
+   *  engines tie the site and the profiles to one entity. */
   socials: [
-    { key: "linkedin", label: "LinkedIn", url: or(process.env.NEXT_PUBLIC_LINKEDIN, "") },
-    { key: "instagram", label: "Instagram", url: or(process.env.NEXT_PUBLIC_INSTAGRAM, "") },
-    { key: "facebook", label: "Facebook", url: or(process.env.NEXT_PUBLIC_FACEBOOK, "") },
+    {
+      key: "instagram",
+      label: "Instagram",
+      url: or(process.env.NEXT_PUBLIC_INSTAGRAM, "https://www.instagram.com/googleitsolution"),
+    },
+    {
+      key: "facebook",
+      label: "Facebook",
+      url: or(
+        process.env.NEXT_PUBLIC_FACEBOOK,
+        "https://www.facebook.com/profile.php?id=61592626603794",
+      ),
+    },
+    {
+      key: "linkedin",
+      label: "LinkedIn",
+      url: or(process.env.NEXT_PUBLIC_LINKEDIN, "https://www.linkedin.com/in/boora-aman/"),
+    },
+    {
+      key: "github",
+      label: "GitHub",
+      url: or(process.env.NEXT_PUBLIC_GITHUB, "https://github.com/boora-aman"),
+    },
     { key: "x", label: "X", url: or(process.env.NEXT_PUBLIC_X, "") },
     { key: "youtube", label: "YouTube", url: or(process.env.NEXT_PUBLIC_YOUTUBE, "") },
-    { key: "github", label: "GitHub", url: or(process.env.NEXT_PUBLIC_GITHUB, "") },
   ] as const,
 
   verification: {

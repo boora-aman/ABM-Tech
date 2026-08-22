@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { PageHead } from "@/components/sections/PageHead";
 import { Faq } from "@/components/sections/Faq";
 import { Card, Rule, Label, Chip } from "@/components/ui/Panel";
-import { ButtonLink, Arrow } from "@/components/ui/Button";
+import { ButtonLink, Arrow, WhatsAppGlyph } from "@/components/ui/Button";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { services, serviceBySlug } from "@/lib/content/services";
 import { projects } from "@/lib/content/work";
@@ -105,11 +105,12 @@ export default async function ServicePage({ params }: RouteParams) {
               </ButtonLink>
               <ButtonLink
                 href={whatsappLink(`Hi ABM Tech — I'm interested in ${s.title}.`)}
-                variant="outline"
+                variant="whatsapp"
                 size="md"
                 external
                 className="w-full"
               >
+                <WhatsAppGlyph />
                 WhatsApp
               </ButtonLink>
             </div>
