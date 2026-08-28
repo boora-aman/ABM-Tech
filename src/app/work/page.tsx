@@ -4,7 +4,7 @@ import { Showcase } from "@/components/sections/Showcase";
 import { Cta } from "@/components/sections/Cta";
 import { Card, Rule, Label } from "@/components/ui/Panel";
 import { JsonLd } from "@/components/seo/JsonLd";
-import { getProjects, getSlides } from "@/lib/content/repo";
+import { getProjects, getSlides, getSettings } from "@/lib/content/repo";
 
 import { pageMeta, graph, breadcrumbLd } from "@/lib/seo";
 import { absoluteUrl } from "@/lib/site.config";
@@ -24,7 +24,11 @@ export const metadata: Metadata = pageMeta({
 export const revalidate = 3600;
 
 export default async function WorkPage() {
-  const [projects, slides] = await Promise.all([getProjects(), getSlides()]);
+  const [projects, slides, settings] = await Promise.all([
+    getProjects(),
+    getSlides(),
+    getSettings(),
+  ]);
   return (
     <>
       <JsonLd
@@ -112,7 +116,7 @@ export default async function WorkPage() {
         </div>
       </section>
 
-      <Cta />
+      <Cta settings={settings} />
     </>
   );
 }

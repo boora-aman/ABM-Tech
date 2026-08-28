@@ -249,10 +249,6 @@ export const commitmentWriteSchema = z
   })
   .strict();
 
-export const leadStatusSchema = z
-  .object({ status: z.enum(["new", "contacted", "won", "lost"]) })
-  .strict();
-
 export const apiKeyWriteSchema = z
   .object({
     name: z.string().trim().min(2).max(80),

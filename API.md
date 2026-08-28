@@ -170,16 +170,48 @@ curl -X POST https://abmtech.in/api/v1/settings \
   }'
 ```
 
-Settings keys currently read by the site:
+Settings keys read by the site. Every group takes the same four keys, plus
+`cta.points`:
 
-| Key | Type | Falls back to |
+| Group | Section | Where it renders |
 | --- | --- | --- |
-| `hero.eyebrow` | string | "Software for every kind of business" |
-| `hero.headline` | string[] | The two headline lines |
-| `hero.headlineAccent` | string | "We build all six." |
-| `hero.lead` | string | The hero paragraph |
+| `hero` | Home hero | `/` |
+| `systems` | "The whole business" | `/`, `/industries` |
+| `services` | "What we do" | `/` |
+| `industries` | "Who we build for" | `/`, `/industries` |
+| `approach` | "How we work" | `/`, `/about` |
+| `cta` | Closing call to action | every page |
+
+Per group:
+
+| Key | Type | Example |
+| --- | --- | --- |
+| `<group>.eyebrow` | string | `"What we do"` |
+| `<group>.heading` | string[] | `["Everything you need to run"]` — one entry per line |
+| `<group>.headingAccent` | string | `"and grow the business."` — the orange line |
+| `<group>.lead` | string | the paragraph beside the heading |
+| `cta.points` | string[] | the four ticks in the CTA panel |
 
 Deleting a key restores the committed copy — it never blanks the page.
+
+### Forcing a cache refresh
+
+Writes through the admin and this API revalidate the affected pages
+automatically. Changes made **around** them — `npm run seed`, a
+`mongorestore`, a script writing to MongoDB directly — do not, and the site
+keeps serving previously rendered HTML until the hourly ISR window expires.
+
+```bash
+# Everything (needs write scope on all resources)
+curl -X POST -H "Authorization: Bearer $TOKEN" \
+  https://abmtech.in/api/v1/revalidate
+
+# Just the pages one resource renders into
+curl -X POST -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"resource":"services"}' \
+  https://abmtech.in/api/v1/revalidate
+```
 
 ### Delete
 

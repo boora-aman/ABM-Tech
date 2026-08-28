@@ -1055,8 +1055,3 @@ export const services: Service[] = [
     stack: ["Docker", "AWS / Vercel", "GitHub Actions", "Sentry", "Uptime monitoring", "Automated backups"],
   },
 ];
-
-export const serviceBySlug = (slug: string) =>
-  services.find((s) => s.slug === slug);
-
-export const featuredServices = () => services.filter((s) => s.featured);

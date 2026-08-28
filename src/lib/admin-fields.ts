@@ -107,7 +107,7 @@ export const FIELDS: Record<string, Field[]> = {
   ],
 
   settings: [
-    { name: "key", label: "Key", type: "text", required: true, hint: "Dot-separated camelCase. Keys the site reads: hero.eyebrow, hero.headline (list), hero.headlineAccent, hero.lead" },
+    { name: "key", label: "Key", type: "text", required: true, hint: "Dot-separated camelCase. Groups the site reads: hero, systems, services, industries, approach, cta. Each takes .eyebrow, .heading (list), .headingAccent and .lead — plus cta.points (list)." },
     { name: "group", label: "Group", type: "text", hint: "For grouping in this list only" },
     { name: "label", label: "Label", type: "text" },
     { name: "hint", label: "Hint", type: "text" },

@@ -92,6 +92,11 @@ async function main() {
     await upsertAll("commitments", CommitmentModel as never, commitments as unknown as Doc[], "index");
 
   console.log("\nDone. The admin now edits these records; the seed files remain the fallback.");
+  console.log(
+    "\nNOTE: this wrote to MongoDB directly, so the running app's cached pages\n" +
+      "were not refreshed. On a live server, either restart it or call:\n" +
+      "  curl -X POST -H 'Authorization: Bearer <token>' https://abmtech.in/api/v1/revalidate",
+  );
   await conn.disconnect();
   process.exit(0);
 }

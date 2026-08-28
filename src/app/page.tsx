@@ -85,15 +85,20 @@ export default async function HomePage() {
         serviceCount={services.length}
         settings={settings}
       />
-      <Systems pillars={pillars} services={services} />
-      <IndustriesSection industries={industries} services={services} initial={6} />
+      <Systems pillars={pillars} services={services} settings={settings} />
+      <IndustriesSection
+        industries={industries}
+        services={services}
+        initial={6}
+        settings={settings}
+      />
       <Rule />
-      <ServiceGrid services={services} initial={6} />
+      <ServiceGrid services={services} initial={6} settings={settings} />
       <Rule />
       <Shifts />
       <Showcase slides={slides} />
       <Rule />
-      <Approach commitments={commitments} />
+      <Approach commitments={commitments} settings={settings} />
       <Rule />
       <Faq
         items={faqs}
@@ -101,7 +106,7 @@ export default async function HomePage() {
         title="Questions, answered"
         lead="Including the ones where the honest answer costs us the project."
       />
-      <Cta />
+      <Cta settings={settings} />
     </>
   );
 }

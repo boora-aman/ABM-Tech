@@ -3,6 +3,7 @@ import { Syne, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
 import { Header } from "@/components/shell/Header";
+import { getMenuPanels } from "@/lib/content/megamenu";
 import { Footer } from "@/components/shell/Footer";
 import { BackToTop } from "@/components/shell/BackToTop";
 import { themeScript } from "@/components/shell/Theme";
@@ -72,7 +73,11 @@ export const viewport: Viewport = {
   ],
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  // Built from the content repo so a service renamed in the admin is renamed
+  // in the header without a redeploy.
+  const panels = await getMenuPanels();
+
   return (
     <html
       lang="en-IN"
@@ -94,7 +99,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           Skip to content
         </a>
 
-        <Header />
+        <Header panels={panels} />
         <main id="main">{children}</main>
         <Footer />
         <BackToTop />

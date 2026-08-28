@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Field, TextArea, Select, Segments } from "@/components/ui/Field";
 import { Button, ButtonLink, Arrow, WhatsAppGlyph } from "@/components/ui/Button";
-import { Card, Rule } from "@/components/ui/Panel";
+import { Card, Rule, Label } from "@/components/ui/Panel";
 import { leadSchema } from "@/lib/validators";
 import { whatsappLink } from "@/lib/site.config";
 import type { Service } from "@/lib/content/services";
@@ -27,7 +27,7 @@ const BUDGETS = [
 type State =
   | { kind: "idle" }
   | { kind: "sending" }
-  | { kind: "sent"; note?: string }
+  | { kind: "sent" }
   | { kind: "error"; message: string };
 
 export function ContactForm({ services }: { services: Service[] }) {
@@ -90,7 +90,6 @@ export function ContactForm({ services }: { services: Service[] }) {
         ok?: boolean;
         error?: string;
         fields?: Record<string, string>;
-        note?: string;
       };
       if (!res.ok || !json.ok) {
         if (json.fields) setErrors(json.fields);
@@ -100,7 +99,7 @@ export function ContactForm({ services }: { services: Service[] }) {
         });
         return;
       }
-      setState({ kind: "sent", note: json.note });
+      setState({ kind: "sent" });
       formRef.current?.reset();
     } catch {
       setState({
@@ -117,16 +116,12 @@ export function ContactForm({ services }: { services: Service[] }) {
         <div className="rise" role="status" aria-live="polite">
           <div className="mb-6 flex items-center gap-2.5">
             <span aria-hidden className="size-1.5 rounded-full bg-brand" />
-            <span className="meta-bright">Received</span>
+            <Label tick={false}>Message sent</Label>
           </div>
-          <h2 className="t-h2 mb-4 font-display">That&apos;s in.</h2>
-          <p className="t-lead mb-2">
-            Your enquiry is logged and we&apos;ve been notified. You&apos;ll hear
-            back from someone who would actually build it — usually within one
-            working day, and with a straight read on whether a custom build is
-            the right call.
+          <h2 className="t-h2 mb-4 font-display">Thanks — we&apos;ve got it.</h2>
+          <p className="t-lead">
+            We usually reply within one working day.
           </p>
-          {state.note && <p className="meta mb-6">{state.note}</p>}
           <Rule className="my-7" />
           <div className="flex flex-wrap gap-3">
             <ButtonLink href={whatsappLink()} variant="whatsapp" size="lg" external>
@@ -148,7 +143,7 @@ export function ContactForm({ services }: { services: Service[] }) {
       <form ref={formRef} onSubmit={onSubmit} noValidate>
         <div className="mb-7 flex items-center gap-2.5">
           <span aria-hidden className="size-1.5 rounded-full bg-brand" />
-          <span className="meta-bright">Project enquiry</span>
+          <Label tick={false}>Project enquiry</Label>
         </div>
 
         <div className="grid gap-5 sm:grid-cols-2">

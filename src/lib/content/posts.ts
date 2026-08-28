@@ -299,13 +299,5 @@ Yes. That is the point, and it is not altruism. A client who can leave at any ti
   },
 ];
 
-export const postBySlug = (slug: string) =>
-  posts.find((p) => p.slug === slug && p.published);
-
-export const publishedPosts = () =>
-  posts
-    .filter((p) => p.published)
-    .sort((a, b) => (a.publishedAt < b.publishedAt ? 1 : -1));
-
 export const allTags = () =>
   Array.from(new Set(posts.flatMap((p) => p.tags))).sort();

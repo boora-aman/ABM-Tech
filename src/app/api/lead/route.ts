@@ -118,13 +118,17 @@ export async function POST(req: Request) {
     );
   }
 
-  const note = !isDbConfigured()
-    ? "Saved to server logs — set MONGODB_URI to store enquiries."
-    : !isMailConfigured()
-      ? "Stored. Add RESEND_API_KEY for email notifications."
-      : undefined;
+  // Configuration gaps are an operator problem, not the visitor's. These used
+  // to be returned in the response and rendered on the thank-you screen, which
+  // showed people "Add RESEND_API_KEY for email notifications" after they had
+  // filled in a contact form. They belong in the server log only.
+  if (!isDbConfigured()) {
+    console.warn("[lead] MONGODB_URI not set — enquiry not stored.");
+  } else if (!isMailConfigured()) {
+    console.warn("[lead] RESEND_API_KEY not set — no email notification sent.");
+  }
 
-  return NextResponse.json({ ok: true, stored, note });
+  return NextResponse.json({ ok: true });
 }
 
 export function GET() {

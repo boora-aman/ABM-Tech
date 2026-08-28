@@ -46,21 +46,6 @@ export function formatDate(value: string | Date) {
   }).format(d);
 }
 
-/** Deterministic pseudo-random from a string — for decorative values that
- *  must match between server and client render. */
-export function seeded(seed: string) {
-  let h = 2166136261;
-  for (let i = 0; i < seed.length; i++) {
-    h ^= seed.charCodeAt(i);
-    h = Math.imul(h, 16777619);
-  }
-  return () => {
-    h = Math.imul(h ^ (h >>> 15), 2246822507);
-    h = Math.imul(h ^ (h >>> 13), 3266489909);
-    return ((h ^= h >>> 16) >>> 0) / 4294967296;
-  };
-}
-
 /** Rough reading time in minutes at ~220 wpm, floor of 1. */
 export function readingTime(text: string) {
   return Math.max(1, Math.round(text.trim().split(/\s+/).length / 220));

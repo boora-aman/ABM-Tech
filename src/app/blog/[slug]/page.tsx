@@ -8,7 +8,7 @@ import { Cta } from "@/components/sections/Cta";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { Markdown } from "@/lib/markdown";
 import { posts as seedPosts } from "@/lib/content/posts";
-import { getPost, getPosts, getServices } from "@/lib/content/repo";
+import { getPost, getPosts, getServices, getSettings } from "@/lib/content/repo";
 import { pageMeta, graph, breadcrumbLd, articleLd, faqLd } from "@/lib/seo";
 import { site, whatsappLink } from "@/lib/site.config";
 import { formatDate, readingTime, outline } from "@/lib/utils";
@@ -40,10 +40,11 @@ export async function generateMetadata({ params }: RouteParams): Promise<Metadat
 
 export default async function PostPage({ params }: RouteParams) {
   const { slug } = await params;
-  const [post, all, allServices] = await Promise.all([
+  const [post, all, allServices, settings] = await Promise.all([
     getPost(slug),
     getPosts(),
     getServices(),
+    getSettings(),
   ]);
   if (!post) notFound();
 
@@ -286,7 +287,7 @@ export default async function PostPage({ params }: RouteParams) {
         </>
       )}
 
-      <Cta />
+      <Cta settings={settings} />
     </>
   );
 }

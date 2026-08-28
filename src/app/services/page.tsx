@@ -6,7 +6,7 @@ import { Faq } from "@/components/sections/Faq";
 import { Card, Rule } from "@/components/ui/Panel";
 import { ButtonLink, Arrow } from "@/components/ui/Button";
 import { JsonLd } from "@/components/seo/JsonLd";
-import { getServices, getGlobalFaqs, getPillars } from "@/lib/content/repo";
+import { getServices, getGlobalFaqs, getPillars, getSettings } from "@/lib/content/repo";
 import { pageMeta, graph, breadcrumbLd, serviceLd, faqLd } from "@/lib/seo";
 import { absoluteUrl } from "@/lib/site.config";
 
@@ -29,10 +29,11 @@ export const metadata: Metadata = pageMeta({
 export const revalidate = 3600;
 
 export default async function ServicesPage() {
-  const [services, globalFaqs, pillars] = await Promise.all([
+  const [services, globalFaqs, pillars, settings] = await Promise.all([
     getServices(),
     getGlobalFaqs(),
     getPillars(),
+    getSettings(),
   ]);
 
   return (
@@ -96,7 +97,7 @@ export default async function ServicesPage() {
         title="Before you enquire"
         lead="The questions that come up on almost every first call."
       />
-      <Cta />
+      <Cta settings={settings} />
     </>
   );
 }

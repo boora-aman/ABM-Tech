@@ -3,6 +3,7 @@ import { ButtonLink, Arrow } from "@/components/ui/Button";
 import { Expandable } from "@/components/ui/Expandable";
 import { inrShort } from "@/lib/utils";
 import type { Service } from "@/lib/content/services";
+import { pick } from "@/lib/content/repo";
 
 /* ==========================================================================
    SERVICES
@@ -81,11 +82,20 @@ export function ServiceGrid({
   heading = true,
   /** Cards shown before the disclosure. 0 shows everything. */
   initial = 0,
+  settings = {},
 }: {
   services: Service[];
   heading?: boolean;
   initial?: number;
+  settings?: Record<string, unknown>;
 }) {
+  const eyebrow = pick(settings, "services.eyebrow", "What we do");
+  const title = pick(settings, "services.heading", ["Everything you need to run"]);
+  const titleAccent = pick(
+    settings,
+    "services.headingAccent",
+    "and grow the business.",
+  );
   const collapse = initial > 0 && services.length > initial;
   const first = collapse ? services.slice(0, initial) : services;
   const rest = collapse ? services.slice(initial) : [];
@@ -95,11 +105,15 @@ export function ServiceGrid({
         {heading && (
           <div className="mb-12 grid gap-6 lg:grid-cols-[1fr_1fr] lg:items-end">
             <div>
-              <Label className="mb-4">What we do</Label>
+              <Label className="mb-4">{eyebrow}</Label>
               <h2 className="t-h1 max-w-lg">
-                Everything you need to run
-                <br />
-                <span className="brand-text">and grow the business.</span>
+                {title.map((line) => (
+                  <span key={line}>
+                    {line}
+                    <br />
+                  </span>
+                ))}
+                <span className="brand-text">{titleAccent}</span>
               </h2>
             </div>
             <p className="t-lead lg:pb-1">

@@ -28,7 +28,7 @@ const credentialsSchema = z.object({
  */
 const DUMMY_HASH = "$2b$12$C6UzMDM.H6dfI/f/IKcEe.7RQwqU9ozlwqZDRBH/dRUu.HYs4WNVy";
 
-export const authConfig = {
+const authConfig = {
   trustHost: true,
   session: { strategy: "jwt", maxAge: 60 * 60 * 8 },
   pages: { signIn: "/admin/login", error: "/admin/login" },

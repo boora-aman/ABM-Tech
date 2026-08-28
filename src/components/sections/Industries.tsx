@@ -4,6 +4,7 @@ import { ButtonLink, Arrow } from "@/components/ui/Button";
 import { Expandable } from "@/components/ui/Expandable";
 import type { Industry } from "@/lib/content/industries";
 import type { Service } from "@/lib/content/services";
+import { pick } from "@/lib/content/repo";
 
 /* ==========================================================================
    INDUSTRIES
@@ -82,12 +83,24 @@ export function IndustriesSection({
   heading = true,
   /** Cards shown before the disclosure. 0 shows everything. */
   initial = 0,
+  settings = {},
 }: {
   industries: Industry[];
   services: Service[];
   heading?: boolean;
   initial?: number;
+  settings?: Record<string, unknown>;
 }) {
+  const eyebrow = pick(settings, "industries.eyebrow", "Who we build for");
+  const title = pick(settings, "industries.heading", [
+    "Your sector has its own words.",
+  ]);
+  const titleAccent = pick(settings, "industries.headingAccent", "We build in them.");
+  const lead = pick(
+    settings,
+    "industries.lead",
+    "Knowing that a pharmacy needs batch-level MRP, that a transporter needs a bilty, and that a fuel station reconciles per shift is the difference between software that gets used and software that gets abandoned in month two.",
+  );
   const bySlug = new Map(services.map((s) => [s.slug, s]));
   const collapse = initial > 0 && industries.length > initial;
   const first = collapse ? industries.slice(0, initial) : industries;
@@ -99,19 +112,18 @@ export function IndustriesSection({
         {heading && (
           <div className="mb-12 grid gap-6 lg:grid-cols-[1fr_1fr] lg:items-end">
             <div>
-              <Label className="mb-4">Who we build for</Label>
+              <Label className="mb-4">{eyebrow}</Label>
               <h2 className="t-h1 max-w-lg">
-                Your sector has its own words.
-                <br />
-                <span className="brand-text">We build in them.</span>
+                {title.map((line) => (
+                  <span key={line}>
+                    {line}
+                    <br />
+                  </span>
+                ))}
+                <span className="brand-text">{titleAccent}</span>
               </h2>
             </div>
-            <p className="t-lead lg:pb-1">
-              Knowing that a pharmacy needs batch-level MRP, that a transporter
-              needs a bilty, and that a fuel station reconciles per shift is the
-              difference between software that gets used and software that gets
-              abandoned in month two.
-            </p>
+            <p className="t-lead lg:pb-1">{lead}</p>
           </div>
         )}
 

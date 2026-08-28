@@ -7,7 +7,7 @@ import { ButtonLink, Arrow } from "@/components/ui/Button";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { pageMeta, graph, breadcrumbLd, organizationLd, faqLd } from "@/lib/seo";
 import { site } from "@/lib/site.config";
-import { getServices, getCommitments } from "@/lib/content/repo";
+import { getServices, getCommitments, getSettings } from "@/lib/content/repo";
 import { Reveal } from "@/components/motion";
 
 export const metadata: Metadata = pageMeta({
@@ -44,9 +44,10 @@ const ABOUT_FAQS = [
 export const revalidate = 3600;
 
 export default async function AboutPage() {
-  const [services, commitments] = await Promise.all([
+  const [services, commitments, settings] = await Promise.all([
     getServices(),
     getCommitments(),
+    getSettings(),
   ]);
 
   return (
@@ -199,7 +200,7 @@ export default async function AboutPage() {
       </section>
 
       <Rule />
-      <Approach commitments={commitments} />
+      <Approach commitments={commitments} settings={settings} />
       <Rule />
       <Faq
         items={ABOUT_FAQS}

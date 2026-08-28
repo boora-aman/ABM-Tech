@@ -3,6 +3,7 @@ import { Card, Label, Tick } from "@/components/ui/Panel";
 import { ButtonLink, Arrow } from "@/components/ui/Button";
 import type { Pillar } from "@/lib/content/pillars";
 import type { Service } from "@/lib/content/services";
+import { pick } from "@/lib/content/repo";
 
 /* ==========================================================================
    SYSTEMS — the six pillars, expanded.
@@ -22,10 +23,26 @@ import type { Service } from "@/lib/content/services";
 export function Systems({
   pillars,
   services,
+  settings = {},
 }: {
   pillars: Pillar[];
   services: Service[];
+  settings?: Record<string, unknown>;
 }) {
+  const eyebrow = pick(settings, "systems.eyebrow", "The whole business");
+  const heading = pick(settings, "systems.heading", [
+    "Six systems. Every business",
+  ]);
+  const headingAccent = pick(
+    settings,
+    "systems.headingAccent",
+    "has all six, working or not.",
+  );
+  const lead = pick(
+    settings,
+    "systems.lead",
+    "Whether they are software, a register, or a person who remembers things. Find the one that is costing you the most and start there — you do not have to fix all six, and you certainly do not have to fix them at once.",
+  );
   const bySlug = new Map(services.map((s) => [s.slug, s]));
 
   return (
@@ -33,19 +50,18 @@ export function Systems({
       <div className="bay">
         <div className="mb-12 grid gap-6 lg:grid-cols-[1fr_1fr] lg:items-end">
           <div>
-            <Label className="mb-4">The whole business</Label>
+            <Label className="mb-4">{eyebrow}</Label>
             <h2 className="t-h1 max-w-xl">
-              Six systems. Every business
-              <br />
-              <span className="brand-text">has all six, working or not.</span>
+              {heading.map((line) => (
+                <span key={line}>
+                  {line}
+                  <br />
+                </span>
+              ))}
+              <span className="brand-text">{headingAccent}</span>
             </h2>
           </div>
-          <p className="t-lead lg:pb-1">
-            Whether they are software, a register, or a person who remembers
-            things. Find the one that is costing you the most and start there —
-            you do not have to fix all six, and you certainly do not have to fix
-            them at once.
-          </p>
+          <p className="t-lead lg:pb-1">{lead}</p>
         </div>
 
         <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">

@@ -142,11 +142,6 @@ export async function getProjects(): Promise<Project[]> {
   );
 }
 
-export async function getProject(slug: string): Promise<Project | null> {
-  const all = await getProjects();
-  return all.find((p) => p.slug === slug) ?? null;
-}
-
 /* -------------------------------- Slides -------------------------------- */
 
 export async function getSlides(): Promise<Slide[]> {
@@ -218,16 +213,6 @@ export async function getSettings(): Promise<Record<string, unknown>> {
       return Object.fromEntries(rows.map((r) => [r.key, r.value]));
     },
     () => ({}),
-  );
-}
-
-export async function getSettingRows(): Promise<SettingRow[]> {
-  return withDb(
-    async () => {
-      const docs = await SettingModel.find().sort({ group: 1, key: 1 }).lean();
-      return plain<SettingRow>(docs);
-    },
-    () => [],
   );
 }
 

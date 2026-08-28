@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Wordmark } from "@/components/brand/Logo";
 import { ButtonLink, Arrow } from "@/components/ui/Button";
 import { ThemeToggle } from "./Theme";
 import { nav, site } from "@/lib/site.config";
+import type { MenuPanel } from "@/lib/content/megamenu";
 import { cn } from "@/lib/utils";
 
 /* ==========================================================================
@@ -23,10 +24,39 @@ import { cn } from "@/lib/utils";
    both variants at once.
    ========================================================================== */
 
-export function Header() {
+export function Header({ panels = [] }: { panels?: MenuPanel[] }) {
   const pathname = usePathname();
   const [lifted, setLifted] = useState(false);
-  const [open, setOpen] = useState(false);
+  /* Both menus store the route they were opened on. Comparing that against
+     the live pathname closes them on navigation as DERIVED state — an effect
+     watching `pathname` would setState during render and cascade. */
+  const [openAt, setOpenAt] = useState<string | null>(null);
+  const [menuAt, setMenuAt] = useState<{ href: string; path: string } | null>(null);
+
+  const open = openAt === pathname;
+  const menu = menuAt?.path === pathname ? menuAt.href : null;
+
+  const setOpen = (v: boolean) => setOpenAt(v ? pathname : null);
+  const setMenu = (href: string | null) =>
+    setMenuAt(href ? { href, path: pathname } : null);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const panelFor = (href: string) => panels.find((p) => p.key === href);
+
+  /* Open immediately, close on a short delay. Without the delay the panel
+     vanishes while the pointer crosses the gap between the trigger and the
+     panel below it, which makes the menu feel broken rather than fast. */
+  const openMenu = (href: string) => {
+    if (closeTimer.current) clearTimeout(closeTimer.current);
+    setMenu(panelFor(href) ? href : null);
+  };
+  const scheduleClose = () => {
+    if (closeTimer.current) clearTimeout(closeTimer.current);
+    closeTimer.current = setTimeout(() => setMenu(null), 140);
+  };
+  const cancelClose = () => {
+    if (closeTimer.current) clearTimeout(closeTimer.current);
+  };
 
   useEffect(() => {
     const onScroll = () => setLifted(window.scrollY > 8);
@@ -36,11 +66,14 @@ export function Header() {
   }, []);
 
   useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      setOpenAt(null);
+      setMenuAt(null);
+    };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [open]);
+  }, []);
 
   const active = (href: string) => pathname.startsWith(href);
 
@@ -69,24 +102,56 @@ export function Header() {
           </Link>
 
           {/* Desktop nav */}
-          <nav aria-label="Primary" className="ml-auto hidden lg:block">
+          <nav
+            aria-label="Primary"
+            className="ml-auto hidden lg:block"
+            onMouseLeave={scheduleClose}
+          >
             <ul className="flex items-center gap-1">
-              {nav.map((item) => (
-                <li key={item.href}>
-                  <Link
-                    href={item.href}
-                    aria-current={active(item.href) ? "page" : undefined}
-                    className={cn(
-                      "rounded-sm px-3.5 py-2 text-[0.875rem] font-medium transition-colors",
-                      active(item.href)
-                        ? "text-brand-ink"
-                        : "text-ink-dim hover:text-ink",
-                    )}
-                  >
-                    {item.label}
-                  </Link>
-                </li>
-              ))}
+              {nav.map((item) => {
+                const panel = panelFor(item.href);
+                const isOpen = menu === item.href;
+                return (
+                  <li key={item.href} onMouseEnter={() => openMenu(item.href)}>
+                    <Link
+                      href={item.href}
+                      aria-current={active(item.href) ? "page" : undefined}
+                      aria-expanded={panel ? isOpen : undefined}
+                      onFocus={() => openMenu(item.href)}
+                      className={cn(
+                        "relative flex items-center gap-1.5 rounded-sm px-3.5 py-2 text-[0.875rem] font-medium",
+                        "transition-colors duration-200",
+                        active(item.href) || isOpen
+                          ? "text-brand-ink"
+                          : "text-ink-dim hover:text-ink",
+                      )}
+                    >
+                      {item.label}
+                      {panel && (
+                        <svg
+                          width="9"
+                          height="9"
+                          viewBox="0 0 10 10"
+                          fill="none"
+                          aria-hidden
+                          className={cn(
+                            "mt-px transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
+                            isOpen && "rotate-180",
+                          )}
+                        >
+                          <path
+                            d="M2 3.5 5 6.5 8 3.5"
+                            stroke="currentColor"
+                            strokeWidth="1.4"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                      )}
+                    </Link>
+                  </li>
+                );
+              })}
             </ul>
           </nav>
 
@@ -106,13 +171,98 @@ export function Header() {
             </span>
             <button
               type="button"
-              onClick={() => setOpen((v) => !v)}
+              onClick={() => setOpen(!open)}
               aria-expanded={open}
               aria-label={open ? "Close menu" : "Open menu"}
               className="grid size-9 place-items-center rounded-sm border border-line text-ink-dim transition-colors hover:border-line-strong hover:text-ink lg:hidden"
             >
               <MenuGlyph open={open} />
             </button>
+          </div>
+        </div>
+      </div>
+
+      {/* ------------------------- Mega panel -------------------------------
+          One container that holds every panel and cross-fades between them,
+          rather than a panel per nav item. Moving from Services to Industries
+          therefore slides the shared surface instead of dismissing one box and
+          building another — that continuity is what makes it feel considered
+          rather than twitchy.
+
+          Every panel stays mounted and is hidden with opacity, so switching
+          costs a composite and never a re-layout. `inert` keeps the hidden
+          ones out of the tab order. */}
+      <div
+        className={cn(
+          "absolute inset-x-0 top-full hidden origin-top lg:block",
+          "transition-[opacity,transform] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
+          menu
+            ? "pointer-events-auto translate-y-0 opacity-100"
+            : "pointer-events-none -translate-y-1 opacity-0",
+        )}
+        onMouseEnter={cancelClose}
+        onMouseLeave={scheduleClose}
+      >
+        <div className="border-b border-line bg-page/95 shadow-md backdrop-blur-md">
+          <div className="page-x">
+            <div className="bay relative">
+              {panels.map((panel) => {
+                const isOpen = menu === panel.key;
+                return (
+                  <div
+                    key={panel.key}
+                    {...(!isOpen ? { inert: true } : {})}
+                    aria-hidden={!isOpen}
+                    className={cn(
+                      "transition-opacity duration-200",
+                      isOpen
+                        ? "opacity-100"
+                        : "pointer-events-none absolute inset-0 opacity-0",
+                    )}
+                  >
+                    <div className="grid gap-x-8 gap-y-7 py-8 md:grid-cols-3 xl:grid-cols-4">
+                      {panel.columns.map((col, i) => (
+                        <div key={col.title || i}>
+                          {col.title && (
+                            <p className="label mb-3.5">{col.title}</p>
+                          )}
+                          <ul className="space-y-1">
+                            {col.links.map((l) => (
+                              <li key={l.href + l.label}>
+                                <Link
+                                  href={l.href}
+                                  onClick={() => setMenu(null)}
+                                  className="group/ml -mx-2 flex items-baseline gap-2 rounded-sm px-2 py-1.5 text-[0.875rem] text-ink-dim transition-colors duration-150 hover:bg-tint hover:text-brand-ink"
+                                >
+                                  <span
+                                    aria-hidden
+                                    className="mt-[0.45em] h-px w-0 shrink-0 bg-brand transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/ml:w-3"
+                                  />
+                                  <span>{l.label}</span>
+                                </Link>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ))}
+                    </div>
+
+                    {panel.footer && (
+                      <div className="border-t border-line py-4">
+                        <Link
+                          href={panel.footer.href}
+                          onClick={() => setMenu(null)}
+                          className="group/btn inline-flex items-center gap-2 text-[0.875rem] font-medium text-brand-ink"
+                        >
+                          {panel.footer.label}
+                          <Arrow />
+                        </Link>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
       </div>

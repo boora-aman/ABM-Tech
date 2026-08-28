@@ -211,14 +211,3 @@ export const industries: Industry[] = [
     services: ["dynamic-website", "dashboards", "business-digitisation"],
   },
 ];
-
-export const industryBySlug = (slug: string) =>
-  industries.find((i) => i.slug === slug);
-
-/** Sectors we have shipped in, used where a claim needs to stay truthful. */
-export const shippedSectors = [
-  "healthcare-pharmacy",
-  "retail-wholesale",
-  "logistics-transport",
-  "field-home-services",
-] as const;

@@ -1,5 +1,6 @@
 import { Card, Label } from "@/components/ui/Panel";
 import type { commitments as Commitments } from "@/lib/content/faq";
+import { pick } from "@/lib/content/repo";
 
 /* ==========================================================================
    APPROACH
@@ -9,23 +10,38 @@ import type { commitments as Commitments } from "@/lib/content/faq";
    with none of that cost.
    ========================================================================== */
 
-export function Approach({ commitments }: { commitments: typeof Commitments }) {
+export function Approach({
+  commitments,
+  settings = {},
+}: {
+  commitments: typeof Commitments;
+  settings?: Record<string, unknown>;
+}) {
+  const eyebrow = pick(settings, "approach.eyebrow", "How we work");
+  const title = pick(settings, "approach.heading", ["Six things we commit to"]);
+  const titleAccent = pick(settings, "approach.headingAccent", "on every project.");
+  const lead = pick(
+    settings,
+    "approach.lead",
+    "None of it is remarkable — it is simply what we would want if we were the ones paying.",
+  );
   return (
     <section id="approach" className="defer-paint page-x py-20 sm:py-24">
       <div className="bay">
         <div className="mb-12 grid gap-6 lg:grid-cols-[1fr_1fr] lg:items-end">
           <div>
-            <Label className="mb-4">How we work</Label>
+            <Label className="mb-4">{eyebrow}</Label>
             <h2 className="t-h1 max-w-lg">
-              Six things we commit to
-              <br />
-              <span className="brand-text">on every project.</span>
+              {title.map((line) => (
+                <span key={line}>
+                  {line}
+                  <br />
+                </span>
+              ))}
+              <span className="brand-text">{titleAccent}</span>
             </h2>
           </div>
-          <p className="t-lead lg:pb-1">
-            None of it is remarkable — it is simply what we would want if we were
-            the ones paying.
-          </p>
+          <p className="t-lead lg:pb-1">{lead}</p>
         </div>
 
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">

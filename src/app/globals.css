@@ -55,41 +55,54 @@
 :root[data-theme="light"] {
   color-scheme: light;
 
-  --t-page: #f6f5f2;
+  /* The ground is a genuine warm paper, not an almost-white. It used to be
+     #f6f5f2 against #ffffff cards — a 1.09 contrast ratio, which is to say
+     no visible separation at all, so every card floated on a field of the
+     same colour and the page read as one flat sheet. Dropping the ground
+     gives cards something to sit on. */
+  --t-page: #eceae4;
   --t-surface: #ffffff;
   --t-raised: #ffffff;
-  --t-line: rgba(20, 22, 26, 0.1);
-  --t-line-strong: rgba(20, 22, 26, 0.16);
+
+  /* Hairlines were 10% and effectively invisible on a bright ground. */
+  --t-line: rgba(20, 22, 26, 0.14);
+  --t-line-strong: rgba(20, 22, 26, 0.24);
 
   --t-ink: #14161a;
-  --t-ink-dim: #4c525b;
-  --t-ink-faint: #7b828c;
+  --t-ink-dim: #474d56;
+  /* 4.68:1 on the page ground, 5.63:1 on a card — the old #7b828c was 3.56:1
+     and failed AA for the small print it is used on. */
+  --t-ink-faint: #616872;
 
-  /* Brand text colour that clears AA on the page tone */
-  --t-brand-ink: #c23a0c;
-  --t-tint: rgba(244, 80, 26, 0.07);
+  --t-brand-ink: #b8380b;
+  --t-tint: rgba(244, 80, 26, 0.09);
 
-  --shadow-sm: 0 1px 2px rgba(20, 22, 26, 0.05);
-  --shadow-md: 0 2px 4px rgba(20, 22, 26, 0.04), 0 8px 24px -12px rgba(20, 22, 26, 0.12);
-  --shadow-lg: 0 4px 8px rgba(20, 22, 26, 0.05), 0 20px 48px -20px rgba(20, 22, 26, 0.2);
+  /* Deeper and warmer. Shadows on a paper ground read as lift; the previous
+     near-transparent values did nothing on a background this bright. */
+  --shadow-sm: 0 1px 2px rgba(38, 30, 22, 0.06), 0 1px 1px rgba(38, 30, 22, 0.04);
+  --shadow-md: 0 2px 4px rgba(38, 30, 22, 0.05), 0 10px 26px -12px rgba(38, 30, 22, 0.18);
+  --shadow-lg: 0 4px 8px rgba(38, 30, 22, 0.06), 0 24px 52px -20px rgba(38, 30, 22, 0.26);
 }
 
 /* ------------------------------- DARK ---------------------------------- */
 :root[data-theme="dark"] {
   color-scheme: dark;
 
-  --t-page: #0f1115;
-  --t-surface: #161a20;
-  --t-raised: #1c2128;
-  --t-line: rgba(255, 255, 255, 0.1);
-  --t-line-strong: rgba(255, 255, 255, 0.18);
+  --t-page: #0e1014;
+  /* Lifted from #161a20 so a card separates from the ground by more than a
+     rounding error, and `raised` sits a step above that again. */
+  --t-surface: #1a1f27;
+  --t-raised: #222831;
+  --t-line: rgba(255, 255, 255, 0.13);
+  --t-line-strong: rgba(255, 255, 255, 0.22);
 
   --t-ink: #f4f6f8;
-  --t-ink-dim: #a8b0bb;
-  --t-ink-faint: #78808b;
+  --t-ink-dim: #adb5c0;
+  /* 4.74:1 on a card — the old #78808b was 4.14:1 and missed AA. */
+  --t-ink-faint: #828a95;
 
-  --t-brand-ink: #ff8c42;
-  --t-tint: rgba(244, 80, 26, 0.12);
+  --t-brand-ink: #ff9152;
+  --t-tint: rgba(244, 80, 26, 0.15);
 
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
   --shadow-md: 0 2px 6px rgba(0, 0, 0, 0.4), 0 10px 28px -14px rgba(0, 0, 0, 0.7);
@@ -421,4 +434,30 @@
 
 @media (prefers-reduced-motion: reduce) {
   .reveal { transition: none; }
+}
+
+/* ------------------------- THEME VIEW TRANSITION ------------------------- */
+
+/* The theme flip is driven entirely by the clip-path animation in Theme.tsx.
+   The default cross-fade would run underneath it and muddy the wipe, so both
+   layers are pinned instead, and the outgoing paint is held still while the
+   new one is revealed over it. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+::view-transition-old(root) {
+  z-index: 0;
+}
+::view-transition-new(root) {
+  z-index: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
 }

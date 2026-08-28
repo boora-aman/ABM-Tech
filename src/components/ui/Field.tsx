@@ -33,7 +33,7 @@ function Shell({
 }: Base & { id: string; children: React.ReactNode }) {
   return (
     <div className={cn("flex flex-col gap-2", className)}>
-      <label htmlFor={id} className="meta-bright flex items-center gap-1.5">
+      <label htmlFor={id} className="flex items-center gap-1.5 text-[0.8125rem] font-medium text-ink">
         {label}
         {required && (
           <span aria-hidden className="text-brand">
@@ -185,7 +185,7 @@ export function Segments({
 }) {
   return (
     <fieldset className={cn("flex flex-col gap-2", className)}>
-      <legend className="meta-bright mb-1">{label}</legend>
+      <legend className="mb-1 text-[0.8125rem] font-medium text-ink">{label}</legend>
       <div className="flex flex-wrap gap-1.5">
         {options.map((o) => {
           const on = value === o.value;

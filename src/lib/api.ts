@@ -43,7 +43,7 @@ export function bump(paths: string[]) {
 const TOKEN_PREFIX = "abm_";
 
 /** Only the hash is ever stored, so a database dump yields no usable tokens. */
-export function hashToken(token: string) {
+function hashToken(token: string) {
   return createHash("sha256").update(token).digest("hex");
 }
 

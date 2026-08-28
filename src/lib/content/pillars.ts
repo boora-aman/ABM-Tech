@@ -181,26 +181,3 @@ export const stackMarks = [
   "OpenAI / Claude",
   "Google Business Profile API",
 ] as const;
-
-/* --------------------------------------------------------------------------
-   CATALOGUE GROUPS — the six loops plus `run`, which is not a business loop
-   but is where hosting and support belong. Used to group 13 services into
-   something scannable; a flat grid of 13 cards is a wall, not a menu.
-   -------------------------------------------------------------------------- */
-
-export const catalogueGroups: {
-  key: string;
-  name: string;
-  blurb: string;
-}[] = [
-  ...pillars.map((p) => ({
-    key: p.key,
-    name: p.name,
-    blurb: p.question,
-  })),
-  {
-    key: "run",
-    name: "Keep it running",
-    blurb: "Who is responsible once it is live?",
-  },
-];

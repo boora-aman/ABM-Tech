@@ -31,7 +31,7 @@ const getServerSnapshot = () => false;
 export function ThemeToggle({ className }: { className?: string }) {
   const dark = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
-  function apply(next: boolean) {
+  function commit(next: boolean) {
     document.documentElement.dataset.theme = next ? "dark" : "light";
     try {
       localStorage.setItem("abm-theme", next ? "dark" : "light");
@@ -41,13 +41,61 @@ export function ThemeToggle({ className }: { className?: string }) {
     listeners.forEach((l) => l());
   }
 
+  /**
+   * Flip the theme as a circle expanding from the button.
+   *
+   * View Transitions give us the old paint as a snapshot underneath the new
+   * one for free, so the effect is a single clip-path animation on the
+   * incoming layer — no cloned DOM, no canvas, no per-element transition. On
+   * a browser without the API, or for a visitor who has asked for reduced
+   * motion, it falls through to the plain instant swap, which is the correct
+   * behaviour rather than a degraded one.
+   */
+  function apply(next: boolean, origin?: { x: number; y: number }) {
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const startViewTransition = (
+      document as Document & {
+        startViewTransition?: (cb: () => void) => { ready: Promise<void> };
+      }
+    ).startViewTransition;
+
+    if (!origin || reduce || typeof startViewTransition !== "function") {
+      commit(next);
+      return;
+    }
+
+    const { x, y } = origin;
+    // Radius to the farthest corner, so the circle always covers the viewport.
+    const end = Math.hypot(
+      Math.max(x, window.innerWidth - x),
+      Math.max(y, window.innerHeight - y),
+    );
+
+    const transition = startViewTransition.call(document, () => commit(next));
+    void transition.ready.then(() => {
+      document.documentElement.animate(
+        {
+          clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${end}px at ${x}px ${y}px)`],
+        },
+        {
+          duration: 520,
+          easing: "cubic-bezier(0.22, 1, 0.36, 1)",
+          pseudoElement: "::view-transition-new(root)",
+        },
+      );
+    });
+  }
+
   return (
     <button
       type="button"
       role="switch"
       aria-checked={dark}
       aria-label={`Switch to ${dark ? "light" : "dark"} theme`}
-      onClick={() => apply(!dark)}
+      onClick={(e) => {
+        const r = e.currentTarget.getBoundingClientRect();
+        apply(!dark, { x: r.left + r.width / 2, y: r.top + r.height / 2 });
+      }}
       className={cn(
         "grid size-9 place-items-center rounded-sm border border-line text-ink-dim",
         "transition-colors duration-200 hover:border-line-strong hover:text-ink",

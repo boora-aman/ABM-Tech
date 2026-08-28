@@ -29,6 +29,9 @@ export default async function AdminLayout({
   }
 
   const role = (session.user as { role?: string }).role ?? "editor";
+  // `name` is set by seed:admin (ADMIN_NAME) and falls back to the email there,
+  // so this shows a person rather than a login string wherever one exists.
+  const displayName = session.user.name?.trim() || session.user.email || "Admin";
 
   return (
     <div className="page-x pt-28 pb-20">
@@ -39,8 +42,25 @@ export default async function AdminLayout({
             <h1 className="t-h2">Content</h1>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-[0.8125rem] text-ink-faint">
-              {session.user.email} · {role}
+            <span className="flex items-center gap-2.5">
+              <span
+                aria-hidden
+                className="grid size-8 shrink-0 place-items-center rounded-full bg-tint font-display text-[0.6875rem] font-semibold text-brand-ink"
+              >
+                {displayName
+                  .split(/\s+/)
+                  .slice(0, 2)
+                  .map((w) => w[0]?.toUpperCase() ?? "")
+                  .join("")}
+              </span>
+              <span className="leading-tight">
+                <span className="block text-[0.8125rem] font-medium">
+                  {displayName}
+                </span>
+                <span className="block text-[0.75rem] text-ink-faint capitalize">
+                  {role}
+                </span>
+              </span>
             </span>
             <Link
               href="/"

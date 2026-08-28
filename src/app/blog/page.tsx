@@ -5,7 +5,7 @@ import { Cta } from "@/components/sections/Cta";
 import { Card, Rule, Label, Chip } from "@/components/ui/Panel";
 import { Arrow } from "@/components/ui/Button";
 import { JsonLd } from "@/components/seo/JsonLd";
-import { getPosts } from "@/lib/content/repo";
+import { getPosts, getSettings } from "@/lib/content/repo";
 import { pageMeta, graph, breadcrumbLd } from "@/lib/seo";
 import { absoluteUrl } from "@/lib/site.config";
 import { formatDate, readingTime } from "@/lib/utils";
@@ -26,7 +26,7 @@ export const metadata: Metadata = pageMeta({
 export const revalidate = 3600;
 
 export default async function BlogPage() {
-  const posts = await getPosts();
+  const [posts, settings] = await Promise.all([getPosts(), getSettings()]);
   const [lead, ...rest] = posts;
   const allTags = Array.from(new Set(posts.flatMap((p) => p.tags))).sort();
 
@@ -151,7 +151,7 @@ export default async function BlogPage() {
         </div>
       </section>
 
-      <Cta />
+      <Cta settings={settings} />
     </>
   );
 }
