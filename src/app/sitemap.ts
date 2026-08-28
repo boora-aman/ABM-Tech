@@ -1,10 +1,12 @@
 import type { MetadataRoute } from "next";
-import { services } from "@/lib/content/services";
-import { publishedPosts } from "@/lib/content/posts";
+import { getServices, getPosts } from "@/lib/content/repo";
 import { absoluteUrl } from "@/lib/site.config";
 
 /** Priorities reflect commercial intent: pricing and services above editorial. */
-export default function sitemap(): MetadataRoute.Sitemap {
+export const revalidate = 3600;
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const [services, posts] = await Promise.all([getServices(), getPosts()]);
   const now = new Date();
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: absoluteUrl("/"), priority: 1, changeFrequency: "weekly", lastModified: now },
@@ -26,7 +28,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     lastModified: now,
   }));
 
-  const postRoutes: MetadataRoute.Sitemap = publishedPosts().map((p) => ({
+  const postRoutes: MetadataRoute.Sitemap = posts.map((p) => ({
     url: absoluteUrl(`/blog/${p.slug}`),
     priority: p.featured ? 0.75 : 0.65,
     changeFrequency: "monthly",

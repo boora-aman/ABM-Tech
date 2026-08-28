@@ -1,13 +1,14 @@
 import Link from "next/link";
 import { Logo } from "@/components/brand/Logo";
 import { Rule } from "@/components/ui/Panel";
-import { services } from "@/lib/content/services";
+import { getServices } from "@/lib/content/repo";
 import { site, nav, isPlaceholder } from "@/lib/site.config";
 import { inrShort } from "@/lib/utils";
 
 /** Footer. Doubles as the crawlable index — every service linked with its
  *  price, and the contact block matches the Organization JSON-LD exactly. */
-export function Footer() {
+export async function Footer() {
+  const services = await getServices();
   const year = new Date().getFullYear();
   const socials = site.socials.filter((s) => s.url && !isPlaceholder(s.url));
 

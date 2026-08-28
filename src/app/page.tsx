@@ -10,9 +10,15 @@ import { Faq } from "@/components/sections/Faq";
 import { Cta } from "@/components/sections/Cta";
 import { Rule } from "@/components/ui/Panel";
 import { JsonLd } from "@/components/seo/JsonLd";
-import { services } from "@/lib/content/services";
-import { slides } from "@/lib/content/showcase";
-import { globalFaqs } from "@/lib/content/faq";
+import {
+  getServices,
+  getSlides,
+  getGlobalFaqs,
+  getIndustries,
+  getPillars,
+  getCommitments,
+  getSettings,
+} from "@/lib/content/repo";
 import { pageMeta, graph, breadcrumbLd, faqLd, serviceLd } from "@/lib/seo";
 import { site } from "@/lib/site.config";
 
@@ -28,10 +34,14 @@ import { site } from "@/lib/site.config";
      Approach  — here is how we work
      FAQ / CTA — here is the answer to what you were about to ask
 
-   Each section answers the objection the previous one raises. That sequence
-   is why the old ordering (hero → showcase → services) converted poorly: it
-   showed products before establishing that any of them applied to the reader.
+   Content comes from the repo, which reads MongoDB when it is configured and
+   the committed seed files otherwise. `revalidate` keeps the page statically
+   generated and refreshed hourly; admin writes call revalidatePath so an edit
+   is live immediately. A crawler is therefore always served pre-rendered HTML
+   with its structured data intact.
    -------------------------------------------------------------------------- */
+
+export const revalidate = 3600;
 
 export const metadata: Metadata = pageMeta({
   title: `${site.name} — Business Software, Websites, Apps & Automation`,
@@ -47,30 +57,46 @@ export const metadata: Metadata = pageMeta({
   ],
 });
 
-export default function HomePage() {
+export default async function HomePage() {
+  const [services, slides, faqs, industries, pillars, commitments, settings] =
+    await Promise.all([
+      getServices(),
+      getSlides(),
+      getGlobalFaqs(),
+      getIndustries(),
+      getPillars(),
+      getCommitments(),
+      getSettings(),
+    ]);
+
   return (
     <>
       <JsonLd
         data={graph(
           breadcrumbLd([{ name: "Home", path: "/" }]),
-          faqLd(globalFaqs),
+          faqLd(faqs),
           ...services.map((s) => serviceLd(s)),
         )}
       />
 
-      <Hero />
-      <Systems />
-      <IndustriesSection limit={6} />
+      <Hero
+        pillars={pillars}
+        industries={industries}
+        serviceCount={services.length}
+        settings={settings}
+      />
+      <Systems pillars={pillars} services={services} />
+      <IndustriesSection industries={industries} services={services} initial={6} />
       <Rule />
-      <ServiceGrid services={services} />
+      <ServiceGrid services={services} initial={6} />
       <Rule />
       <Shifts />
       <Showcase slides={slides} />
       <Rule />
-      <Approach />
+      <Approach commitments={commitments} />
       <Rule />
       <Faq
-        items={globalFaqs}
+        items={faqs}
         label="Common questions"
         title="Questions, answered"
         lead="Including the ones where the honest answer costs us the project."

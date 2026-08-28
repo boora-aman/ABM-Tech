@@ -67,20 +67,29 @@ export const site = {
    *  These also feed `sameAs` in Organization schema, which is how search
    *  engines tie the site and the profiles to one entity. */
   socials: [
-    /* ⚠️ These MUST be ABM Tech's own profiles, not another brand's. They feed
-       `sameAs` in Organization schema, which is how a search engine ties a
-       site and a profile to one entity — pointing them at a different company
-       actively tells Google the two brands are the same thing. Left empty
-       until the ABM Tech accounts exist; an empty URL renders no icon. */
+    /* Shared with Google IT Solution by choice — ABM Tech is the brand being
+       focused on and the handles are established, so the accounts are being
+       repurposed rather than started again.
+
+       These feed `sameAs` in Organization schema, which is an entity-identity
+       claim. Only ONE site should list them: if abmtech.in and the Google IT
+       Solution site both claim the same profiles, search engines are being
+       told the two Organizations are one entity. See the note in README.md. */
     {
       key: "instagram",
       label: "Instagram",
-      url: or(process.env.NEXT_PUBLIC_INSTAGRAM, ""), // TODO: ABM Tech Instagram
+      url: or(
+        process.env.NEXT_PUBLIC_INSTAGRAM,
+        "https://www.instagram.com/googleitsolution/",
+      ),
     },
     {
       key: "facebook",
       label: "Facebook",
-      url: or(process.env.NEXT_PUBLIC_FACEBOOK, ""), // TODO: ABM Tech Facebook page
+      url: or(
+        process.env.NEXT_PUBLIC_FACEBOOK,
+        "https://www.facebook.com/people/Google-IT-Solution/61592626603794/",
+      ),
     },
     {
       key: "linkedin",

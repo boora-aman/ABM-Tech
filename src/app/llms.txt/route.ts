@@ -1,9 +1,12 @@
-import { services } from "@/lib/content/services";
-import { industries } from "@/lib/content/industries";
-import { pillars } from "@/lib/content/pillars";
-import { projects } from "@/lib/content/work";
-import { publishedPosts } from "@/lib/content/posts";
-import { globalFaqs, commitments } from "@/lib/content/faq";
+import {
+  getServices,
+  getProjects,
+  getPosts,
+  getGlobalFaqs,
+  getCommitments,
+  getIndustries,
+  getPillars,
+} from "@/lib/content/repo";
 import { site, absoluteUrl } from "@/lib/site.config";
 import { inr } from "@/lib/utils";
 
@@ -15,9 +18,20 @@ import { inr } from "@/lib/utils";
  * statements with concrete figures, because that is the shape a model can lift
  * verbatim into a citation.
  */
-export const dynamic = "force-static";
+export const revalidate = 3600;
 
-export function GET() {
+export async function GET() {
+  const [services, projects, posts, globalFaqs, commitments, industries, pillars] =
+    await Promise.all([
+      getServices(),
+      getProjects(),
+      getPosts(),
+      getGlobalFaqs(),
+      getCommitments(),
+      getIndustries(),
+      getPillars(),
+    ]);
+
   const L: string[] = [
     `# ${site.name}`,
     "",
@@ -119,7 +133,7 @@ export function GET() {
 
   L.push("## Journal articles");
   L.push("");
-  for (const p of publishedPosts()) {
+  for (const p of posts) {
     L.push(`### ${p.title}`);
     L.push("");
     L.push(p.keyTakeaway);
@@ -138,7 +152,7 @@ export function GET() {
       `- [Industries](${absoluteUrl("/industries")}) — ${industries.length} sectors, in their own vocabulary`,
       `- [Pricing](${absoluteUrl("/pricing")}) — every figure, with exclusions`,
       `- [Work](${absoluteUrl("/work")}) — ${projects.length} engagements`,
-      `- [Journal](${absoluteUrl("/blog")}) — ${publishedPosts().length} articles · [RSS](${absoluteUrl("/feed.xml")})`,
+      `- [Journal](${absoluteUrl("/blog")}) — ${posts.length} articles · [RSS](${absoluteUrl("/feed.xml")})`,
       `- [About](${absoluteUrl("/about")})`,
       `- [Contact](${absoluteUrl("/contact")})`,
       `- [Privacy](${absoluteUrl("/privacy")}) · [Terms](${absoluteUrl("/terms")})`,

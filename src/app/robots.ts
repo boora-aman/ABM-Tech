@@ -8,7 +8,9 @@ import { absoluteUrl } from "@/lib/site.config";
  * an inherited default — see /llms.txt for the map published for them.
  */
 export default function robots(): MetadataRoute.Robots {
-  const disallow = ["/api/", "/_next/"];
+  // /admin is also blocked by middleware (X-Robots-Tag: noindex) and by the
+  // layout's metadata, so this is the third of three independent gates.
+  const disallow = ["/api/", "/admin", "/_next/"];
   const agents = [
     "*", "Googlebot", "Bingbot", "DuckDuckBot",
     "GPTBot", "OAI-SearchBot", "ChatGPT-User",

@@ -1,8 +1,9 @@
 import { Card, Label, Rule } from "@/components/ui/Panel";
 import { ButtonLink, Arrow, WhatsAppGlyph } from "@/components/ui/Button";
 import { site, whatsappLink } from "@/lib/site.config";
-import { pillars } from "@/lib/content/pillars";
-import { industries } from "@/lib/content/industries";
+import type { Pillar } from "@/lib/content/pillars";
+import type { Industry } from "@/lib/content/industries";
+import { pick } from "@/lib/content/repo";
 
 /* ==========================================================================
    HERO
@@ -24,7 +25,32 @@ import { industries } from "@/lib/content/industries";
    positioned element — it composites once and never repaints on scroll.
    ========================================================================== */
 
-export function Hero() {
+export function Hero({
+  pillars,
+  industries,
+  serviceCount,
+  settings = {},
+}: {
+  pillars: Pillar[];
+  industries: Industry[];
+  serviceCount: number;
+  /** Copy overrides from the CMS. Every read carries the committed wording as
+   *  its fallback, so a missing or deleted key restores the original text
+   *  rather than rendering an empty heading. */
+  settings?: Record<string, unknown>;
+}) {
+  const headline = pick(settings, "hero.headline", [
+    "Every business runs",
+    "on six systems.",
+  ]);
+  const headlineAccent = pick(settings, "hero.headlineAccent", "We build all six.");
+  const eyebrow = pick(settings, "hero.eyebrow", "Software for every kind of business");
+  const lead = pick(
+    settings,
+    "hero.lead",
+    "A shop, a clinic, a factory, a school, a transport fleet — the software looks different, the six loops never change. Get found, catch demand, run operations, collect the money, work off the desk, and know what is happening. We design, build and run all of it.",
+  );
+
   return (
     <section className="relative page-x pt-32 pb-14 sm:pt-40 sm:pb-20">
       {/* Static brand aura. Decorative, pointer-events-none, paints once. */}
@@ -35,22 +61,21 @@ export function Hero() {
           {/* ---------------------------- Statement ------------------------ */}
           <div>
             <div className="rise mb-7" style={{ animationDelay: "0.04s" }}>
-              <Label>Software for every kind of business</Label>
+              <Label>{eyebrow}</Label>
             </div>
 
             <h1 className="t-hero rise mb-7" style={{ animationDelay: "0.1s" }}>
-              Every business runs
-              <br />
-              on six systems.
-              <br />
-              <span className="brand-text">We build all six.</span>
+              {headline.map((line) => (
+                <span key={line}>
+                  {line}
+                  <br />
+                </span>
+              ))}
+              <span className="brand-text">{headlineAccent}</span>
             </h1>
 
             <p className="t-lead rise mb-8 max-w-xl" style={{ animationDelay: "0.18s" }}>
-              A shop, a clinic, a factory, a school, a transport fleet — the
-              software looks different, the six loops never change. Get found,
-              catch demand, run operations, collect the money, work off the desk,
-              and know what is happening. We design, build and run all of it.
+              {lead}
             </p>
 
             <div
@@ -62,7 +87,7 @@ export function Hero() {
                 <Arrow />
               </ButtonLink>
               <ButtonLink href="/services" variant="outline" size="lg">
-                See all 13 services
+                See all {serviceCount} services
                 <Arrow />
               </ButtonLink>
               <ButtonLink

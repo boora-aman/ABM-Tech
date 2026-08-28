@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { Card, Label, Tick } from "@/components/ui/Panel";
 import { ButtonLink, Arrow } from "@/components/ui/Button";
-import { pillars } from "@/lib/content/pillars";
-import { serviceBySlug } from "@/lib/content/services";
+import type { Pillar } from "@/lib/content/pillars";
+import type { Service } from "@/lib/content/services";
 
 /* ==========================================================================
    SYSTEMS — the six pillars, expanded.
@@ -19,7 +19,15 @@ import { serviceBySlug } from "@/lib/content/services";
    Server component. Hover states are CSS.
    ========================================================================== */
 
-export function Systems() {
+export function Systems({
+  pillars,
+  services,
+}: {
+  pillars: Pillar[];
+  services: Service[];
+}) {
+  const bySlug = new Map(services.map((s) => [s.slug, s]));
+
   return (
     <section id="systems" className="defer-paint band page-x py-20 sm:py-24">
       <div className="bay">
@@ -79,7 +87,7 @@ export function Systems() {
                 </div>
                 <div className="flex flex-wrap gap-x-2 gap-y-1.5">
                   {p.services.map((slug) => {
-                    const s = serviceBySlug(slug);
+                    const s = bySlug.get(slug);
                     if (!s) return null;
                     return (
                       <Link

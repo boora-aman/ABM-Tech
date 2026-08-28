@@ -78,6 +78,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en-IN"
       className={`${syne.variable} ${inter.variable} ${jetbrains.variable}`}
       suppressHydrationWarning
+      data-scroll-behavior="smooth"
     >
       <head>
         {/* Stamps the stored theme before first paint — no flash. */}

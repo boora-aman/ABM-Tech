@@ -6,6 +6,7 @@ import { Faq } from "@/components/sections/Faq";
 import { Card, Rule, Label } from "@/components/ui/Panel";
 import { ButtonLink, Arrow, WhatsAppGlyph } from "@/components/ui/Button";
 import { JsonLd } from "@/components/seo/JsonLd";
+import { getServices } from "@/lib/content/repo";
 import { pageMeta, graph, breadcrumbLd, organizationLd, faqLd } from "@/lib/seo";
 import { site, whatsappLink, isPlaceholder } from "@/lib/site.config";
 
@@ -36,7 +37,10 @@ const CONTACT_FAQS = [
   },
 ];
 
-export default function ContactPage() {
+export const revalidate = 3600;
+
+export default async function ContactPage() {
+  const services = await getServices();
   const addressReady = !isPlaceholder(site.address.locality);
 
   return (
@@ -107,7 +111,7 @@ export default function ContactPage() {
               </Card>
             }
           >
-            <ContactForm />
+            <ContactForm services={services} />
           </Suspense>
 
           <div className="flex flex-col gap-5">

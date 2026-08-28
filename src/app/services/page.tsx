@@ -6,8 +6,7 @@ import { Faq } from "@/components/sections/Faq";
 import { Card, Rule } from "@/components/ui/Panel";
 import { ButtonLink, Arrow } from "@/components/ui/Button";
 import { JsonLd } from "@/components/seo/JsonLd";
-import { services } from "@/lib/content/services";
-import { globalFaqs } from "@/lib/content/faq";
+import { getServices, getGlobalFaqs, getPillars } from "@/lib/content/repo";
 import { pageMeta, graph, breadcrumbLd, serviceLd, faqLd } from "@/lib/seo";
 import { absoluteUrl } from "@/lib/site.config";
 
@@ -27,7 +26,15 @@ export const metadata: Metadata = pageMeta({
   ],
 });
 
-export default function ServicesPage() {
+export const revalidate = 3600;
+
+export default async function ServicesPage() {
+  const [services, globalFaqs, pillars] = await Promise.all([
+    getServices(),
+    getGlobalFaqs(),
+    getPillars(),
+  ]);
+
   return (
     <>
       <JsonLd
@@ -81,7 +88,7 @@ export default function ServicesPage() {
       />
 
       <Rule />
-      <ServiceCatalogue services={services} />
+      <ServiceCatalogue services={services} pillars={pillars} />
       <Rule />
       <Faq
         items={globalFaqs}

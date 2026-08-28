@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { leadSchema } from "@/lib/validators";
-import { connectDb, isDbConfigured, LeadModel } from "@/lib/db";
+import { connectDb, isDbConfigured } from "@/lib/db/mongoose";
+import { LeadModel } from "@/lib/db/models";
 import { notifyLead, isMailConfigured } from "@/lib/mail";
 
 /* ==========================================================================

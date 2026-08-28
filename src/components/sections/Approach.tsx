@@ -1,5 +1,5 @@
 import { Card, Label } from "@/components/ui/Panel";
-import { commitments } from "@/lib/content/faq";
+import type { commitments as Commitments } from "@/lib/content/faq";
 
 /* ==========================================================================
    APPROACH
@@ -9,7 +9,7 @@ import { commitments } from "@/lib/content/faq";
    with none of that cost.
    ========================================================================== */
 
-export function Approach() {
+export function Approach({ commitments }: { commitments: typeof Commitments }) {
   return (
     <section id="approach" className="defer-paint page-x py-20 sm:py-24">
       <div className="bay">

@@ -7,21 +7,25 @@ import { Faq } from "@/components/sections/Faq";
 import { Cta } from "@/components/sections/Cta";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { Markdown } from "@/lib/markdown";
-import { posts, postBySlug, publishedPosts } from "@/lib/content/posts";
-import { serviceBySlug } from "@/lib/content/services";
+import { posts as seedPosts } from "@/lib/content/posts";
+import { getPost, getPosts, getServices } from "@/lib/content/repo";
 import { pageMeta, graph, breadcrumbLd, articleLd, faqLd } from "@/lib/seo";
 import { site, whatsappLink } from "@/lib/site.config";
 import { formatDate, readingTime, outline } from "@/lib/utils";
 
 type RouteParams = { params: Promise<{ slug: string }> };
 
+export const revalidate = 3600;
+
+/* Built from the committed seed so the route set exists at build time without
+   a database. Posts published later from the admin are served on demand. */
 export function generateStaticParams() {
-  return posts.filter((p) => p.published).map((p) => ({ slug: p.slug }));
+  return seedPosts.filter((p) => p.published).map((p) => ({ slug: p.slug }));
 }
 
 export async function generateMetadata({ params }: RouteParams): Promise<Metadata> {
   const { slug } = await params;
-  const post = postBySlug(slug);
+  const post = await getPost(slug);
   if (!post)
     return pageMeta({ title: "Article not found", description: "", noIndex: true });
 
@@ -36,14 +40,18 @@ export async function generateMetadata({ params }: RouteParams): Promise<Metadat
 
 export default async function PostPage({ params }: RouteParams) {
   const { slug } = await params;
-  const post = postBySlug(slug);
+  const [post, all, allServices] = await Promise.all([
+    getPost(slug),
+    getPosts(),
+    getServices(),
+  ]);
   if (!post) notFound();
 
   const toc = outline(post.body);
-  const all = publishedPosts();
   const related = all.filter((p) => p.slug !== post.slug).slice(0, 3);
+  const bySlug = new Map(allServices.map((s) => [s.slug, s]));
   const services = (post.related ?? [])
-    .map((s) => serviceBySlug(s))
+    .map((s) => bySlug.get(s))
     .filter((s): s is NonNullable<typeof s> => Boolean(s));
 
   return (

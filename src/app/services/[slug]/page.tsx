@@ -6,8 +6,8 @@ import { Faq } from "@/components/sections/Faq";
 import { Card, Rule, Label, Chip } from "@/components/ui/Panel";
 import { ButtonLink, Arrow, WhatsAppGlyph } from "@/components/ui/Button";
 import { JsonLd } from "@/components/seo/JsonLd";
-import { services, serviceBySlug } from "@/lib/content/services";
-import { projects } from "@/lib/content/work";
+import { services as seedServices } from "@/lib/content/services";
+import { getService, getServices, getProjects } from "@/lib/content/repo";
 import { pageMeta, graph, breadcrumbLd, serviceLd, faqLd } from "@/lib/seo";
 import { inr, inrShort } from "@/lib/utils";
 import { whatsappLink } from "@/lib/site.config";
@@ -15,13 +15,18 @@ import { Reveal, Stagger, StaggerItem } from "@/components/motion";
 
 type RouteParams = { params: Promise<{ slug: string }> };
 
+export const revalidate = 3600;
+
+/* Built from the committed seed so the route set is known at build time even
+   on a machine with no database. A service added later in the admin is served
+   on demand by the dynamic fallback and picked up by the next build. */
 export function generateStaticParams() {
-  return services.map((s) => ({ slug: s.slug }));
+  return seedServices.map((s) => ({ slug: s.slug }));
 }
 
 export async function generateMetadata({ params }: RouteParams): Promise<Metadata> {
   const { slug } = await params;
-  const s = serviceBySlug(slug);
+  const s = await getService(slug);
   if (!s) return pageMeta({ title: "Not found", description: "", noIndex: true });
   return pageMeta({
     title: s.title,
@@ -33,7 +38,11 @@ export async function generateMetadata({ params }: RouteParams): Promise<Metadat
 
 export default async function ServicePage({ params }: RouteParams) {
   const { slug } = await params;
-  const s = serviceBySlug(slug);
+  const [s, services, projects] = await Promise.all([
+    getService(slug),
+    getServices(),
+    getProjects(),
+  ]);
   if (!s) notFound();
 
   const others = services.filter((x) => x.slug !== s.slug);
@@ -54,9 +63,14 @@ export default async function ServicePage({ params }: RouteParams) {
       />
 
       <PageHead
-        label="Service"
+        label={`Service ${s.index}`}
         title={s.title}
         lead={s.summary}
+        /* The left column was thin — a label, a heading and one line — against
+           a tall spec card. The stack chips give it enough substance to hold
+           its own half of the grid, and they are the detail a technical buyer
+           looks for first. */
+        tags={s.stack}
         breadcrumb={[
           { name: "Home", path: "/" },
           { name: "Services", path: "/services" },

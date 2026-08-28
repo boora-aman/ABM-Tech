@@ -1,7 +1,7 @@
 import { Card, Label, Chip, Tick } from "@/components/ui/Panel";
 import { ButtonLink, Arrow } from "@/components/ui/Button";
 import { inrShort } from "@/lib/utils";
-import { catalogueGroups } from "@/lib/content/pillars";
+import type { Pillar } from "@/lib/content/pillars";
 import type { Service } from "@/lib/content/services";
 
 /* ==========================================================================
@@ -81,8 +81,22 @@ function ServiceCard({ s }: { s: Service }) {
   );
 }
 
-export function ServiceCatalogue({ services }: { services: Service[] }) {
-  const grouped = catalogueGroups
+export function ServiceCatalogue({
+  services,
+  pillars,
+}: {
+  services: Service[];
+  pillars: Pillar[];
+}) {
+  /* The six business loops plus `run`, which is not a loop but is where
+     hosting and support belong. Derived from the live pillars so renaming one
+     in the admin renames the heading here too. */
+  const groups = [
+    ...pillars.map((p) => ({ key: p.key, name: p.name, blurb: p.question })),
+    { key: "run", name: "Keep it running", blurb: "Who is responsible once it is live?" },
+  ];
+
+  const grouped = groups
     .map((g) => ({ ...g, items: services.filter((s) => s.pillar === g.key) }))
     .filter((g) => g.items.length > 0);
 

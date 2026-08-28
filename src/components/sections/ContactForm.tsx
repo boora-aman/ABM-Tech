@@ -7,7 +7,7 @@ import { Button, ButtonLink, Arrow, WhatsAppGlyph } from "@/components/ui/Button
 import { Card, Rule } from "@/components/ui/Panel";
 import { leadSchema } from "@/lib/validators";
 import { whatsappLink } from "@/lib/site.config";
-import { services } from "@/lib/content/services";
+import type { Service } from "@/lib/content/services";
 
 /* ==========================================================================
    CONTACT FORM
@@ -30,7 +30,7 @@ type State =
   | { kind: "sent"; note?: string }
   | { kind: "error"; message: string };
 
-export function ContactForm() {
+export function ContactForm({ services }: { services: Service[] }) {
   const params = useSearchParams();
   const formRef = useRef<HTMLFormElement>(null);
   const renderedAt = useRef(0);

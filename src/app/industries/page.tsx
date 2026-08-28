@@ -7,8 +7,7 @@ import { Cta } from "@/components/sections/Cta";
 import { Card, Rule, Label } from "@/components/ui/Panel";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { pageMeta, graph, breadcrumbLd, faqLd } from "@/lib/seo";
-import { industries } from "@/lib/content/industries";
-import { pillars } from "@/lib/content/pillars";
+import { getIndustries, getPillars, getServices } from "@/lib/content/repo";
 
 export const metadata: Metadata = pageMeta({
   title: "Industries — software built in your sector's own vocabulary",
@@ -47,7 +46,15 @@ const INDUSTRY_FAQS = [
   },
 ];
 
-export default function IndustriesPage() {
+export const revalidate = 3600;
+
+export default async function IndustriesPage() {
+  const [industries, pillars, services] = await Promise.all([
+    getIndustries(),
+    getPillars(),
+    getServices(),
+  ]);
+
   return (
     <>
       <JsonLd
@@ -94,8 +101,12 @@ export default function IndustriesPage() {
       />
 
       <Rule />
-      <IndustriesSection heading={false} />
-      <Systems />
+      <IndustriesSection
+        industries={industries}
+        services={services}
+        heading={false}
+      />
+      <Systems pillars={pillars} services={services} />
       <Faq
         items={INDUSTRY_FAQS}
         label="Sector questions"

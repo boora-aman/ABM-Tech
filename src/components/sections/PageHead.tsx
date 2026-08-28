@@ -59,7 +59,11 @@ export function PageHead({
         <div
           className={cn(
             "grid gap-10",
-            Boolean(aside) && "lg:grid-cols-[1.5fr_minmax(0,21rem)] lg:items-end",
+            // `items-start`, not `items-end`. The aside varies from ~200px on
+            // /pricing to ~510px on a service page; bottom-aligning against a
+            // tall card pushed the heading down the page and left a large void
+            // above it, which read as a broken hero rather than a layout.
+            Boolean(aside) && "lg:grid-cols-[1.5fr_minmax(0,21rem)] lg:items-start",
           )}
         >
           <div className="min-w-0">

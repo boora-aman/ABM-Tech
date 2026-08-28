@@ -5,7 +5,7 @@ import { Faq } from "@/components/sections/Faq";
 import { Card, Rule, Label, Chip, Tick } from "@/components/ui/Panel";
 import { ButtonLink, Arrow } from "@/components/ui/Button";
 import { JsonLd } from "@/components/seo/JsonLd";
-import { services } from "@/lib/content/services";
+import { getServices } from "@/lib/content/repo";
 import { pageMeta, graph, breadcrumbLd, faqLd, serviceLd } from "@/lib/seo";
 import { inr, inrShort } from "@/lib/utils";
 import { Reveal, Stagger, StaggerItem } from "@/components/motion";
@@ -54,7 +54,10 @@ const PRICING_FAQS = [
   },
 ];
 
-export default function PricingPage() {
+export const revalidate = 3600;
+
+export default async function PricingPage() {
+  const services = await getServices();
   const priced = services.filter((s) => s.from > 0).sort((a, b) => a.from - b.from);
   const floor = priced[0];
 

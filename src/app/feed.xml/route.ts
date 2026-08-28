@@ -1,8 +1,8 @@
-import { publishedPosts } from "@/lib/content/posts";
+import { getPosts } from "@/lib/content/repo";
 import { site, absoluteUrl } from "@/lib/site.config";
 
 /** RSS 2.0 feed. Static — the journal is a file in the repo, not a database. */
-export const dynamic = "force-static";
+export const revalidate = 3600;
 
 /** XML has five predefined entities; everything else in our copy is safe as
  *  UTF-8. Escaping is done rather than CDATA so the output stays diffable. */
@@ -14,8 +14,8 @@ const esc = (s: string) =>
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&apos;");
 
-export function GET() {
-  const posts = publishedPosts();
+export async function GET() {
+  const posts = await getPosts();
   const updated = posts[0]?.publishedAt ?? new Date().toISOString();
 
   const items = posts

@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { Card, Label, Chip } from "@/components/ui/Panel";
 import { ButtonLink, Arrow } from "@/components/ui/Button";
-import { industries, type Industry } from "@/lib/content/industries";
-import { serviceBySlug } from "@/lib/content/services";
+import { Expandable } from "@/components/ui/Expandable";
+import type { Industry } from "@/lib/content/industries";
+import type { Service } from "@/lib/content/services";
 
 /* ==========================================================================
    INDUSTRIES
@@ -16,7 +17,13 @@ import { serviceBySlug } from "@/lib/content/services";
    version with pains and builds is for /industries.
    ========================================================================== */
 
-function IndustryCard({ ind }: { ind: Industry }) {
+function IndustryCard({
+  ind,
+  bySlug,
+}: {
+  ind: Industry;
+  bySlug: Map<string, Service>;
+}) {
   return (
     <Card as="article" lift className="flex flex-col p-6">
       <div className="mb-4 flex items-start justify-between gap-3">
@@ -52,7 +59,7 @@ function IndustryCard({ ind }: { ind: Industry }) {
 
       <div className="mt-auto flex flex-wrap gap-x-2 gap-y-1.5 border-t border-line pt-5">
         {ind.services.map((slug) => {
-          const s = serviceBySlug(slug);
+          const s = bySlug.get(slug);
           if (!s) return null;
           return (
             <Link
@@ -70,13 +77,21 @@ function IndustryCard({ ind }: { ind: Industry }) {
 }
 
 export function IndustriesSection({
+  industries,
+  services,
   heading = true,
-  limit,
+  /** Cards shown before the disclosure. 0 shows everything. */
+  initial = 0,
 }: {
+  industries: Industry[];
+  services: Service[];
   heading?: boolean;
-  limit?: number;
+  initial?: number;
 }) {
-  const shown = limit ? industries.slice(0, limit) : industries;
+  const bySlug = new Map(services.map((s) => [s.slug, s]));
+  const collapse = initial > 0 && industries.length > initial;
+  const first = collapse ? industries.slice(0, initial) : industries;
+  const rest = collapse ? industries.slice(initial) : [];
 
   return (
     <section id="industries" className="defer-paint page-x py-20 sm:py-24">
@@ -101,10 +116,20 @@ export function IndustriesSection({
         )}
 
         <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-          {shown.map((ind) => (
-            <IndustryCard key={ind.slug} ind={ind} />
+          {first.map((ind) => (
+            <IndustryCard key={ind.slug} ind={ind} bySlug={bySlug} />
           ))}
         </div>
+
+        {collapse && (
+          <Expandable hidden={rest.length} total={industries.length} noun="sectors">
+            <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+              {rest.map((ind) => (
+                <IndustryCard key={ind.slug} ind={ind} bySlug={bySlug} />
+              ))}
+            </div>
+          </Expandable>
+        )}
 
         <Card className="mt-6 grid gap-6 p-6 sm:p-8 lg:grid-cols-[1.6fr_auto] lg:items-center">
           <div>
@@ -121,9 +146,9 @@ export function IndustriesSection({
               </span>
             </p>
           </div>
-          {limit ? (
+          {collapse ? (
             <ButtonLink href="/industries" variant="outline" size="lg">
-              All {industries.length} sectors
+              Sector detail
               <Arrow />
             </ButtonLink>
           ) : (

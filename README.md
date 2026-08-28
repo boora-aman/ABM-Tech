@@ -180,3 +180,34 @@ the Vercel Firewall if it is ever targeted.
 
 Vercel. Push, import, add env vars. Everything except `/api/lead` and `/api/og`
 is statically prerendered.
+
+---
+
+## A note on the shared social accounts
+
+Instagram and Facebook are shared with **Google IT Solution** — the handles are
+established and ABM Tech is the brand being focused on, so the accounts are
+being repurposed rather than started from scratch.
+
+Sharing the accounts operationally is fine. One thing is worth getting right:
+
+**Only one site should list them in `sameAs`.** Those URLs appear in the
+Organization structured data on both this site and the Google IT Solution site.
+`sameAs` is an entity-identity claim — it says "this profile is this
+organisation". Two different Organizations claiming the same profiles tells a
+search engine the two brands are one entity, which muddles both.
+
+Since ABM Tech is the focus, the recommended split is:
+
+- **abmtech.in** — lists them (already configured)
+- **Google IT Solution** — removes them from `socials` in its `site.config.ts`
+
+Two follow-ups that make the claim truthful rather than just declared:
+
+1. Set the account **display name** and bio to ABM Tech. The `@handle` can stay
+   — handles carry the followers and the history, and changing one costs more
+   than it gains.
+2. Point the **link in bio** at `abmtech.in`.
+
+Until the display name matches, a profile called "Google IT Solution" being
+claimed by ABM Tech is a weak signal — not harmful, just not doing any work.
