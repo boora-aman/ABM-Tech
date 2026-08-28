@@ -29,7 +29,10 @@ function inline(text: string, key: string): ReactNode[] {
       );
     } else if (tok.startsWith("`")) {
       out.push(
-        <code key={k} className="inset-panel px-1.5 py-0.5 font-mono text-[0.875em] text-signal/85">
+        <code
+            key={k}
+            className="rounded-sm border border-line bg-tint px-1.5 py-0.5 font-mono text-[0.875em] text-brand-ink"
+          >
           {tok.slice(1, -1)}
         </code>,
       );
@@ -42,7 +45,7 @@ function inline(text: string, key: string): ReactNode[] {
             key={k}
             href={link[2]}
             {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-            className="text-flare underline decoration-flare/40 underline-offset-[3px] transition-colors hover:text-flare-hi"
+            className="text-brand underline decoration-brand/40 underline-offset-[3px] transition-colors hover:text-brand-ink"
           >
             {link[1]}
           </a>,
@@ -85,11 +88,14 @@ export function Markdown({ source }: { source: string }) {
         {items.map((it, idx) => (
           <li key={idx} className="flex gap-3.5">
             {Tag === "ol" ? (
-              <span className="mt-0.5 font-mono text-[0.6875rem] tabular-nums text-flare/70">
+              <span className="mt-0.5 font-mono text-[0.6875rem] tabular-nums text-brand/70">
                 {String(idx + 1).padStart(2, "0")}
               </span>
             ) : (
-              <span aria-hidden className="datum mt-[0.6em] shrink-0" />
+              <span
+                aria-hidden
+                className="mt-[0.62em] size-1.5 shrink-0 rounded-full bg-brand"
+              />
             )}
             <span className="flex-1 text-[1rem] leading-[1.72] text-ink-dim">
               {inline(it, `li${key}-${idx}`)}
@@ -111,12 +117,26 @@ export function Markdown({ source }: { source: string }) {
       flush();
       continue;
     }
+    if (/^###\s/.test(line)) {
+      flush();
+      const text = line.replace(/^###\s+/, "");
+      blocks.push(
+        <h3
+          key={`h3${key++}`}
+          id={slugify(text)}
+          className="mt-9 mb-4 scroll-mt-28 font-display text-[1.0625rem] font-semibold"
+        >
+          {inline(text, `h3${key}`)}
+        </h3>,
+      );
+      continue;
+    }
     if (/^##\s/.test(line)) {
       flush();
       const text = line.replace(/^##\s+/, "");
       blocks.push(
         <div key={`h${key++}`} className="mt-12 mb-5 first:mt-0">
-          <span aria-hidden className="mb-4 block h-px w-12" style={{ background: "var(--color-flare)" }} />
+          <span aria-hidden className="mb-4 block h-px w-12" style={{ background: "var(--color-brand)" }} />
           <h2 id={slugify(text)} className="t-h3 scroll-mt-28 font-display">
             {inline(text, `h${key}`)}
           </h2>

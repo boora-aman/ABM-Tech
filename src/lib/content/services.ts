@@ -38,13 +38,29 @@ export type Service = {
   keywords: string[];
   /** For the X-ray showcase: what sits under the interface. */
   stack: string[];
+  /** Primary pillar key from content/pillars.ts. A service can support
+   *  several loops; this is the one it is filed under when the catalogue is
+   *  grouped, so every service appears exactly once. */
+  pillar: PillarKey;
   featured?: boolean;
 };
+
+/** Pillar keys, plus `run` — the cross-cutting "keep it alive" group that is
+ *  not one of the six business loops but does need a home in the catalogue. */
+export type PillarKey =
+  | "found"
+  | "capture"
+  | "operate"
+  | "money"
+  | "mobile"
+  | "know"
+  | "run";
 
 export const services: Service[] = [
   /* ------------------------------------------------------------------- 01 */
   {
     slug: "crm",
+    pillar: "capture",
     index: "01",
     title: "Custom CRM",
     short: "CRM",
@@ -144,6 +160,7 @@ export const services: Service[] = [
   /* ------------------------------------------------------------------- 02 */
   {
     slug: "business-website",
+    pillar: "found",
     index: "02",
     title: "Static Business Website",
     short: "Static Site",
@@ -213,6 +230,7 @@ export const services: Service[] = [
   /* ------------------------------------------------------------------- 03 */
   {
     slug: "dynamic-website",
+    pillar: "found",
     index: "03",
     title: "Dynamic Website + Admin Panel",
     short: "Dynamic Site",
@@ -282,6 +300,7 @@ export const services: Service[] = [
   /* ------------------------------------------------------------------- 04 */
   {
     slug: "erp-system",
+    pillar: "operate",
     index: "04",
     title: "ERP System",
     short: "ERP",
@@ -362,6 +381,7 @@ export const services: Service[] = [
   /* ------------------------------------------------------------------- 05 */
   {
     slug: "billing-platform-app",
+    pillar: "money",
     index: "05",
     title: "Website + Billing Web App + Mobile App",
     short: "Full Platform",
@@ -436,6 +456,7 @@ export const services: Service[] = [
   /* ------------------------------------------------------------------- 06 */
   {
     slug: "ai-automation",
+    pillar: "know",
     index: "06",
     title: "AI Automation",
     short: "AI Automation",
@@ -514,6 +535,7 @@ export const services: Service[] = [
   /* ------------------------------------------------------------------- 07 */
   {
     slug: "business-digitisation",
+    pillar: "operate",
     index: "07",
     title: "Business Digitisation",
     short: "Digitisation",
@@ -580,6 +602,7 @@ export const services: Service[] = [
   /* ------------------------------------------------------------------- 08 */
   {
     slug: "maps-and-seo",
+    pillar: "found",
     index: "08",
     title: "Google Maps Profile & SEO",
     short: "Maps & SEO",
@@ -650,6 +673,386 @@ export const services: Service[] = [
       "technical seo services india",
     ],
     stack: ["GBP API", "Search Console", "Schema.org", "Rank tracking", "PageSpeed"],
+  },
+  /* ------------------------------------------------------------------- 09 */
+  {
+    slug: "mobile-apps",
+    pillar: "mobile",
+    index: "09",
+    title: "Mobile App Development",
+    short: "Mobile Apps",
+    from: 25000,
+    priceMode: "project",
+    timeline: "4–8 weeks",
+    bestFor: "Businesses whose work happens away from a desk",
+    featured: true,
+    summary:
+      "Android and iOS from a single codebase — for technicians, drivers, sales staff and customers — built offline-first because the network is not a given where the work happens.",
+    intro:
+      "A mobile app is not a website squeezed into a phone. The people who need one are usually standing in a basement, a warehouse or a customer's kitchen, on a device three years old, on a connection that drops. So we build for that case first: capture works with no signal, syncs when it returns, and never loses what somebody already typed.",
+    deliverables: [
+      "One React Native codebase shipping to Android and iOS",
+      "Offline-first data capture with conflict-safe sync",
+      "Push notifications for assignments and status changes",
+      "Camera, signature, barcode and GPS capture where needed",
+      "Role-based screens — field, supervisor, customer",
+      "Deep links from WhatsApp and SMS straight into a record",
+      "Play Store and App Store submission handled end to end",
+      "Crash and performance monitoring wired from day one",
+      "Over-the-air updates for fixes without a store review",
+      "Source, signing keys and store accounts in your name",
+    ],
+    excludes: ["Native-only games", "AR/VR", "Store fees and device hardware"],
+    capabilities: [
+      {
+        title: "Offline is the default, not a feature",
+        body: "Every write goes to a local queue first and reconciles server-side on reconnect, with deterministic conflict rules agreed in scope. A technician in a lift shaft finishes the job; the sync is our problem, not theirs.",
+      },
+      {
+        title: "One codebase, honestly",
+        body: "React Native with native modules where they genuinely earn their place — camera, background location, secure storage. You get two stores from one build pipeline instead of paying twice and drifting apart.",
+      },
+      {
+        title: "Built for the phone people actually hold",
+        body: "Targeted at a mid-range Android on 4G, not a flagship on office wifi. Bundle size, cold-start time and battery draw are tracked as requirements, because an app that heats the phone gets uninstalled.",
+      },
+      {
+        title: "Store submission is included",
+        body: "Listing copy, screenshots, privacy declarations, data-safety forms and the review back-and-forth. Publishing is where most first apps stall for a month; we do it under your accounts so you keep control.",
+      },
+    ],
+    phases: [
+      { step: "Flows and offline rules", detail: "Which screens exist, who sees them, what must work with no signal, and how conflicts resolve. Output is a fixed scope.", when: "Week 1" },
+      { step: "Core build", detail: "Data layer, sync engine, authentication and the primary flows, on an install you can put on a real phone.", when: "Week 2–4" },
+      { step: "Field testing", detail: "Your staff use it on their own devices in real conditions for a week. Everything they hit gets fixed before submission.", when: "Week 5–6" },
+      { step: "Store release", detail: "Builds signed, listings written, submissions made and review responses handled, under your developer accounts.", when: "Week 7–8" },
+    ],
+    faqs: [
+      {
+        q: "Can we not just make the website mobile-friendly?",
+        a: "Often yes, and we will say so. A responsive site is cheaper and instantly updatable. You need a real app when you need offline capture, push notifications, background location or hardware access — if none of those apply, we would rather build you a good mobile web experience and save you the money.",
+      },
+      {
+        q: "What does ₹25,000 actually include?",
+        a: "A focused single-role app — one user type, up to about eight screens, offline capture, push and one store release. Multi-role apps, payments in-app, live tracking or a customer-facing app alongside a staff app are scoped on top and quoted before anything starts. Most real apps land between ₹60,000 and ₹2,50,000.",
+      },
+      {
+        q: "Who owns the app listing?",
+        a: "You do. The Play Console and Apple Developer accounts are registered in your business name, and the signing keys are handed to you. We publish on your behalf; we never hold the listing hostage.",
+      },
+      {
+        q: "What about iOS — do we need a Mac?",
+        a: "No. Builds run on a hosted pipeline. You need an Apple Developer account, which is an annual fee paid directly by you at actuals, and we handle everything else.",
+      },
+    ],
+    keywords: [
+      "mobile app development company india price",
+      "react native app development india",
+      "android and ios app development cost",
+      "offline mobile app for field staff",
+      "business mobile app development",
+    ],
+    stack: ["React Native", "Expo", "TypeScript", "SQLite", "Push (FCM/APNs)", "EAS Build"],
+  },
+
+  /* ------------------------------------------------------------------- 10 */
+  {
+    slug: "ecommerce",
+    pillar: "money",
+    index: "10",
+    title: "E-commerce & Online Store",
+    short: "E-commerce",
+    from: 18000,
+    priceMode: "project",
+    timeline: "2–4 weeks",
+    bestFor: "Anyone selling products across a site, a marketplace and social",
+    summary:
+      "A storefront that takes orders and payments properly — catalogue, variants, offers, shipping and returns — with inventory that stays in agreement across every channel you sell on.",
+    intro:
+      "Selling online breaks in a predictable place: not the storefront, but the second channel. The moment orders arrive from a website, a marketplace and Instagram at once, inventory becomes three people editing one sheet and something oversells. We build the store and the single order spine underneath it at the same time.",
+    deliverables: [
+      "Storefront with categories, variants, options and search",
+      "Offers, coupons, bundles and tiered/wholesale pricing",
+      "Payment gateway integration with idempotent order writes",
+      "Shipping rules, courier integration and tracking updates",
+      "Returns, exchanges and credit-note handling",
+      "One order inbox across web, marketplace and social channels",
+      "Inventory synced across channels so nothing oversells",
+      "Customer accounts, addresses and re-order in one tap",
+      "Abandoned-cart and back-in-stock nudges over email/WhatsApp",
+      "Admin panel for catalogue, pricing, orders and dispatch",
+    ],
+    excludes: ["Product photography", "Paid ad management", "Marketplace seller fees"],
+    capabilities: [
+      {
+        title: "Payments that cannot double-charge",
+        body: "Order creation is idempotent and reconciled against the gateway's own record, not against a browser redirect. A provider timeout mid-payment resolves to exactly one order — the failure mode most stores discover the expensive way.",
+      },
+      {
+        title: "One stock number, every channel",
+        body: "Marketplace and social orders write into the same ledger as the website. Overselling on a marketplace costs a metric that is hard to repair, so this is built in rather than added after the first incident.",
+      },
+      {
+        title: "Priced for how you actually sell",
+        body: "Retail and wholesale rates, minimum quantities, slab pricing and customer-specific rates. Indian businesses rarely sell at one price to everyone, and most platforms assume otherwise.",
+      },
+      {
+        title: "Own the storefront, not a monthly rent",
+        body: "Built on your infrastructure with your data — no per-order commission and no platform that can change its terms. If a hosted platform genuinely fits you better, we will say so on the first call.",
+      },
+    ],
+    phases: [
+      { step: "Catalogue and rules", detail: "Product structure, variants, pricing tiers, tax treatment, shipping and return rules written down as a fixed scope.", when: "Week 1" },
+      { step: "Store build", detail: "Storefront, cart, checkout, payments and the admin panel, on a preview link you can order through end to end.", when: "Week 2–3" },
+      { step: "Channels and launch", detail: "Marketplace/social order intake, inventory sync, courier integration, then go-live on your domain.", when: "Week 4" },
+    ],
+    faqs: [
+      {
+        q: "Why not just use Shopify?",
+        a: "For a straightforward retail catalogue, Shopify is often the right answer and we will tell you so. Custom earns its keep when you have wholesale slabs, made-to-order items, an existing ERP to sync with, or a commission bill that has grown past what a build costs. We compare the two on the first call with your actual numbers.",
+      },
+      {
+        q: "What does ₹18,000 include?",
+        a: "A single-channel storefront: catalogue, cart, one payment gateway, shipping rules, the admin panel and go-live on your domain. Multi-channel order sync, marketplace integrations, subscriptions and wholesale portals are scoped on top and quoted before starting.",
+      },
+      {
+        q: "Can it connect to our existing billing or ERP?",
+        a: "Yes — that is usually the point. Orders, stock and customers sync both ways so the store is a channel of the business rather than an island. If your existing system has no API, we quote the connector honestly rather than pretending it is free.",
+      },
+    ],
+    keywords: [
+      "ecommerce website development india price",
+      "online store development company",
+      "custom ecommerce website with admin panel",
+      "multi channel inventory sync india",
+      "d2c website development india",
+    ],
+    stack: ["Next.js", "PostgreSQL", "Razorpay/Stripe", "Webhooks", "Redis", "Shiprocket API"],
+  },
+
+  /* ------------------------------------------------------------------- 11 */
+  {
+    slug: "integrations",
+    pillar: "know",
+    index: "11",
+    title: "Integrations & Custom APIs",
+    short: "Integrations",
+    from: 8000,
+    priceMode: "project",
+    timeline: "1–3 weeks",
+    bestFor: "Businesses where a person is the connection between two systems",
+    summary:
+      "Making the tools you already pay for talk to each other — Tally, WhatsApp, payment gateways, marketplaces, couriers, CRMs — so nobody is exporting a CSV on a Friday afternoon.",
+    intro:
+      "Most businesses do not need new software. They need the six things they already run to stop requiring a human as the connector. That human is slow, expensive, and the single point of failure the day they take leave. An integration is usually the cheapest project we sell and the one that pays back fastest.",
+    deliverables: [
+      "Two-way sync between named systems, with a written field map",
+      "Tally / accounting export and voucher push",
+      "WhatsApp Business API for alerts, receipts and reminders",
+      "Payment gateway and bank statement reconciliation",
+      "Marketplace and courier connectors",
+      "Webhook endpoints for anything that can call out",
+      "A documented REST API over your own data",
+      "Retry, backoff and dead-letter handling on every job",
+      "A failure inbox: nothing fails silently",
+      "Monitoring with alerts to email or WhatsApp",
+    ],
+    excludes: ["Third-party API subscription fees", "Vendor licence costs"],
+    capabilities: [
+      {
+        title: "Sync is a contract, not a script",
+        body: "We write down which system owns each field, what happens on conflict, and how a partial failure resolves — before code. That document is the difference between an integration that runs for years and one that quietly corrupts data for a month.",
+      },
+      {
+        title: "Nothing fails silently",
+        body: "Every job retries with backoff and lands in a visible failure queue if it exhausts. You get an alert, not a discovery three weeks later while reconciling.",
+      },
+      {
+        title: "Your data, over your own API",
+        body: "Where nothing exists to integrate with, we build the API — versioned, authenticated, documented and rate-limited — so future tools plug into your business rather than around it.",
+      },
+      {
+        title: "Legacy systems included",
+        body: "Desktop accounting, an old Tally instance, a vendor system with no API, a portal that only exports Excel. These are the normal case in Indian businesses and we quote them honestly rather than declaring them impossible.",
+      },
+    ],
+    phases: [
+      { step: "Field mapping", detail: "Both systems inspected, ownership of each field decided, conflict and failure rules agreed. Output is a fixed scope with a fixed price.", when: "Week 1" },
+      { step: "Build and dry run", detail: "The connector built and run against a copy of your data, with a reconciliation report you can check line by line.", when: "Week 2" },
+      { step: "Cutover and monitoring", detail: "Live switch, alerting configured, and a runbook for the two or three things that could ever need a human.", when: "Week 3" },
+    ],
+    faqs: [
+      {
+        q: "Our vendor says their system has no API. Now what?",
+        a: "That is common and usually not fatal. Options in order of preference: a documented API they have not advertised, a database view, a scheduled file export, or as a last resort a supervised import. We will tell you which one applies after looking, and if the honest answer is that it cannot be done reliably, we say that instead of selling you a fragile script.",
+      },
+      {
+        q: "Is ₹8,000 realistic for an integration?",
+        a: "For one connection between two systems with a clean API and a modest field map, yes. Multi-system syncs, legacy connectors and anything needing reconciliation logic run higher, and we quote the actual figure after the mapping session — which is free.",
+      },
+      {
+        q: "What happens when the other system changes its API?",
+        a: "Contract tests run against the live endpoint on a schedule, so a breaking change raises an alert rather than a silent gap in your data. Fixing it is covered under a support retainer, or quoted as a small change if you are not on one.",
+      },
+    ],
+    keywords: [
+      "api integration services india",
+      "tally integration with website",
+      "whatsapp business api integration india",
+      "custom api development company india",
+      "system integration services small business",
+    ],
+    stack: ["Node.js", "TypeScript", "Queues (BullMQ)", "Webhooks", "OAuth 2.0", "OpenAPI"],
+  },
+
+  /* ------------------------------------------------------------------- 12 */
+  {
+    slug: "dashboards",
+    pillar: "know",
+    index: "12",
+    title: "Dashboards & Business Reporting",
+    short: "Dashboards",
+    from: 10000,
+    priceMode: "project",
+    timeline: "1–3 weeks",
+    bestFor: "Owners who wait until month end to find out what happened",
+    summary:
+      "The three or four numbers you would actually act on, live on one screen — pulled from the systems you already run, with the definitions written down so nobody argues about what 'revenue' means.",
+    intro:
+      "Most reporting projects fail by building forty charts nobody opens. We start from the opposite end: what decision would you make differently if you knew this on Tuesday instead of the 5th? Everything that does not answer that question does not get built.",
+    deliverables: [
+      "A written metric dictionary — every number defined once",
+      "Owner dashboard: the four numbers that drive decisions",
+      "Sales, stock, cash and receivables views as applicable",
+      "Drill-down from any figure to the underlying records",
+      "Comparisons that mean something: same day last week, MTD, YoY",
+      "Scheduled WhatsApp or email digest, daily or weekly",
+      "Threshold alerts — margin floor, stock-out, ageing debt",
+      "Role-based visibility: branch, team and owner views",
+      "Export to Excel and PDF for anything you must circulate",
+      "Data pulled from your existing systems, not re-entered",
+    ],
+    excludes: ["Data entry backfill", "BI tool licences", "Predictive forecasting models"],
+    capabilities: [
+      {
+        title: "Definitions before charts",
+        body: "Does revenue include GST? Is a sale counted at order or at dispatch? We write the answers down and every view uses them. Half of all reporting disputes are two people using the same word for different numbers.",
+      },
+      {
+        title: "Every number is clickable",
+        body: "A figure you cannot drill into is a figure you cannot trust. Any total opens the underlying rows, so the first response to a surprising number is investigation rather than doubt.",
+      },
+      {
+        title: "It comes to you",
+        body: "A dashboard nobody opens is a screensaver. The daily digest arrives on WhatsApp at a time you choose, and thresholds alert on their own — the dashboard is for when the alert makes you curious.",
+      },
+      {
+        title: "Reads your systems as they are",
+        body: "Built on top of whatever you already run — our software, someone else's, a Tally export, a Google Sheet. Reporting should not require replacing the thing that holds the data.",
+      },
+    ],
+    phases: [
+      { step: "Decisions, then metrics", detail: "One session on the decisions you make weekly, working backwards to the numbers that inform them. Output is the metric dictionary and a fixed scope.", when: "Week 1" },
+      { step: "Pipelines and views", detail: "Connections to your source systems, the definitions implemented once, and the dashboard built on a preview link.", when: "Week 2" },
+      { step: "Alerts and handover", detail: "Digests scheduled, thresholds set, roles assigned, and a walkthrough with everyone who will use it.", when: "Week 3" },
+    ],
+    faqs: [
+      {
+        q: "Our data is messy. Is this premature?",
+        a: "Usually the opposite — a dashboard is how messy data becomes visible. We often find duplicate customers and mis-posted entries in week one. What we will not do is quietly clean historical data as an unbilled side project; if a backfill is needed we scope it separately and you decide whether it is worth it.",
+      },
+      {
+        q: "Can it read data from software you did not build?",
+        a: "Yes, if the data can be reached — an API, a database, a scheduled export, even a maintained Google Sheet. We check access before quoting so there are no surprises after you have paid.",
+      },
+      {
+        q: "Why not just use Power BI or Looker Studio?",
+        a: "If your data already sits in one clean place and someone on the team enjoys building views, those tools are excellent and we will point you at them. This service exists for the common case: data across four systems, nobody with the time, and a licence-per-viewer model that punishes sharing.",
+      },
+    ],
+    keywords: [
+      "business dashboard development india",
+      "mis reporting software india price",
+      "custom analytics dashboard company",
+      "real time business reporting india",
+      "whatsapp daily sales report automation",
+    ],
+    stack: ["Next.js", "PostgreSQL", "Recharts", "Scheduled ETL", "WhatsApp API", "Row-level security"],
+  },
+
+  /* ------------------------------------------------------------------- 13 */
+  {
+    slug: "cloud-support",
+    pillar: "run",
+    index: "13",
+    title: "Hosting, Cloud & Support",
+    short: "Support",
+    from: 4000,
+    priceMode: "retainer",
+    timeline: "Ongoing, cancel with 30 days",
+    bestFor: "Anyone running software they cannot afford to have go down",
+    summary:
+      "Someone responsible for the thing staying up — hosting, backups tested by restoring them, security patches, monitoring, and a named person who answers when something breaks.",
+    intro:
+      "Software is not finished at launch; it is only started. Dependencies get security advisories, certificates expire, disks fill, and a backup nobody has ever restored is a rumour rather than a backup. This is the retainer that makes those somebody's job — and it is genuinely optional, because everything we hand over runs whether or not you buy it.",
+    deliverables: [
+      "Hosting configured on your cloud account, in your name",
+      "SSL, domains and DNS managed and renewed",
+      "Automated backups with a documented restore, tested quarterly",
+      "Uptime and error monitoring with real alerting",
+      "Security patching and dependency updates on a schedule",
+      "A monthly allowance of change requests, carried over one month",
+      "Defined response times, with a named contact",
+      "Performance review and cost optimisation each quarter",
+      "Staging environment for changes before they touch live",
+      "Monthly report: uptime, incidents, changes, spend",
+    ],
+    excludes: ["Cloud infrastructure bills (at actuals)", "New feature builds", "Third-party licences"],
+    capabilities: [
+      {
+        title: "A backup you have watched restore",
+        body: "Backups are verified by restoring them into a scratch environment on a schedule, and the restore time is in your monthly report. An untested backup is the most common form of imaginary safety in small business IT.",
+      },
+      {
+        title: "Patching before the advisory becomes an incident",
+        body: "Dependency advisories are monitored and patched on a cadence, tested on staging first. This is unglamorous and it is the reason systems quietly keep working for years.",
+      },
+      {
+        title: "Response times that are written down",
+        body: "Site down: same working day, and out of hours on the higher tier. Something broken but usable: two working days. A change request: inside the monthly allowance. Written into the agreement, not implied.",
+      },
+      {
+        title: "Your account, your keys",
+        body: "Everything runs in cloud accounts you own and pay for directly at actuals, with no markup. You can revoke our access and keep running — which is exactly the leverage a client should have.",
+      },
+    ],
+    phases: [
+      { step: "Takeover audit", detail: "Current hosting, backups, certificates, access and known risks documented — including for systems we did not build.", when: "Week 1" },
+      { step: "Baseline hardening", detail: "Monitoring, alerting, automated backups, staging and access control put in place before routine support begins.", when: "Week 2" },
+      { step: "Ongoing", detail: "Patch cadence, change requests, quarterly restore tests and a monthly report.", when: "Monthly" },
+    ],
+    faqs: [
+      {
+        q: "Will you support software somebody else built?",
+        a: "Often yes, after a takeover audit. If the codebase turns out to be unsupportable — no source, no documentation, abandoned framework versions — we will tell you that and what the realistic options are, rather than charging a retainer to hope.",
+      },
+      {
+        q: "What does ₹4,000 a month cover?",
+        a: "Monitoring, backups, patching, SSL and domain management, and a small monthly change allowance for one system. Multi-system estates, higher response tiers and out-of-hours cover are priced up from there, and the infrastructure bill is separate and paid by you at actuals.",
+      },
+      {
+        q: "Is this compulsory after a build?",
+        a: "No. Thirty days of bug fixing is included with every project regardless. After that the retainer is a choice — the code is yours, the deployment is yours, and an in-house developer or another vendor can pick it up from the runbook we hand over.",
+      },
+    ],
+    keywords: [
+      "website maintenance services india price",
+      "application support retainer india",
+      "cloud hosting management company india",
+      "amc for software india",
+      "server monitoring and backup services",
+    ],
+    stack: ["Docker", "AWS / Vercel", "GitHub Actions", "Sentry", "Uptime monitoring", "Automated backups"],
   },
 ];
 

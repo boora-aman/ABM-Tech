@@ -60,3 +60,21 @@ export function seeded(seed: string) {
     return ((h ^= h >>> 16) >>> 0) / 4294967296;
   };
 }
+
+/** Rough reading time in minutes at ~220 wpm, floor of 1. */
+export function readingTime(text: string) {
+  return Math.max(1, Math.round(text.trim().split(/\s+/).length / 220));
+}
+
+/** Heading outline for an article table of contents. Matches the `##` and
+ *  `###` rules in `Markdown`, so the ids always resolve to a real anchor. */
+export function outline(source: string) {
+  return source
+    .split("\n")
+    .filter((l) => /^#{2,3}\s/.test(l))
+    .map((l) => {
+      const level = l.startsWith("### ") ? 3 : 2;
+      const text = l.replace(/^#{2,3}\s+/, "").trim();
+      return { level, text, id: slugify(text) };
+    });
+}

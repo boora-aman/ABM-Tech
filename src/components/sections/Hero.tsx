@@ -1,118 +1,148 @@
 import { Card, Label, Rule } from "@/components/ui/Panel";
-import { ButtonLink, Arrow } from "@/components/ui/Button";
-import { site } from "@/lib/site.config";
+import { ButtonLink, Arrow, WhatsAppGlyph } from "@/components/ui/Button";
+import { site, whatsappLink } from "@/lib/site.config";
+import { pillars } from "@/lib/content/pillars";
+import { industries } from "@/lib/content/industries";
 
 /* ==========================================================================
    HERO
 
-   Deliberately NOT a product or price list. A hero has one job — say what you
-   do, for whom, and what happens if the visitor is interested. Prices and
-   services are one click away on /pricing and /services, and repeating them
-   here made the first screen read as a catalogue index rather than a
-   proposition.
+   The old hero addressed one reader: an Indian SMB running on spreadsheets.
+   That is a real customer and a narrow door — a hotel, a machine shop or a
+   coaching institute read "CRM, ERP, billing platform" and had to work out
+   for themselves whether any of it applied to them.
 
-   The right column answers the question the CTA raises — "what actually
-   happens if I get in touch?" — which is what moves someone to click it.
+   This version leads with the structural claim instead: every business runs
+   the same six systems, and we build all six. The right column is that claim
+   made visible — the six loops as a stack you can read in one glance — which
+   does more work than a generic screenshot ever would.
 
-   Entirely a server component: no hooks, no timers, no scroll listeners, no
-   client JS. The entrance is CSS with staggered delays, so it runs from the
-   server HTML and cannot be stranded invisible.
+   Still entirely a server component: no hooks, no timers, no scroll
+   listeners, no client JS. The entrance is CSS with staggered delays, so it
+   renders from server HTML and can never be stranded invisible. The aura
+   behind the heading is a single static radial gradient on an absolutely
+   positioned element — it composites once and never repaints on scroll.
    ========================================================================== */
-
-const STEPS = [
-  {
-    n: "1",
-    t: "A conversation",
-    d: "Twenty minutes on what is slowing the business down. No brief needed, no obligation.",
-  },
-  {
-    n: "2",
-    t: "A written scope and a fixed price",
-    d: "Exactly what gets built, what it costs, and what is deliberately left out. Free.",
-  },
-  {
-    n: "3",
-    t: "Something you can click, weekly",
-    d: "Working slices on a preview link every week — never an eight-week wait for a reveal.",
-  },
-];
 
 export function Hero() {
   return (
-    <section className="page-x pt-32 pb-14 sm:pt-40 sm:pb-20">
-      <div className="bay">
-        <div className="grid gap-12 lg:grid-cols-[1.15fr_1fr] lg:gap-16 lg:items-center">
+    <section className="relative page-x pt-32 pb-14 sm:pt-40 sm:pb-20">
+      {/* Static brand aura. Decorative, pointer-events-none, paints once. */}
+      <div aria-hidden className="aura" />
+
+      <div className="bay relative">
+        <div className="grid gap-12 lg:grid-cols-[1.08fr_1fr] lg:gap-14 xl:gap-20">
           {/* ---------------------------- Statement ------------------------ */}
           <div>
             <div className="rise mb-7" style={{ animationDelay: "0.04s" }}>
-              <Label>Software built for Indian businesses</Label>
+              <Label>Software for every kind of business</Label>
             </div>
 
             <h1 className="t-hero rise mb-7" style={{ animationDelay: "0.1s" }}>
-              Stop running your
+              Every business runs
               <br />
-              business on
+              on six systems.
               <br />
-              <span className="brand-text">spreadsheets and memory.</span>
+              <span className="brand-text">We build all six.</span>
             </h1>
 
-            <p className="t-lead rise mb-9 max-w-xl" style={{ animationDelay: "0.18s" }}>
-              We build the systems that hold it together — sales, stock, billing,
-              your website — shaped around how you already work. Fixed price,
-              written scope, and the code is yours from day one.
+            <p className="t-lead rise mb-8 max-w-xl" style={{ animationDelay: "0.18s" }}>
+              A shop, a clinic, a factory, a school, a transport fleet — the
+              software looks different, the six loops never change. Get found,
+              catch demand, run operations, collect the money, work off the desk,
+              and know what is happening. We design, build and run all of it.
             </p>
 
             <div
-              className="rise flex flex-wrap gap-3"
+              className="rise mb-9 flex flex-wrap gap-3"
               style={{ animationDelay: "0.26s" }}
             >
               <ButtonLink href="/contact" variant="primary" size="lg">
                 Get a free quote
                 <Arrow />
               </ButtonLink>
-              <ButtonLink href="/work" variant="outline" size="lg">
-                See our work
+              <ButtonLink href="/services" variant="outline" size="lg">
+                See all 13 services
                 <Arrow />
               </ButtonLink>
+              <ButtonLink
+                href={whatsappLink()}
+                variant="whatsapp"
+                size="lg"
+                external
+              >
+                <WhatsAppGlyph />
+                WhatsApp
+              </ButtonLink>
             </div>
+
+            <p
+              className="rise text-[0.8125rem] leading-relaxed text-ink-faint"
+              style={{ animationDelay: "0.32s" }}
+            >
+              {site.promise}
+            </p>
           </div>
 
-          {/* -------------------- What happens next ------------------------ */}
-          <Card raised className="rise p-6 sm:p-8" style={{ animationDelay: "0.16s" }}>
-            <Label className="mb-6">How we start</Label>
-            <ol className="space-y-6">
-              {STEPS.map((s) => (
-                <li key={s.n} className="flex gap-4">
+          {/* ------------------ The six systems, as a stack ---------------- */}
+          <Card
+            raised
+            className="rise overflow-hidden p-0"
+            style={{ animationDelay: "0.16s" }}
+          >
+            <div className="flex items-center justify-between gap-3 border-b border-line px-6 py-5 sm:px-7">
+              <Label tick={false}>The six systems</Label>
+              <span className="text-[0.6875rem] text-ink-faint">
+                Pick the one that hurts
+              </span>
+            </div>
+
+            <ol>
+              {pillars.map((p) => (
+                <li
+                  key={p.key}
+                  className="group/row flex items-start gap-4 border-b border-line px-6 py-4 transition-colors last:border-0 hover:bg-tint sm:px-7"
+                >
                   <span
                     aria-hidden
-                    className="grid size-8 shrink-0 place-items-center rounded-full bg-tint font-display text-[0.8125rem] font-semibold text-brand-ink"
+                    className="mt-0.5 grid size-7 shrink-0 place-items-center rounded-sm bg-tint font-display text-[0.6875rem] font-semibold text-brand-ink"
                   >
-                    {s.n}
+                    {p.index}
                   </span>
-                  <div>
-                    <h2 className="mb-1 font-display text-[1rem] font-semibold">
-                      {s.t}
+                  <div className="min-w-0">
+                    <h2 className="font-display text-[0.9375rem] font-semibold">
+                      {p.name}
                     </h2>
-                    <p className="text-[0.875rem] leading-relaxed text-ink-dim">
-                      {s.d}
+                    <p className="mt-0.5 text-[0.8125rem] leading-snug text-ink-dim">
+                      {p.question}
                     </p>
                   </div>
                 </li>
               ))}
             </ol>
-
-            <Rule className="my-6" />
-
-            <p className="text-[0.8125rem] leading-relaxed text-ink-dim">
-              And if an off-the-shelf tool would genuinely serve you better than
-              a custom build, we&apos;ll tell you — on the first call, not three
-              weeks in.
-            </p>
           </Card>
         </div>
 
+        {/* --------------------- Sectors, as a ticker --------------------- */}
+        <div className="rise mt-14" style={{ animationDelay: "0.36s" }}>
+          <Rule className="mb-6" />
+          <div className="ticker overflow-hidden" style={{ ["--ticker-duration" as string]: "48s" }}>
+            <div className="ticker-track gap-3 pr-3">
+              {[...industries, ...industries].map((ind, i) => (
+                <span
+                  key={`${ind.slug}-${i}`}
+                  aria-hidden={i >= industries.length}
+                  className="whitespace-nowrap rounded-sm border border-line px-3.5 py-2 text-[0.8125rem] text-ink-dim"
+                >
+                  {ind.name}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+
         {/* ------------------------- Trust strip ------------------------- */}
-        <div className="rise mt-16" style={{ animationDelay: "0.34s" }}>
+        <div className="rise mt-12" style={{ animationDelay: "0.4s" }}>
           <Rule className="mb-8" />
           <dl className="grid grid-cols-2 gap-x-6 gap-y-7 sm:grid-cols-4">
             {site.proof.map((p) => (

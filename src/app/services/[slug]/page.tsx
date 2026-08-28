@@ -88,7 +88,7 @@ export default async function ServicePage({ params }: RouteParams) {
               <Row k="First milestone" v={s.phases[0]?.when ?? "Week 1"} />
             </dl>
 
-            <div className="mb-6 border-t border-hair pt-4">
+            <div className="mb-6 border-t border-line pt-4">
               <span className="label mb-2 block">Best for</span>
               <p className="text-[0.8125rem] leading-relaxed">{s.bestFor}</p>
             </div>
@@ -152,11 +152,11 @@ export default async function ServicePage({ params }: RouteParams) {
             </Label>
           </Reveal>
           <div className="grid gap-10 lg:grid-cols-[1.3fr_1fr] lg:gap-14">
-            <Stagger className="border-t border-hair" step={0.03}>
+            <Stagger className="border-t border-line" step={0.03}>
               {s.deliverables.map((d, i) => (
                 <StaggerItem key={d}>
-                  <div className="flex items-start gap-4 border-b border-hair py-3.5">
-                    <span className="font-mono text-[0.625rem] tabular-nums text-flare/60">
+                  <div className="flex items-start gap-4 border-b border-line py-3.5">
+                    <span className="font-mono text-[0.625rem] tabular-nums text-brand/60">
                       {String(i + 1).padStart(2, "0")}
                     </span>
                     <span className="text-[0.9375rem] leading-snug text-ink-dim">
@@ -210,8 +210,8 @@ export default async function ServicePage({ params }: RouteParams) {
           <Stagger className="grid gap-5 md:grid-cols-2" step={0.05}>
             {s.capabilities.map((c, i) => (
               <StaggerItem key={c.title} className="h-full">
-                <Card leak className="flex h-full flex-col p-6">
-                  <span className="mb-4 font-mono text-[0.625rem] tabular-nums text-flare/70">
+                <Card lift className="flex h-full flex-col p-6">
+                  <span className="mb-4 font-mono text-[0.625rem] tabular-nums text-brand/70">
                     [{String(i + 1).padStart(2, "0")}]
                   </span>
                   <h3 className="t-h3 mb-3 font-display">{c.title}</h3>
@@ -240,7 +240,7 @@ export default async function ServicePage({ params }: RouteParams) {
               <Reveal as="li" key={p.step} delay={0.05 * i}>
                 <Card className="flex h-full flex-col p-6">
                   <div className="mb-5 flex items-center justify-between gap-3">
-                    <span className="flare-fill grid size-8 place-items-center rounded-tight font-mono text-[0.625rem] font-semibold tabular-nums">
+                    <span className="brand-fill grid size-8 place-items-center rounded-sm font-mono text-[0.625rem] font-semibold tabular-nums">
                       {String(i + 1).padStart(2, "0")}
                     </span>
                     <span className="label whitespace-nowrap">{p.when}</span>
@@ -272,7 +272,7 @@ export default async function ServicePage({ params }: RouteParams) {
               <div className="grid gap-5 md:grid-cols-2">
                 {related.map((p) => (
                   <Reveal key={p.slug}>
-                    <Card leak className="h-full p-6">
+                    <Card lift className="h-full p-6">
                       <div className="mb-4 flex flex-wrap items-center gap-2">
                         <Chip brand>{p.sector}</Chip>
                         <Chip>{p.year}</Chip>
@@ -284,7 +284,7 @@ export default async function ServicePage({ params }: RouteParams) {
                       <dl className="grid grid-cols-2 gap-4">
                         {p.outcomes.slice(0, 2).map((o) => (
                           <div key={o.metric}>
-                            <dd className="font-display text-base text-flare-hi">
+                            <dd className="font-display text-base text-brand-ink">
                               {o.value}
                             </dd>
                             <dt className="label mt-1">{o.metric}</dt>
@@ -327,9 +327,9 @@ export default async function ServicePage({ params }: RouteParams) {
               <Link
                 key={o.slug}
                 href={`/services/${o.slug}`}
-                className="group/btn inline-flex items-center gap-3 rounded-tight border border-hair px-4 py-2.5 transition-colors hover:border-hair-warm"
+                className="group/btn inline-flex items-center gap-3 rounded-sm border border-line px-4 py-2.5 transition-colors hover:border-line-strong"
               >
-                <span className="font-mono text-[0.5625rem] tabular-nums text-flare/70">
+                <span className="font-mono text-[0.5625rem] tabular-nums text-brand/70">
                   {o.index}
                 </span>
                 <span className="text-[0.875rem]">{o.short}</span>
@@ -348,7 +348,7 @@ export default async function ServicePage({ params }: RouteParams) {
 
 function Row({ k, v }: { k: string; v: string }) {
   return (
-    <div className="flex items-baseline justify-between gap-3 border-b border-hair pb-2.5 last:border-0 last:pb-0">
+    <div className="flex items-baseline justify-between gap-3 border-b border-line pb-2.5 last:border-0 last:pb-0">
       <dt className="label">{k}</dt>
       <dd className="text-right text-[0.8125rem]">{v}</dd>
     </div>

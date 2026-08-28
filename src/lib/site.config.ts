@@ -21,10 +21,14 @@ export const site = {
   tagline: "Systems · Software · Scale",
 
   description:
-    "ABM Tech builds the software Indian businesses actually run on — CRM, ERP, billing platforms, admin-driven websites and AI automation. Fixed scope, fixed price, code you own.",
+    "ABM Tech builds the systems a business runs on — website, CRM, ERP, billing, mobile apps, integrations, dashboards and AI automation. Any sector, any size. Fixed scope, fixed price, code you own.",
 
   positioning:
-    "ABM Tech is an engineering studio. We build custom CRM and ERP systems, billing platforms, business websites with real admin panels, and the AI automation layer that removes the manual work in between. Every engagement is a fixed price against a written scope, and you own the code from the first commit.",
+    "ABM Tech is a software engineering studio. We build the six systems every business depends on — the website that gets you found, the CRM that catches demand, the operations core that keeps stock and jobs honest, the billing that reconciles, the mobile apps for work that happens away from a desk, and the automation and reporting that stop the copying in between. Retail, healthcare, manufacturing, logistics, education, hospitality, services — the software differs, the six loops do not. Every engagement is a fixed price against a written scope, and you own the code from the first commit.",
+
+  /** One sentence a visitor should be able to repeat after five seconds. */
+  promise:
+    "Whatever your business is, we build the software that runs it — and we tell you when you don't need us.",
 
   url: or(process.env.NEXT_PUBLIC_SITE_URL, "https://abmtech.in"),
   locale: "en_IN",
@@ -63,18 +67,20 @@ export const site = {
    *  These also feed `sameAs` in Organization schema, which is how search
    *  engines tie the site and the profiles to one entity. */
   socials: [
+    /* ⚠️ These MUST be ABM Tech's own profiles, not another brand's. They feed
+       `sameAs` in Organization schema, which is how a search engine ties a
+       site and a profile to one entity — pointing them at a different company
+       actively tells Google the two brands are the same thing. Left empty
+       until the ABM Tech accounts exist; an empty URL renders no icon. */
     {
       key: "instagram",
       label: "Instagram",
-      url: or(process.env.NEXT_PUBLIC_INSTAGRAM, "https://www.instagram.com/googleitsolution"),
+      url: or(process.env.NEXT_PUBLIC_INSTAGRAM, ""), // TODO: ABM Tech Instagram
     },
     {
       key: "facebook",
       label: "Facebook",
-      url: or(
-        process.env.NEXT_PUBLIC_FACEBOOK,
-        "https://www.facebook.com/profile.php?id=61592626603794",
-      ),
+      url: or(process.env.NEXT_PUBLIC_FACEBOOK, ""), // TODO: ABM Tech Facebook page
     },
     {
       key: "linkedin",
@@ -102,6 +108,32 @@ export const site = {
     { k: "First milestone", v: "7 days", note: "Something real to click" },
     { k: "Lock-in", v: "None", note: "Cancel with 30 days notice" },
   ],
+
+  /** Scale facts for the home page counter strip. Deliberately structural —
+   *  countable things about the offer, never invented client numbers. */
+  scale: [
+    { v: "13", k: "Services", note: "The whole business, not one slice" },
+    { v: "12", k: "Sectors", note: "Modelled in their own vocabulary" },
+    { v: "6", k: "Systems", note: "Found, capture, operate, bill, mobile, know" },
+    { v: "1", k: "Team", note: "The people building it are the people you talk to" },
+  ],
+
+  /** Answers the "are we too small / too big / too weird for you" question
+   *  before a visitor has to ask it. */
+  fit: [
+    {
+      title: "A business with no software at all",
+      body: "Registers, WhatsApp and a shared Excel file. We start with the one process that hurts most and digitise it properly, rather than replacing everything in one weekend.",
+    },
+    {
+      title: "A business that has outgrown its tools",
+      body: "Five subscriptions that do not talk to each other and a person whose job is to copy between them. Usually the cheapest fix we sell, and the fastest to pay back.",
+    },
+    {
+      title: "A business somebody else built software for",
+      body: "An abandoned build, a vendor who stopped replying, or code nobody can deploy. We audit it honestly and tell you whether it is worth rescuing or replacing.",
+    },
+  ],
 } as const;
 
 export function absoluteUrl(path = "/") {
@@ -121,8 +153,10 @@ export function isPlaceholder(v: string | number | null | undefined) {
 
 export const nav = [
   { href: "/services", label: "Services", index: "01" },
-  { href: "/pricing", label: "Pricing", index: "02" },
-  { href: "/work", label: "Work", index: "03" },
-  { href: "/about", label: "About", index: "04" },
-  { href: "/contact", label: "Contact", index: "05" },
+  { href: "/industries", label: "Industries", index: "02" },
+  { href: "/pricing", label: "Pricing", index: "03" },
+  { href: "/work", label: "Work", index: "04" },
+  { href: "/blog", label: "Journal", index: "05" },
+  { href: "/about", label: "About", index: "06" },
+  { href: "/contact", label: "Contact", index: "07" },
 ] as const;

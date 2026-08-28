@@ -13,13 +13,16 @@ import { Reveal, Stagger, StaggerItem } from "@/components/motion";
 export const metadata: Metadata = pageMeta({
   title: "Pricing — every service, every figure, in the open",
   description:
-    "Transparent INR pricing for custom CRM from ₹12,000, business websites from ₹6,000, dynamic sites with admin panels from ₹15,000, ERP from ₹15,000, full platforms from ₹20,000, plus AI automation and local SEO.",
+    "Transparent INR pricing across 13 services: websites from ₹6,000, integrations from ₹8,000, dashboards from ₹10,000, CRM from ₹12,000, ERP and admin-driven sites from ₹15,000, e-commerce from ₹18,000, full platforms from ₹20,000, mobile apps from ₹25,000, plus local SEO and support retainers from ₹4,000 a month.",
   path: "/pricing",
   keywords: [
     "crm development price india",
     "website development cost india",
     "erp software price india",
+    "mobile app development cost india",
+    "ecommerce website cost india",
     "billing software development cost",
+    "website maintenance charges india",
     "ai automation pricing india",
   ],
 });
@@ -72,7 +75,7 @@ export default function PricingPage() {
         label="Pricing"
         title="Published, itemised,"
         titleAccent="and exclusive of hand-waving."
-        lead="Every service with its starting figure, what that figure includes, and what it deliberately excludes. All in INR, exclusive of GST, fixed against a written scope."
+        lead={`All ${services.length} services with a starting figure, what that figure includes, and what it deliberately excludes. In INR, exclusive of GST, fixed against a written scope — and we tell you which bracket a real project lands in on the first call, before you have spent anything.`}
         breadcrumb={[
           { name: "Home", path: "/" },
           { name: "Pricing", path: "/pricing" },
@@ -122,7 +125,7 @@ export default function PricingPage() {
                   timeline and audience for each service.
                 </caption>
                 <thead>
-                  <tr className="border-b border-hair">
+                  <tr className="border-b border-line">
                     <th scope="col" className="label py-3.5 pr-4">Service</th>
                     <th scope="col" className="label py-3.5 pr-4">From</th>
                     <th scope="col" className="label py-3.5 pr-4">Billing</th>
@@ -134,17 +137,17 @@ export default function PricingPage() {
                   {services.map((s) => (
                     <tr
                       key={s.slug}
-                      className="group border-b border-hair transition-colors hover:bg-white/[0.015]"
+                      className="group border-b border-line transition-colors hover:bg-tint"
                     >
                       <th scope="row" className="py-4 pr-4 align-top">
                         <Link
                           href={`/services/${s.slug}`}
                           className="flex items-baseline gap-2"
                         >
-                          <span className="font-mono text-[0.625rem] tabular-nums text-flare/70">
+                          <span className="font-mono text-[0.625rem] tabular-nums text-brand/70">
                             {s.index}
                           </span>
-                          <span className="font-display text-[0.9375rem] tracking-[-0.01em] transition-colors group-hover:text-flare-hi">
+                          <span className="font-display text-[0.9375rem] tracking-[-0.01em] transition-colors group-hover:text-brand-ink">
                             {s.title}
                           </span>
                         </Link>
@@ -188,9 +191,9 @@ export default function PricingPage() {
           <Stagger className="grid gap-5 md:grid-cols-2 xl:grid-cols-3" step={0.05}>
             {services.map((s) => (
               <StaggerItem key={s.slug} className="h-full">
-                <Card leak className="flex h-full flex-col p-6">
+                <Card lift className="flex h-full flex-col p-6">
                   <div className="mb-5 flex items-start justify-between gap-3">
-                    <span className="font-mono text-[0.625rem] tabular-nums text-flare/70">
+                    <span className="font-mono text-[0.625rem] tabular-nums text-brand/70">
                       [{s.index}]
                     </span>
                     <Chip brand={s.priceMode !== "quote"}>
@@ -262,8 +265,10 @@ export default function PricingPage() {
                 ₹40,000 to ₹1,50,000. A ₹20,000 platform is a focused
                 single-role app on a well-defined billing flow; most land between
                 ₹45,000 and ₹1,50,000 once roles and app store work are counted.
-                We tell you which bracket you are in on the first call — before
-                you have spent anything.
+                A ₹25,000 mobile app is one user role and about eight screens;
+                most land between ₹60,000 and ₹2,50,000 once a second role and
+                store work are counted. We tell you which bracket you are in on
+                the first call — before you have spent anything.
               </p>
             </Card>
           </Reveal>

@@ -172,6 +172,31 @@ export function serviceLd(s: {
   };
 }
 
+export function articleLd(p: {
+  slug: string;
+  title: string;
+  excerpt: string;
+  publishedAt: string;
+  updatedAt?: string;
+  author: string;
+  tags: string[];
+}): Json {
+  return {
+    "@type": "BlogPosting",
+    "@id": absoluteUrl(`/blog/${p.slug}#article`),
+    headline: p.title,
+    description: p.excerpt,
+    url: absoluteUrl(`/blog/${p.slug}`),
+    datePublished: p.publishedAt,
+    dateModified: p.updatedAt ?? p.publishedAt,
+    author: { "@type": "Person", name: p.author },
+    publisher: { "@id": absoluteUrl("/#organization") },
+    mainEntityOfPage: { "@type": "WebPage", "@id": absoluteUrl(`/blog/${p.slug}`) },
+    keywords: p.tags.join(", "),
+    inLanguage: "en-IN",
+  };
+}
+
 export function graph(...nodes: (Json | null | undefined)[]) {
   return { "@context": "https://schema.org", "@graph": nodes.filter(Boolean) };
 }

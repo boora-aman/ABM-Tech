@@ -20,7 +20,7 @@ type Base = {
 };
 
 const INPUT =
-  "peer w-full rounded-tight border bg-obsidian/70 px-3.5 py-3 text-[0.9375rem] outline-none transition-colors duration-300 placeholder:text-ink-faint/70 focus:border-flare focus:bg-obsidian";
+  "peer w-full rounded-sm border bg-page px-3.5 py-3 text-[0.9375rem] outline-none transition-colors duration-300 placeholder:text-ink-faint/70 focus:border-brand focus:bg-surface";
 
 function Shell({
   label,
@@ -36,7 +36,7 @@ function Shell({
       <label htmlFor={id} className="meta-bright flex items-center gap-1.5">
         {label}
         {required && (
-          <span aria-hidden className="text-flare">
+          <span aria-hidden className="text-brand">
             *
           </span>
         )}
@@ -51,7 +51,7 @@ function Shell({
         <p
           id={`${id}-err`}
           role="alert"
-          className="flex items-center gap-1.5 text-[0.75rem] font-medium text-flare-hi"
+          className="flex items-center gap-1.5 text-[0.75rem] font-medium text-brand-ink"
         >
           <svg width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden>
             <circle cx="7" cy="7" r="6" stroke="currentColor" strokeWidth="1.2" />
@@ -85,7 +85,7 @@ export function Field({
         required={required}
         aria-invalid={error ? true : undefined}
         aria-describedby={error ? `${id}-err` : hint ? `${id}-hint` : undefined}
-        className={cn(INPUT, error ? "border-flare" : "border-hair")}
+        className={cn(INPUT, error ? "border-brand" : "border-line")}
         {...rest}
       />
     </Shell>
@@ -113,7 +113,7 @@ export function TextArea({
         required={required}
         aria-invalid={error ? true : undefined}
         aria-describedby={error ? `${id}-err` : hint ? `${id}-hint` : undefined}
-        className={cn(INPUT, "resize-y leading-relaxed", error ? "border-flare" : "border-hair")}
+        className={cn(INPUT, "resize-y leading-relaxed", error ? "border-brand" : "border-line")}
         {...rest}
       />
     </Shell>
@@ -144,7 +144,7 @@ export function Select({
           className={cn(
             INPUT,
             "cursor-pointer appearance-none pr-10",
-            error ? "border-flare" : "border-hair",
+            error ? "border-brand" : "border-line",
           )}
           {...rest}
         >
@@ -193,10 +193,10 @@ export function Segments({
             <label
               key={o.value}
               className={cn(
-                "cursor-pointer rounded-tight border px-3 py-2 text-[0.8125rem] transition-colors duration-250 has-focus-visible:outline has-focus-visible:outline-flare-hi",
+                "cursor-pointer rounded-sm border px-3 py-2 text-[0.8125rem] transition-colors duration-250 has-focus-visible:outline has-focus-visible:outline-brand-ink",
                 on
-                  ? "border-hair-warm bg-flare/10 text-ink"
-                  : "border-hair text-ink-dim hover:border-white/15 hover:text-ink",
+                  ? "border-brand bg-tint text-brand-ink font-medium"
+                  : "border-line text-ink-dim hover:border-line-strong hover:text-ink",
               )}
             >
               <input

@@ -202,6 +202,50 @@
 
 @utility brand-text { color: var(--t-brand-ink); }
 
+/* Decorative brand aura behind the hero heading. One absolutely positioned
+   element with a static radial gradient — it paints once and never repaints on
+   scroll, unlike the fixed-attachment body gradient this replaces. */
+@utility aura {
+  position: absolute;
+  inset-inline-start: -12rem;
+  inset-block-start: -14rem;
+  z-index: 0;
+  width: min(62rem, 130vw);
+  aspect-ratio: 1;
+  pointer-events: none;
+  background: radial-gradient(
+    closest-side,
+    rgba(244, 80, 26, 0.16),
+    rgba(244, 80, 26, 0.05) 55%,
+    transparent 72%
+  );
+}
+:root[data-theme="dark"] .aura {
+  background: radial-gradient(
+    closest-side,
+    rgba(255, 140, 66, 0.16),
+    rgba(244, 80, 26, 0.06) 55%,
+    transparent 72%
+  );
+}
+
+/* Section ground: a card-coloured band that separates a section from the page
+   without a border. Opaque, so it costs nothing to composite. */
+@utility band {
+  background: var(--t-surface);
+  border-block: 1px solid var(--t-line);
+}
+
+/* Hairline grid overlay for structural sections. A repeating-linear-gradient
+   on one element, not a border per cell. */
+@utility mesh {
+  background-image:
+    linear-gradient(to right, var(--t-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--t-line) 1px, transparent 1px);
+  background-size: 3.5rem 3.5rem;
+  mask-image: radial-gradient(closest-side, #000 30%, transparent 100%);
+}
+
 @utility brand-fill {
   background: var(--color-brand);
   color: #fff;
@@ -325,4 +369,26 @@
 @media print {
   .no-print { display: none !important; }
   body { background: #fff; color: #000; }
+}
+
+/* Framed panel with a faint structural grid. Used on the closing about-page
+   card. One element, one repeating gradient, masked to fade at the edges —
+   not a border per cell. */
+@utility mesh-frame {
+  position: relative;
+  isolation: isolate;
+}
+.mesh-frame::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background-image:
+    linear-gradient(to right, var(--t-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--t-line) 1px, transparent 1px);
+  background-size: 3.5rem 3.5rem;
+  -webkit-mask-image: radial-gradient(closest-side, #000, transparent);
+  mask-image: radial-gradient(closest-side, #000, transparent);
+  opacity: 0.7;
 }

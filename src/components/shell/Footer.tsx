@@ -96,6 +96,7 @@ export function Footer() {
               {[
                 { href: "/privacy", label: "Privacy" },
                 { href: "/terms", label: "Terms" },
+                { href: "/feed.xml", label: "RSS feed" },
                 { href: "/sitemap.xml", label: "Sitemap" },
                 { href: "/llms.txt", label: "llms.txt" },
               ].map((l) => (

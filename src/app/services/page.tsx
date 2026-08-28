@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { PageHead } from "@/components/sections/PageHead";
-import { ServiceGrid } from "@/components/sections/ServiceGrid";
+import { ServiceCatalogue } from "@/components/sections/ServiceCatalogue";
+import { Cta } from "@/components/sections/Cta";
 import { Faq } from "@/components/sections/Faq";
 import { Card, Rule } from "@/components/ui/Panel";
 import { ButtonLink, Arrow } from "@/components/ui/Button";
@@ -11,14 +12,17 @@ import { pageMeta, graph, breadcrumbLd, serviceLd, faqLd } from "@/lib/seo";
 import { absoluteUrl } from "@/lib/site.config";
 
 export const metadata: Metadata = pageMeta({
-  title: "Services — CRM, ERP, billing platforms, websites & AI automation",
+  title: "Services — websites, CRM, ERP, billing, apps, automation & support",
   description:
-    "Eight services with published pricing: custom CRM, static and dynamic business websites, ERP systems, billing platforms with mobile apps, AI automation, business digitisation, and Google Business Profile with technical SEO.",
+    "Thirteen services with published pricing, grouped by the part of the business they fix: websites and local search, CRM, ERP and digitisation, billing and e-commerce, mobile apps, dashboards, integrations and AI automation, plus hosting and support.",
   path: "/services",
   keywords: [
     "software development services india",
     "custom crm erp development",
     "business software company india",
+    "mobile app development services india",
+    "ecommerce development services india",
+    "api integration services india",
     "ai automation services india",
   ],
 });
@@ -52,7 +56,7 @@ export default function ServicesPage() {
         label="Services"
         title="What we build,"
         titleAccent="and what it costs."
-        lead="Eight services. Each page carries the full deliverable list, the delivery sequence, the honest exclusions and the price floor — so you can qualify us out without a call."
+        lead={`${services.length} services, grouped by the part of the business each one fixes. Every page carries the full deliverable list, the delivery sequence, the honest exclusions and the price floor — so you can qualify us out without ever making a call.`}
         breadcrumb={[
           { name: "Home", path: "/" },
           { name: "Services", path: "/services" },
@@ -77,7 +81,7 @@ export default function ServicesPage() {
       />
 
       <Rule />
-      <ServiceGrid services={services} />
+      <ServiceCatalogue services={services} />
       <Rule />
       <Faq
         items={globalFaqs}
@@ -85,6 +89,7 @@ export default function ServicesPage() {
         title="Before you enquire"
         lead="The questions that come up on almost every first call."
       />
+      <Cta />
     </>
   );
 }

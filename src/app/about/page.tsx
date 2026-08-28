@@ -13,12 +13,16 @@ import { Reveal } from "@/components/motion";
 export const metadata: Metadata = pageMeta({
   title: "About — an engineering studio, not an agency",
   description:
-    "ABM Tech builds custom CRM, ERP, billing platforms and business websites for Indian businesses. Fixed scope, fixed price, code you own, and a straight answer when off-the-shelf fits better.",
+    "ABM Tech is a software engineering studio building the six systems a business runs on — website, CRM, ERP, billing, mobile apps and automation — across 12 sectors. Fixed scope, fixed price, code you own, and a straight answer when off-the-shelf fits better.",
   path: "/about",
   keywords: ["about abm tech", "software studio india", "custom software company india"],
 });
 
 const ABOUT_FAQS = [
+  {
+    q: "You list 13 services across 12 sectors. Isn't that too broad to be good at?",
+    a: "It would be, if they were 13 unrelated products. They are not — they are the same six systems assembled differently, on one stack, by the same people. A billing app and a CRM share a data model, an auth layer and a deployment pipeline; the difference is which nouns they hold. What we do not do is claim depth we lack: sectors we have shipped in are marked as such, and if your problem needs specialist domain knowledge we do not have, we say so.",
+  },
   {
     q: "How big is the team?",
     a: "Small, deliberately. Everyone on an engagement writes production code, with specialist contractors brought in for defined pieces — design, mobile, content — rather than a bench of generalists billed against your budget. It means we take fewer projects at once and say no more often than an agency would.",
@@ -29,7 +33,7 @@ const ABOUT_FAQS = [
   },
   {
     q: "What sectors do you know well?",
-    a: "Retail pharmacy, fuel retail, distribution, home services and field operations. Sector knowledge matters more than people expect — knowing a pharmacy needs batch-level MRP, or that a fuel station reconciles per shift, is the difference between software that gets used and software that gets abandoned.",
+    a: "Production systems have shipped in retail pharmacy, fuel and general retail, distribution, logistics and home/field services. We have modelled a further set — manufacturing, construction, education, hospitality, professional services, e-commerce, finance and non-profits — and we mark the difference rather than implying a portfolio we do not have. Sector knowledge matters more than people expect: knowing a pharmacy needs batch-level MRP, or that a fuel station reconciles per shift, is the difference between software that gets used and software abandoned in month two.",
   },
   {
     q: "Do you work with businesses outside India?",
@@ -76,7 +80,7 @@ export default function AboutPage() {
               ].map((r) => (
                 <div
                   key={r.k}
-                  className="flex items-baseline justify-between gap-3 border-b border-hair pb-2.5 last:border-0 last:pb-0"
+                  className="flex items-baseline justify-between gap-3 border-b border-line pb-2.5 last:border-0 last:pb-0"
                 >
                   <dt className="label">{r.k}</dt>
                   <dd className="text-right text-[0.8125rem]">{r.v}</dd>
@@ -94,12 +98,15 @@ export default function AboutPage() {
         <div className="bay">
           <Reveal>
             <dl className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-              {site.proof.map((t) => (
-                <div key={t.k} className="border-t border-hair pt-5">
-                  <dd className="font-display text-3xl tracking-[-0.03em] text-flare-hi sm:text-4xl">
+              {[...site.scale, ...site.proof].map((t) => (
+                <div key={t.k} className="border-t border-line pt-5">
+                  <dd className="font-display text-3xl tracking-[-0.03em] text-brand-ink sm:text-4xl">
                     {t.v}
                   </dd>
                   <dt className="label mt-2.5">{t.k}</dt>
+                  <p className="mt-1.5 text-[0.75rem] leading-snug text-ink-faint">
+                    {t.note}
+                  </p>
                 </div>
               ))}
             </dl>
@@ -197,7 +204,7 @@ export default function AboutPage() {
       <section className="page-x pb-20">
         <div className="bay">
           <Reveal>
-            <Card className="blueprint flex flex-wrap items-center justify-between gap-6 p-7 sm:p-10">
+            <Card raised className="mesh-frame flex flex-wrap items-center justify-between gap-6 p-7 sm:p-10">
               <div>
                 <h2 className="t-h3 mb-2 font-display">
                   Start with the problem, not the product.

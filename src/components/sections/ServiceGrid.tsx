@@ -33,8 +33,10 @@ export function ServiceGrid({
               </h2>
             </div>
             <p className="t-lead lg:pb-1">
-              Eight services with published starting prices. Each page lists what
-              is included, what is deliberately not, and the realistic timeline.
+              {services.length} services with published starting prices — from a
+              ₹6,000 website to a full platform with a mobile app. Each page
+              lists what is included, what is deliberately not, and the realistic
+              timeline.
             </p>
           </div>
         )}
@@ -105,10 +107,13 @@ export function ServiceGrid({
         <Card className="mt-6 p-6 sm:p-8">
           <Label className="mb-4">What we don&apos;t do</Label>
           <p className="max-w-3xl text-[0.9375rem] leading-relaxed text-ink-dim">
-            We don&apos;t run paid ad campaigns, buy backlinks, do print or brand
-            design, or sell per-seat licences. And if an off-the-shelf tool would
-            genuinely serve you better than a custom build, we&apos;ll tell you
-            on the first call rather than three weeks in.
+            We don&apos;t run paid ad campaigns, buy backlinks or reviews, do print
+            or brand identity design, or sell per-seat licences. We don&apos;t
+            take on projects we cannot staff properly, and we don&apos;t quote a
+            number before we understand the scope. And if an off-the-shelf tool
+            would genuinely serve you better than a custom build — Shopify,
+            Zoho, ERPNext, Power BI — we&apos;ll name it on the first call rather
+            than three weeks in.
           </p>
         </Card>
       </div>

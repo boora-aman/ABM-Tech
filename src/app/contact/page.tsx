@@ -140,7 +140,7 @@ export default function ContactPage() {
                   "Whether there's a hard deadline driving it.",
                 ].map((q, i) => (
                   <li key={q} className="flex gap-3">
-                    <span className="mt-0.5 font-mono text-[0.625rem] tabular-nums text-flare/70">
+                    <span className="mt-0.5 font-mono text-[0.625rem] tabular-nums text-brand/70">
                       {String(i + 1).padStart(2, "0")}
                     </span>
                     <span className="text-[0.8125rem] leading-relaxed text-ink-dim">
@@ -173,9 +173,9 @@ function Line({ label, value, href }: { label: string; value: string; href?: str
     </>
   );
   return (
-    <li className="flex items-baseline justify-between gap-4 border-b border-hair pb-3 last:border-0 last:pb-0">
+    <li className="flex items-baseline justify-between gap-4 border-b border-line pb-3 last:border-0 last:pb-0">
       {href ? (
-        <a href={href} className="flex w-full items-baseline justify-between gap-4 transition-colors hover:text-flare-hi">
+        <a href={href} className="flex w-full items-baseline justify-between gap-4 transition-colors hover:text-brand-ink">
           {body}
         </a>
       ) : (
