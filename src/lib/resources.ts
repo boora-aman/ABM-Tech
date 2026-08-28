@@ -63,7 +63,14 @@ export const RESOURCES: Record<string, ResourceDef> = {
     uniqueKey: "slug",
     label: "Services",
     sort: { order: 1, index: 1 },
-    revalidate: [...ALWAYS, "/services", "/pricing", "/industries"],
+    revalidate: [
+      ...ALWAYS,
+      "/services",
+      "/services/[slug]",
+      "/pricing",
+      "/industries",
+      "/blog/[slug]",
+    ],
   },
   posts: {
     model: PostModel,
@@ -71,7 +78,7 @@ export const RESOURCES: Record<string, ResourceDef> = {
     uniqueKey: "slug",
     label: "Journal posts",
     sort: { publishedAt: -1 },
-    revalidate: [...ALWAYS, "/blog", "/feed.xml"],
+    revalidate: [...ALWAYS, "/blog", "/blog/[slug]", "/feed.xml"],
   },
   industries: {
     model: IndustryModel,
@@ -79,7 +86,7 @@ export const RESOURCES: Record<string, ResourceDef> = {
     uniqueKey: "slug",
     label: "Industries",
     sort: { order: 1, index: 1 },
-    revalidate: [...ALWAYS, "/industries"],
+    revalidate: [...ALWAYS, "/industries", "/services/[slug]"],
   },
   pillars: {
     model: PillarModel,
@@ -87,7 +94,7 @@ export const RESOURCES: Record<string, ResourceDef> = {
     uniqueKey: "key",
     label: "Systems (pillars)",
     sort: { order: 1, index: 1 },
-    revalidate: [...ALWAYS, "/industries", "/services"],
+    revalidate: [...ALWAYS, "/industries", "/services", "/services/[slug]"],
   },
   projects: {
     model: ProjectModel,
@@ -95,7 +102,7 @@ export const RESOURCES: Record<string, ResourceDef> = {
     uniqueKey: "slug",
     label: "Work",
     sort: { order: 1, index: 1 },
-    revalidate: [...ALWAYS, "/work"],
+    revalidate: [...ALWAYS, "/work", "/services/[slug]"],
   },
   slides: {
     model: SlideModel,
@@ -103,7 +110,7 @@ export const RESOURCES: Record<string, ResourceDef> = {
     uniqueKey: "slug",
     label: "Showcase slides",
     sort: { order: 1 },
-    revalidate: [...ALWAYS],
+    revalidate: [...ALWAYS, "/work"],
   },
   settings: {
     model: SettingModel,
@@ -121,6 +128,8 @@ export const RESOURCES: Record<string, ResourceDef> = {
       "/about",
       "/contact",
       "/blog",
+      "/services/[slug]",
+      "/blog/[slug]",
     ],
   },
   faqs: {
@@ -128,7 +137,7 @@ export const RESOURCES: Record<string, ResourceDef> = {
     schema: globalFaqWriteSchema,
     label: "Site-wide FAQs",
     sort: { order: 1 },
-    revalidate: [...ALWAYS, "/services"],
+    revalidate: [...ALWAYS, "/services", "/services/[slug]"],
   },
   commitments: {
     model: CommitmentModel,

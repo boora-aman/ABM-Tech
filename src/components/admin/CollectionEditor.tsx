@@ -52,7 +52,8 @@ const emptyFor = (fields: Field[]): Row =>
 
 function toEditable(value: unknown, type: Field["type"]): string {
   if (value === undefined || value === null) return "";
-  if (type === "list") return Array.isArray(value) ? value.join("\n") : String(value);
+  if (type === "list")
+    return Array.isArray(value) ? value.join("\n") : String(value);
   if (type === "json") return JSON.stringify(value ?? [], null, 2);
   return String(value);
 }
@@ -73,7 +74,15 @@ export function CollectionEditor({
   const [rows, setRows] = useState<Row[]>([]);
   const [draft, setDraft] = useState<Row>(() => emptyFor(fields));
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [status, setStatus] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
+  /* The form is closed by default. It used to sit permanently above the list,
+     which pushed the existing records off the first screen — on a collection
+     with twenty fields you could not see what you already had without
+     scrolling past a blank form you had not asked for. */
+  const [formOpen, setFormOpen] = useState(false);
+  const [status, setStatus] = useState<{
+    kind: "ok" | "err";
+    text: string;
+  } | null>(null);
   const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("");
@@ -93,14 +102,17 @@ export function CollectionEditor({
 
     (async () => {
       try {
-        const res = await fetch(`/api/admin/${resource}`, { cache: "no-store" });
+        const res = await fetch(`/api/admin/${resource}`, {
+          cache: "no-store",
+        });
         const json = await res.json();
         if (cancelled) return;
         if (!json.ok) throw new Error(json.error ?? "Could not load");
         setRows(json.data as Row[]);
         setStatus(null);
       } catch (err) {
-        if (!cancelled) setStatus({ kind: "err", text: (err as Error).message });
+        if (!cancelled)
+          setStatus({ kind: "err", text: (err as Error).message });
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -128,13 +140,23 @@ export function CollectionEditor({
     for (const f of fields) next[f.name] = row[f.name];
     setDraft(next);
     setEditingId(String(row.id ?? ""));
+    setFormOpen(true);
     setStatus(null);
-    if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
+    if (typeof window !== "undefined")
+      window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   function reset() {
     setDraft(emptyFor(fields));
     setEditingId(null);
+    setFormOpen(false);
+    setStatus(null);
+  }
+
+  function startNew() {
+    setDraft(emptyFor(fields));
+    setEditingId(null);
+    setFormOpen(true);
     setStatus(null);
   }
 
@@ -148,7 +170,12 @@ export function CollectionEditor({
       } else if (f.type === "boolean") {
         out[f.name] = Boolean(raw);
       } else if (f.type === "list") {
-        const text = typeof raw === "string" ? raw : Array.isArray(raw) ? raw.join("\n") : "";
+        const text =
+          typeof raw === "string"
+            ? raw
+            : Array.isArray(raw)
+              ? raw.join("\n")
+              : "";
         out[f.name] = text
           .split("\n")
           .map((s) => s.trim())
@@ -193,8 +220,9 @@ export function CollectionEditor({
       if (!json.ok) {
         const paths = Array.isArray(json.detail)
           ? json.detail
-              .map((i: { path?: unknown[]; message?: string }) =>
-                `${(i.path ?? []).join(".") || "(root)"}: ${i.message ?? ""}`,
+              .map(
+                (i: { path?: unknown[]; message?: string }) =>
+                  `${(i.path ?? []).join(".") || "(root)"}: ${i.message ?? ""}`,
               )
               .join(" · ")
           : "";
@@ -202,7 +230,9 @@ export function CollectionEditor({
       }
       setStatus({
         kind: "ok",
-        text: editingId ? "Saved. Live pages refreshed." : "Created. Live pages refreshed.",
+        text: editingId
+          ? "Saved. Live pages refreshed."
+          : "Created. Live pages refreshed.",
       });
       reset();
       await load();
@@ -245,118 +275,164 @@ export function CollectionEditor({
 
   return (
     <div className="grid gap-6">
-      {/* ------------------------------- Form ------------------------------ */}
-      <Card raised className="p-6 sm:p-7">
-        <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <Label className="mb-1.5">{editingId ? "Editing" : "New record"}</Label>
-            <h2 className="t-h3">{title}</h2>
-          </div>
-          {editingId && (
-            <Button variant="ghost" size="sm" onClick={reset}>
-              Cancel edit
-            </Button>
-          )}
+      {/* ------------------------------ Toolbar ---------------------------- */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <Label className="mb-1.5">Collection</Label>
+          <h2 className="t-h3">{title}</h2>
         </div>
-
-        {note && (
-          <p className="mb-6 rounded-sm border border-line bg-tint px-4 py-3 text-[0.8125rem] leading-relaxed text-ink-dim">
-            {note}
-          </p>
+        {!formOpen && (
+          <Button variant="primary" onClick={startNew}>
+            + New record
+          </Button>
         )}
+      </div>
 
-        <div className="grid gap-5 md:grid-cols-2">
-          {fields.map((f) => {
-            const wide = f.type === "textarea" || f.type === "json" || f.type === "list";
-            return (
-              <div key={f.name} className={cn(wide && "md:col-span-2")}>
-                <label
-                  htmlFor={`f-${f.name}`}
-                  className="mb-1.5 block text-[0.8125rem] font-medium"
-                >
-                  {f.label}
-                  {f.required && <span className="ml-1 text-brand">*</span>}
-                </label>
+      {/* -------------------------------- Form ----------------------------- */}
+      {formOpen && (
+        <Card raised className="p-6 sm:p-7">
+          <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <Label className="mb-1.5">
+                {editingId ? "Editing" : "New record"}
+              </Label>
+              <h2 className="t-h3">
+                {editingId ? String(draft[labelKey] ?? title) : title}
+              </h2>
+            </div>
+            <Button variant="ghost" size="sm" onClick={reset}>
+              {editingId ? "Cancel edit" : "Close"}
+            </Button>
+          </div>
 
-                {f.type === "boolean" ? (
-                  <label className="flex cursor-pointer items-center gap-2.5 text-[0.875rem] text-ink-dim">
+          {note && (
+            <p className="mb-6 rounded-sm border border-line bg-tint px-4 py-3 text-[0.8125rem] leading-relaxed text-ink-dim">
+              {note}
+            </p>
+          )}
+
+          <div className="grid gap-5 md:grid-cols-2">
+            {fields.map((f) => {
+              const wide =
+                f.type === "textarea" || f.type === "json" || f.type === "list";
+              return (
+                <div key={f.name} className={cn(wide && "md:col-span-2")}>
+                  <label
+                    htmlFor={`f-${f.name}`}
+                    className="mb-1.5 block text-[0.8125rem] font-medium"
+                  >
+                    {f.label}
+                    {f.required && <span className="ml-1 text-brand">*</span>}
+                  </label>
+
+                  {f.type === "boolean" ? (
+                    <label className="flex cursor-pointer items-center gap-2.5 text-[0.875rem] text-ink-dim">
+                      <input
+                        id={`f-${f.name}`}
+                        type="checkbox"
+                        checked={Boolean(draft[f.name])}
+                        onChange={(e) =>
+                          setDraft({ ...draft, [f.name]: e.target.checked })
+                        }
+                        className="size-4 accent-[var(--color-brand)]"
+                      />
+                      {f.hint ?? "Enabled"}
+                    </label>
+                  ) : f.type === "select" ? (
+                    <select
+                      id={`f-${f.name}`}
+                      className={input}
+                      value={String(draft[f.name] ?? "")}
+                      onChange={(e) =>
+                        setDraft({ ...draft, [f.name]: e.target.value })
+                      }
+                    >
+                      <option value="">—</option>
+                      {(f.options ?? []).map((o) => (
+                        <option key={o} value={o}>
+                          {o}
+                        </option>
+                      ))}
+                    </select>
+                  ) : f.type === "textarea" ||
+                    f.type === "json" ||
+                    f.type === "list" ? (
+                    <textarea
+                      id={`f-${f.name}`}
+                      className={cn(
+                        input,
+                        "resize-y leading-relaxed",
+                        f.type === "json" && "font-mono text-[0.8125rem]",
+                      )}
+                      rows={f.rows ?? (f.type === "json" ? 8 : 4)}
+                      value={toEditable(draft[f.name], f.type)}
+                      onChange={(e) =>
+                        setDraft({ ...draft, [f.name]: e.target.value })
+                      }
+                    />
+                  ) : (
                     <input
                       id={`f-${f.name}`}
-                      type="checkbox"
-                      checked={Boolean(draft[f.name])}
+                      type={f.type === "number" ? "number" : "text"}
+                      className={input}
+                      value={String(draft[f.name] ?? "")}
                       onChange={(e) =>
-                        setDraft({ ...draft, [f.name]: e.target.checked })
+                        setDraft({
+                          ...draft,
+                          [f.name]:
+                            f.type === "number"
+                              ? Number(e.target.value)
+                              : e.target.value,
+                        })
                       }
-                      className="size-4 accent-[var(--color-brand)]"
                     />
-                    {f.hint ?? "Enabled"}
-                  </label>
-                ) : f.type === "select" ? (
-                  <select
-                    id={`f-${f.name}`}
-                    className={input}
-                    value={String(draft[f.name] ?? "")}
-                    onChange={(e) => setDraft({ ...draft, [f.name]: e.target.value })}
-                  >
-                    <option value="">—</option>
-                    {(f.options ?? []).map((o) => (
-                      <option key={o} value={o}>
-                        {o}
-                      </option>
-                    ))}
-                  </select>
-                ) : f.type === "textarea" || f.type === "json" || f.type === "list" ? (
-                  <textarea
-                    id={`f-${f.name}`}
-                    className={cn(input, "resize-y leading-relaxed", f.type === "json" && "font-mono text-[0.8125rem]")}
-                    rows={f.rows ?? (f.type === "json" ? 8 : 4)}
-                    value={toEditable(draft[f.name], f.type)}
-                    onChange={(e) => setDraft({ ...draft, [f.name]: e.target.value })}
-                  />
-                ) : (
-                  <input
-                    id={`f-${f.name}`}
-                    type={f.type === "number" ? "number" : "text"}
-                    className={input}
-                    value={String(draft[f.name] ?? "")}
-                    onChange={(e) =>
-                      setDraft({
-                        ...draft,
-                        [f.name]:
-                          f.type === "number" ? Number(e.target.value) : e.target.value,
-                      })
-                    }
-                  />
+                  )}
+
+                  {f.hint && f.type !== "boolean" && (
+                    <p className="mt-1.5 text-[0.75rem] leading-relaxed text-ink-faint">
+                      {f.hint}
+                    </p>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          <Rule className="my-6" />
+
+          <div className="flex flex-wrap items-center gap-3">
+            <Button variant="primary" onClick={save} disabled={busy}>
+              {busy ? "Saving…" : editingId ? "Save changes" : "Create"}
+            </Button>
+            {status && (
+              <span
+                className={cn(
+                  "text-[0.8125rem]",
+                  status.kind === "ok"
+                    ? "text-brand-ink"
+                    : "text-red-600 dark:text-red-400",
                 )}
+              >
+                {status.text}
+              </span>
+            )}
+          </div>
+        </Card>
+      )}
 
-                {f.hint && f.type !== "boolean" && (
-                  <p className="mt-1.5 text-[0.75rem] leading-relaxed text-ink-faint">
-                    {f.hint}
-                  </p>
-                )}
-              </div>
-            );
-          })}
-        </div>
-
-        <Rule className="my-6" />
-
-        <div className="flex flex-wrap items-center gap-3">
-          <Button variant="primary" onClick={save} disabled={busy}>
-            {busy ? "Saving…" : editingId ? "Save changes" : "Create"}
-          </Button>
-          {status && (
-            <span
-              className={cn(
-                "text-[0.8125rem]",
-                status.kind === "ok" ? "text-brand-ink" : "text-red-600 dark:text-red-400",
-              )}
-            >
-              {status.text}
-            </span>
+      {/* A save or delete made with the form closed still needs to report. */}
+      {!formOpen && status && (
+        <p
+          className={cn(
+            "rounded-sm border px-4 py-3 text-[0.875rem]",
+            status.kind === "ok"
+              ? "border-brand/30 bg-tint text-ink-dim"
+              : "border-red-500/40 text-red-600 dark:text-red-400",
           )}
-        </div>
-      </Card>
+        >
+          {status.text}
+        </p>
+      )}
 
       {/* ------------------------------ Records ---------------------------- */}
       <Card className="p-6 sm:p-7">
@@ -376,8 +452,11 @@ export function CollectionEditor({
         {!loading && rows.length === 0 && (
           <p className="text-[0.875rem] leading-relaxed text-ink-dim">
             Nothing in the database yet — the site is serving the bundled seed
-            content. Run <code className="rounded-sm border border-line bg-tint px-1.5 py-0.5 font-mono text-[0.8125rem]">npm run seed</code>{" "}
-            to import it, or create a record above.
+            content. Run{" "}
+            <code className="rounded-sm border border-line bg-tint px-1.5 py-0.5 font-mono text-[0.8125rem]">
+              npm run seed
+            </code>{" "}
+            to import it, or create one with <strong>New record</strong>.
           </p>
         )}
 

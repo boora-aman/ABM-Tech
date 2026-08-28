@@ -210,10 +210,17 @@ export const slideWriteSchema = z
 
 export const settingWriteSchema = z
   .object({
+    /* Dot-separated, camelCase segments — `hero.headlineAccent`, not
+       `hero.headline_accent`. The previous pattern banned uppercase entirely,
+       which rejected every key the page components actually read, so no copy
+       override could be saved at all. */
     key: z
       .string()
       .trim()
-      .regex(/^[a-z][a-z0-9.]*$/, "Lowercase, dot-separated key")
+      .regex(
+        /^[a-z][a-zA-Z0-9]*(\.[a-z][a-zA-Z0-9]*)*$/,
+        "Dot-separated camelCase, e.g. hero.headlineAccent",
+      )
       .max(80),
     group: z.string().trim().max(40).optional(),
     label: z.string().trim().max(160).optional(),

@@ -16,11 +16,20 @@ export function fail(message: string, status = 400, extra?: unknown) {
   return NextResponse.json({ ok: false, error: message, detail: extra }, { status });
 }
 
-/** Regenerate the static HTML for every page a write could have changed. */
+/**
+ * Regenerate the static HTML for every page a write could have changed.
+ *
+ * A path containing a `[param]` segment is a ROUTE PATTERN, not a URL, and
+ * must be revalidated with the "page" type — `revalidatePath("/services")`
+ * does nothing for `/services/crm`, because they are different cache entries.
+ * Missing that is why a price edit updated the listing pages while the detail
+ * page kept serving stale output.
+ */
 export function bump(paths: string[]) {
   for (const p of paths) {
     try {
-      revalidatePath(p);
+      if (p.includes("[")) revalidatePath(p, "page");
+      else revalidatePath(p);
     } catch (err) {
       // A failed revalidation must not fail the write — the content is saved
       // either way and the page refreshes on its next ISR interval.
