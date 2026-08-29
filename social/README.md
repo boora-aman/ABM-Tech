@@ -7,9 +7,15 @@ Three files:
 
 | File | What it is |
 | --- | --- |
-| `README.md` | The system — slots, times, hashtag banks, image templates, rules |
-| `CONTENT-CALENDAR-30-DAY.md` | 60 ready-to-post pieces: caption, hashtags, image brief |
-| `GOOGLE-LISTING-POSTS.md` | 10 offer posts for the Google Maps listing service |
+| `README.md` | The system — slots, themes, hashtag rules, the master image prompt |
+| `CONTENT-CALENDAR-30-DAY.md` | **Part 1:** 30-day calendar, 60 posts · **Part 2:** service library, 84 posts · **Part 3:** 6 website reels |
+| `GOOGLE-LISTING-POSTS.md` | 22 Google Business Profile posts + 4 Maps reels |
+
+**176 posts and 10 reels.** Every one carries a finished caption, exactly five
+hashtags, and a complete image prompt you can paste straight into a model.
+
+They are also browsable and tickable in the admin at **`/admin/social`** —
+that is where the day-to-day job actually happens.
 
 ---
 
@@ -65,89 +71,157 @@ the most comments. You need all three.
 
 ---
 
-## 4. Hashtag banks
+## 4. Hashtags — the five-tag rule
 
-**Rules:**
-- 20–25 tags per post, never the identical set twice in a row — rotate banks.
-- Put 3–5 in the caption, the rest in the first comment. Keeps the caption readable.
-- Every post gets **Core (5) + one Topic bank (10) + Local (5) + Reach (3)**.
+**Instagram capped posts and Reels at five hashtags in December 2025.** A hard
+platform limit, not advice. Extra tags are ignored, and posts over the cap get
+*suppressed* distribution in Explore, on hashtag pages and in Reels
+recommendations.
 
-### Core — on every post
-```
-#ABMTech #BusinessSoftware #CustomSoftware #SoftwareDevelopment #DigitalTransformation
-```
+So the old playbook — twenty-five broad tags, some in the caption and the rest
+in the first comment — is now actively harmful. Every post in this system
+carries exactly five, already chosen. **Copy them as they are.**
 
-### Topic banks — pick the one matching the post
+Two things about how hashtags work now:
 
-**T1 · Websites & SEO**
-```
-#WebsiteDesign #WebDevelopment #WebsiteDevelopment #SEOTips #LocalSEO #GoogleMyBusiness #GoogleBusinessProfile #SmallBusinessWebsite #ResponsiveDesign #NextJS
-```
+- **They no longer drive reach.** They tell the system what the post is about.
+  Reach comes from the content, the format and engagement.
+- **Caption or first comment makes no algorithmic difference.** Instagram counts
+  both identically. First-comment placement is purely cosmetic.
 
-**T2 · CRM & Sales**
-```
-#CRM #CRMSoftware #SalesAutomation #LeadManagement #SalesPipeline #FollowUp #BusinessGrowth #SalesTeam #CustomerRelationship #CRMForSmallBusiness
-```
+### How each set of five is built
 
-**T3 · ERP, Inventory & Billing**
-```
-#ERP #ERPSoftware #InventoryManagement #BillingSoftware #GSTBilling #StockManagement #ERPNext #AccountingSoftware #InvoiceSoftware #BusinessAutomation
-```
+| Slot | Job | Example |
+| --- | --- | --- |
+| 2 × **topic** | What the post is actually about | `#CRMSoftware` `#LeadManagement` |
+| 1 × **anchor** | What the business is | `#CustomSoftware` |
+| 1 × **local** | Where you are — cheapest reach available | `#Dehradun` |
+| 1 × **audience** | Who it is for | `#SmallBusinessIndia` |
 
-**T4 · Mobile & Apps**
-```
-#MobileAppDevelopment #AppDeveloper #ReactNative #AndroidApp #IOSApp #AppDevelopment #BusinessApp #FieldService #OfflineFirst #CrossPlatform
-```
+Specific beats broad now that only five count. `#CRMSoftware` earns its slot;
+`#Business` does not.
 
-**T5 · AI & Automation**
-```
-#AIAutomation #ArtificialIntelligence #WorkflowAutomation #AITools #BusinessAutomation #ProcessAutomation #AIForBusiness #DataEntry #Productivity #AutomationTools
-```
+### The pools
 
-**T6 · E-commerce**
-```
-#Ecommerce #OnlineStore #EcommerceWebsite #D2C #OnlineBusiness #ShopifyAlternative #EcommerceDevelopment #SellOnline #DigitalStore #OrderManagement
-```
+Rotated automatically so consecutive posts never carry an identical set — a
+repeated block of five on every post is exactly the pattern spam filters watch
+for.
 
-**T7 · Small business / owner mindset**
-```
-#SmallBusiness #SmallBusinessOwner #BusinessTips #Entrepreneur #StartupIndia #MSME #BusinessOwner #SmallBusinessIndia #BusinessAdvice #GrowYourBusiness
-```
+**Anchor** — `#CustomSoftware` `#BusinessSoftware` `#SoftwareDevelopment`
+**Local** — `#Dehradun` `#Uttarakhand` `#DehradunBusiness` `#IndiaBusiness`
+**Audience** — `#SmallBusinessIndia` `#MSME` `#BusinessOwner` `#Entrepreneur`
 
-### Local — on every post
-```
-#Dehradun #Uttarakhand #DehradunBusiness #IndiaBusiness #MadeInIndia
-```
-Swap in the city you are targeting that week (`#Delhi #Noida #Gurgaon #Haridwar
-#Rishikesh #Mussoorie`) — local tags are the cheapest reach you will ever get.
+| Topic bank | Tags |
+| --- | --- |
+| Websites & SEO | `#WebsiteDesign` `#WebDevelopment` `#LocalSEO` `#SEOTips` `#SmallBusinessWebsite` `#WebsiteDevelopment` |
+| CRM & sales | `#CRM` `#CRMSoftware` `#SalesAutomation` `#LeadManagement` `#SalesPipeline` `#CustomerRelationship` |
+| ERP & billing | `#ERPSoftware` `#InventoryManagement` `#GSTBilling` `#BillingSoftware` `#StockManagement` `#ERP` |
+| Mobile & apps | `#MobileAppDevelopment` `#ReactNative` `#AndroidApp` `#AppDevelopment` `#FieldService` `#IOSApp` |
+| AI & automation | `#AIAutomation` `#WorkflowAutomation` `#BusinessAutomation` `#ProcessAutomation` `#AIForBusiness` `#APIIntegration` |
+| E-commerce | `#Ecommerce` `#OnlineStore` `#EcommerceWebsite` `#D2C` `#SellOnline` `#OrderManagement` |
+| Small business | `#BusinessTips` `#SmallBusiness` `#BusinessGrowth` `#StartupIndia` `#BusinessAdvice` `#DigitalTransformation` |
+| Google profile | `#GoogleBusinessProfile` `#GoogleMyBusiness` `#GoogleMaps` `#LocalSEO` `#MapsListing` `#LocalBusiness` |
 
-### Reach — rotate 3 per post
-```
-#Explore #ExplorePage #Trending #Viral #InstagramBusiness #ReelsIndia #BusinessReels #TechIndia
-```
+**Facebook** never rewarded hashtag volume. Two or three, or none.
 
 ---
 
-## 5. Image templates
+## 5. Images — one master prompt, one subject per post
 
-Four templates. Build them once in Canva, then it is a text swap each time.
+### 5.1 AI cannot render text. Plan around it.
 
-**Brand colours:** Orange `#F4501A` · Deep orange `#D63C0C` · Ink `#14161A` ·
-Warm paper `#F6F5F2` · White `#FFFFFF`
-**Fonts:** headings *Syne* (or Poppins SemiBold) · body *Inter*
+Every current image model spells words wrong and invents letterforms. A ₹ figure
+or a service name generated *inside* the picture will be wrong, and wrong in a
+way that looks careless on a software company's feed.
 
-| # | Template | Look |
+**So it is always two steps:**
+
+1. **Generate the picture.** The prompt produces a scene with deliberate empty
+   space and no text at all.
+2. **Add the text and logo in Canva** over that empty space.
+
+Every prompt ends with `no text, no words, no letters, no numbers`. Do not
+remove it. **The logo is never generated either** — place the real SVG from
+`public/icon.svg`, bottom-left, same size every time.
+
+### 5.2 The master prompt
+
+This is the block that makes 176 images look like one brand. **It is already
+appended to every prompt in the other two files** — you do not need to paste it
+yourself. It is here so you can reuse it for anything new.
+
+**Light — the default:**
+
+```
+soft directional daylight from the left, warm paper #ECEAE4 background, one
+vivid orange #F4501A accent and nothing else saturated, editorial product
+photography, shot on 50mm, shallow depth of field, generous empty space in the
+upper third for a text overlay, muted natural palette, photorealistic,
+4:5 aspect ratio
+```
+
+**Dark — for price cards and dramatic posts:**
+
+```
+low-key studio lighting, deep ink #0E1014 background, one vivid orange #F4501A
+rim light and nothing else saturated, editorial product photography, shot on
+50mm, shallow depth of field, generous empty space in the upper third for a
+text overlay, photorealistic, 4:5 aspect ratio
+```
+
+**Negative — paste into the negative field, or leave appended:**
+
+```
+no text, no words, no letters, no numbers, no logos, no watermarks, no people
+looking at camera, no stock-photo handshakes, no clutter, not oversaturated,
+no HDR, no lens flare
+```
+
+For reels and stories, swap `4:5 aspect ratio` for `9:16 vertical aspect ratio`.
+
+### 5.3 Writing a new subject
+
+A prompt is `SUBJECT` + the master block. The subject is one concrete sentence:
+a real object, a specific action, one orange element.
+
+**Good:** *"A worn spiral notebook open on a wooden desk beside a switched-off
+phone, handwritten columns trailing off, one entry circled in vivid orange"*
+
+**Bad:** *"An image representing business efficiency"* — nothing to photograph.
+
+### 5.4 The six archetypes
+
+Rotated so a service's six posts never look like six versions of one image.
+
+| | Archetype | Best for |
 | --- | --- | --- |
-| **A** | **Statement card** | Warm paper ground, huge dark headline, one orange underline bar, small ABM Tech logo bottom-left. Nothing else. |
-| **B** | **Price card** | Dark ink ground, service name in white, the ₹ figure enormous in orange, three tick lines beneath, "ex-GST · fixed scope" in small grey. |
-| **C** | **Before → After** | Split canvas. Left = grey, struck-through, messy. Right = white, clean, one orange tick. Arrow between. |
-| **D** | **Carousel** | Slide 1 hook on paper ground. Slides 2–6 white with one idea each and a big number. Final slide = orange ground, white CTA. |
+| **A** | **Object still-life** — a real business object on the brand ground | Problem posts |
+| **B** | **Isometric clay scene** — matte 3D at 30°, usually on the dark ground | Price and how-it-works |
+| **C** | **Abstract data form** — geometric shapes, no literal objects | Automation, APIs, dashboards |
+| **D** | **Editorial photograph** — a real Indian business interior, no faces to camera | Sector and proof posts |
+| **E** | **Macro detail** — extreme close crop, tactile | Quality and detail posts |
+| **F** | **Blueprint schematic** — technical drawing, thin orange lines | Architecture and process |
 
-**Every image must:**
-- Be **1080 × 1350** (4:5 portrait — takes the most feed space) except reels (1080 × 1920)
-- Carry readable text at thumbnail size — if you cannot read the headline at 15% zoom, the headline is too long
-- Have the logo small and in the same corner every single time
-- Use **one** accent colour. Never two.
+### 5.5 Sizes
+
+| Use | Size |
+| --- | --- |
+| Feed post / carousel slide | **1080 × 1350** (4:5) |
+| Reel / story | **1080 × 1920** (9:16), text inside the middle 80% |
+
+### 5.6 The grid test
+
+Before scheduling a week, view the nine upcoming images as a 3×3 grid.
+Two adjacent posts sharing an archetype? Swap one. More than one accent colour?
+Something has crept in. A headline you cannot read at thumbnail size is too
+long.
+
+### 5.7 Tools
+
+**Midjourney** suits archetypes A, D, E — add `--ar 4:5 --style raw`.
+**Gemini / nanobanana** follows the "empty space" instruction best, so it suits
+B and C. **DALL·E** is the most literal — try it when a prompt is being ignored.
+**Canva** is where text and logo go on, always.
 
 ---
 
@@ -164,7 +238,9 @@ Warm paper `#F6F5F2` · White `#FFFFFF`
    describe by sector — "a pharmacy in Dehradun", never the shop name.
 5. **Every price posted must match the website.** A figure on Instagram that
    differs from `/pricing` is the fastest way to lose a deal on the first call.
-6. **Reply to every comment and DM within 12 hours.** Reach on a business
+6. **Never exceed five hashtags.** Instagram's December 2025 cap is enforced —
+   over it, the post's distribution is suppressed rather than merely unhelped.
+7. **Reply to every comment and DM within 12 hours.** Reach on a business
    account is mostly a function of reply rate.
 
 ---
@@ -188,9 +264,10 @@ Total: **under 3 hours a week** once the templates exist.
 Meta Business Suite posts to both at once, but the caption should differ
 slightly:
 
-- **Instagram** — hook in line 1, short lines, hashtags in first comment.
+- **Instagram** — hook in line 1, short lines. The five hashtags can sit in the
+  caption or the first comment; it makes no algorithmic difference.
 - **Facebook** — you can write longer. Put the CTA link *in the post* (Instagram
-  captions do not carry clickable links; Facebook does). Move hashtags down to
-  5 only — Facebook does not reward volume.
+  captions carry no clickable link; Facebook does). Cut to two or three
+  hashtags, or drop them — Facebook never rewarded them.
 
 Keep the same image on both.

@@ -5,6 +5,7 @@ import { isDbConfigured } from "@/lib/db/mongoose";
 import { resourceNames, RESOURCES } from "@/lib/resources";
 import { Button } from "@/components/ui/Button";
 import { Label } from "@/components/ui/Panel";
+import { AdminNav } from "@/components/admin/AdminNav";
 
 /* Admin is never indexed and never cached. */
 export const metadata: Metadata = {
@@ -36,7 +37,7 @@ export default async function AdminLayout({
   return (
     <div className="page-x pt-28 pb-20">
       <div className="bay">
-        <header className="mb-8 flex flex-wrap items-end justify-between gap-4 border-b border-line pb-6">
+        <header className="mb-6 flex flex-wrap items-end justify-between gap-4 border-b border-line pb-5 sm:mb-8 sm:pb-6">
           <div>
             <Label className="mb-2">Admin</Label>
             <h1 className="t-h2">Content</h1>
@@ -64,7 +65,7 @@ export default async function AdminLayout({
             </span>
             <Link
               href="/"
-              className="text-[0.8125rem] text-ink-dim hover:text-brand-ink"
+              className="hidden text-[0.8125rem] text-ink-dim hover:text-brand-ink sm:block"
             >
               View site
             </Link>
@@ -90,39 +91,22 @@ export default async function AdminLayout({
           </p>
         )}
 
-        <div className="grid gap-8 lg:grid-cols-[minmax(0,12rem)_minmax(0,1fr)]">
-          <nav aria-label="Admin sections">
-            <ul className="space-y-1">
-              {resourceNames.map((name) => (
-                <li key={name}>
-                  <Link
-                    href={`/admin/${name}`}
-                    className="block rounded-sm px-3 py-2 text-[0.875rem] text-ink-dim transition-colors hover:bg-tint hover:text-ink"
-                  >
-                    {RESOURCES[name].label}
-                  </Link>
-                </li>
-              ))}
-              <li className="pt-2">
-                <Link
-                  href="/admin/leads"
-                  className="block rounded-sm px-3 py-2 text-[0.875rem] text-ink-dim transition-colors hover:bg-tint hover:text-ink"
-                >
-                  Leads
-                </Link>
-              </li>
-              {role === "owner" && (
-                <li>
-                  <Link
-                    href="/admin/keys"
-                    className="block rounded-sm px-3 py-2 text-[0.875rem] text-ink-dim transition-colors hover:bg-tint hover:text-ink"
-                  >
-                    API keys
-                  </Link>
-                </li>
-              )}
-            </ul>
-          </nav>
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,13rem)_minmax(0,1fr)] lg:items-start">
+          <AdminNav
+            items={[
+              ...resourceNames
+                .filter((name) => name !== "social-status")
+                .map((name) => ({
+                  href: `/admin/${name}`,
+                  label: RESOURCES[name].label,
+                })),
+              { href: "/admin/social", label: "Social posts" },
+              { href: "/admin/leads", label: "Leads" },
+              ...(role === "owner"
+                ? [{ href: "/admin/keys", label: "API keys" }]
+                : []),
+            ]}
+          />
 
           <main className="min-w-0">{children}</main>
         </div>

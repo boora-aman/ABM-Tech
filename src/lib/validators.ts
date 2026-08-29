@@ -264,3 +264,13 @@ export const apiKeyWriteSchema = z
     expiresAt: isoDate.optional(),
   })
   .strict();
+
+export const socialStatusWriteSchema = z
+  .object({
+    key: z.string().trim().min(1).max(80),
+    status: z.enum(["todo", "scheduled", "posted", "skipped"]),
+    date: isoDate.optional().or(z.literal("")),
+    note: z.string().trim().max(500).optional().or(z.literal("")),
+    batch: z.string().trim().max(60).optional().or(z.literal("")),
+  })
+  .strict();

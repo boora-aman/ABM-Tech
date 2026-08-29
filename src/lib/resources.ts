@@ -10,6 +10,7 @@ import {
   SettingModel,
   GlobalFaqModel,
   CommitmentModel,
+  SocialStatusModel,
   type AnyDoc,
 } from "@/lib/db/models";
 import {
@@ -22,6 +23,7 @@ import {
   settingWriteSchema,
   globalFaqWriteSchema,
   commitmentWriteSchema,
+  socialStatusWriteSchema,
 } from "@/lib/validators";
 
 /* ==========================================================================
@@ -138,6 +140,17 @@ export const RESOURCES: Record<string, ResourceDef> = {
     label: "Site-wide FAQs",
     sort: { order: 1 },
     revalidate: [...ALWAYS, "/services", "/services/[slug]"],
+  },
+  /* Publishing state only — the post content itself is a generated module,
+     not a database record, so this writes nothing the site renders and needs
+     no page revalidation. */
+  "social-status": {
+    model: SocialStatusModel,
+    schema: socialStatusWriteSchema,
+    uniqueKey: "key",
+    label: "Social publishing status",
+    sort: { key: 1 },
+    revalidate: [],
   },
   commitments: {
     model: CommitmentModel,

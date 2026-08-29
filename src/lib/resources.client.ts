@@ -15,4 +15,5 @@ export const resourceNames = [
   "settings",
   "faqs",
   "commitments",
+  "social-status",
 ] as const;

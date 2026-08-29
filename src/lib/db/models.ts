@@ -238,6 +238,35 @@ const CommitmentSchema = new Schema(
   timestamps,
 );
 
+/* ------------------------------ Social post ------------------------------ */
+
+/**
+ * Publishing state for one social post, keyed by the `key` in
+ * content/social.ts.
+ *
+ * Only the STATE is stored — never the caption or the image prompt. The
+ * content lives in the generated module, so regenerating it from the markdown
+ * cannot wipe what you have already published, and a post whose wording you
+ * revise keeps its history.
+ */
+const SocialStatusSchema = new Schema(
+  {
+    key: { type: String, required: true, unique: true, index: true },
+    status: {
+      type: String,
+      enum: ["todo", "scheduled", "posted", "skipped"],
+      default: "todo",
+      index: true,
+    },
+    /** When it went out, or is due to. */
+    date: String,
+    note: String,
+    /** Free-form, for grouping a batch you have prepared images for. */
+    batch: String,
+  },
+  timestamps,
+);
+
 /* --------------------------------- Lead --------------------------------- */
 
 const LeadSchema = new Schema(
@@ -313,6 +342,7 @@ export const SlideModel = register("Slide", SlideSchema);
 export const SettingModel = register("Setting", SettingSchema);
 export const GlobalFaqModel = register("GlobalFaq", GlobalFaqSchema);
 export const CommitmentModel = register("Commitment", CommitmentSchema);
+export const SocialStatusModel = register("SocialStatus", SocialStatusSchema);
 export const LeadModel = register("Lead", LeadSchema);
 export const AdminUserModel = register("AdminUser", AdminUserSchema);
 export const ApiKeyModel = register("ApiKey", ApiKeySchema);

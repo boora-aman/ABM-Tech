@@ -30,7 +30,9 @@ export default async function AdminHome() {
       </Card>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        {resourceNames.map((name) => (
+        {resourceNames
+                .filter((name) => name !== "social-status")
+                .map((name) => (
           <Card key={name} lift as={Link} href={`/admin/${name}`} className="block p-5">
             <h2 className="mb-1.5 font-display text-[1rem] font-semibold">
               {RESOURCES[name].label}

@@ -6,8 +6,12 @@ import { FIELDS } from "@/lib/admin-fields";
 
 export const dynamic = "force-dynamic";
 
+/* `social-status` is a resource for the API but has no generic editor — it is
+   driven by the purpose-built board at /admin/social. */
 export function generateStaticParams() {
-  return resourceNames.map((resource) => ({ resource }));
+  return resourceNames
+    .filter((resource) => resource !== "social-status")
+    .map((resource) => ({ resource }));
 }
 
 export default async function ResourceAdminPage({
