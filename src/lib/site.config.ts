@@ -121,7 +121,7 @@ export const site = {
   /** Scale facts for the home page counter strip. Deliberately structural —
    *  countable things about the offer, never invented client numbers. */
   scale: [
-    { v: "13", k: "Services", note: "The whole business, not one slice" },
+    { v: "14", k: "Services", note: "The whole business, not one slice" },
     { v: "12", k: "Sectors", note: "Modelled in their own vocabulary" },
     { v: "6", k: "Systems", note: "Found, capture, operate, bill, mobile, know" },
     { v: "1", k: "Team", note: "The people building it are the people you talk to" },

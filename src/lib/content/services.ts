@@ -11,6 +11,10 @@ export type Service = {
   /** Two-digit index used across the UI as a structural label. */
   index: string;
   title: string;
+  /** Search-voice <title> tag. Falls back to `title` when absent — keeps the
+   *  on-page H1 in brand voice while the tag search engines actually rank on
+   *  is written for the query, not the catalogue. */
+  seoTitle?: string;
   /** Short label for nav, cards and breadcrumbs. */
   short: string;
   /** One line. Feeds cards, meta description and Service schema. */
@@ -63,6 +67,7 @@ export const services: Service[] = [
     pillar: "capture",
     index: "01",
     title: "Custom CRM",
+    seoTitle: "Custom CRM Software Development Company India",
     short: "CRM",
     from: 12000,
     priceMode: "project",
@@ -163,6 +168,7 @@ export const services: Service[] = [
     pillar: "found",
     index: "02",
     title: "Static Business Website",
+    seoTitle: "Business Website Design Company India",
     short: "Static Site",
     from: 6000,
     priceMode: "project",
@@ -233,6 +239,7 @@ export const services: Service[] = [
     pillar: "found",
     index: "03",
     title: "Dynamic Website + Admin Panel",
+    seoTitle: "Website with Admin Panel & CMS Development India",
     short: "Dynamic Site",
     from: 15000,
     priceMode: "project",
@@ -303,6 +310,7 @@ export const services: Service[] = [
     pillar: "operate",
     index: "04",
     title: "ERP System",
+    seoTitle: "Custom ERP Software Development Company India",
     short: "ERP",
     from: 15000,
     priceMode: "project",
@@ -384,6 +392,7 @@ export const services: Service[] = [
     pillar: "money",
     index: "05",
     title: "Website + Billing Web App + Mobile App",
+    seoTitle: "Billing Software & Mobile App Development India",
     short: "Full Platform",
     from: 20000,
     priceMode: "project",
@@ -459,6 +468,7 @@ export const services: Service[] = [
     pillar: "know",
     index: "06",
     title: "AI Automation",
+    seoTitle: "Business Process Automation Services India",
     short: "AI Automation",
     from: 15000,
     priceMode: "project",
@@ -538,6 +548,7 @@ export const services: Service[] = [
     pillar: "operate",
     index: "07",
     title: "Business Digitisation",
+    seoTitle: "Business Digitisation Services India",
     short: "Digitisation",
     from: 0,
     priceMode: "quote",
@@ -605,6 +616,7 @@ export const services: Service[] = [
     pillar: "found",
     index: "08",
     title: "Google Maps Profile & SEO",
+    seoTitle: "Local SEO & Google Maps Ranking Services India",
     short: "Maps & SEO",
     from: 5000,
     priceMode: "retainer",
@@ -680,6 +692,7 @@ export const services: Service[] = [
     pillar: "mobile",
     index: "09",
     title: "Mobile App Development",
+    seoTitle: "Mobile App Development Company India",
     short: "Mobile Apps",
     from: 25000,
     priceMode: "project",
@@ -761,6 +774,7 @@ export const services: Service[] = [
     pillar: "money",
     index: "10",
     title: "E-commerce & Online Store",
+    seoTitle: "Ecommerce Website Development Company India",
     short: "E-commerce",
     from: 18000,
     priceMode: "project",
@@ -836,6 +850,7 @@ export const services: Service[] = [
     pillar: "know",
     index: "11",
     title: "Integrations & Custom APIs",
+    seoTitle: "API Integration Services India",
     short: "Integrations",
     from: 8000,
     priceMode: "project",
@@ -911,6 +926,7 @@ export const services: Service[] = [
     pillar: "know",
     index: "12",
     title: "Dashboards & Business Reporting",
+    seoTitle: "Business Intelligence Dashboard Development India",
     short: "Dashboards",
     from: 10000,
     priceMode: "project",
@@ -986,6 +1002,7 @@ export const services: Service[] = [
     pillar: "run",
     index: "13",
     title: "Hosting, Cloud & Support",
+    seoTitle: "Application Support & Maintenance Services India",
     short: "Support",
     from: 4000,
     priceMode: "retainer",
@@ -1053,5 +1070,91 @@ export const services: Service[] = [
       "server monitoring and backup services",
     ],
     stack: ["Docker", "AWS / Vercel", "GitHub Actions", "Sentry", "Uptime monitoring", "Automated backups"],
+  },
+  /* ------------------------------------------------------------------- 14 */
+  {
+    slug: "google-business-profile-setup",
+    pillar: "found",
+    index: "14",
+    title: "Google Business Profile Setup",
+    short: "Maps Listing",
+    from: 2499,
+    priceMode: "project",
+    timeline: "A single day",
+    bestFor: "A business with no Google Maps listing yet, or one nobody can find",
+    featured: true,
+    summary:
+      "A Google Business Profile created, verified and fully built out in one sitting — and you don't pay until it's actually live.",
+    intro:
+      "Most setup offers lead with speed they don't control — Google owns the verification clock, not the agency. So we lead with the one thing we do control: you pay after your listing goes live, not before. Built and submitted the same day, prepared to pass verification the first time, and priced once, with no retainer attached.",
+    deliverables: [
+      "Profile created or claimed for your business",
+      "Verification prepared end to end for a first-time pass",
+      "Primary and secondary categories set against who actually ranks",
+      "Hours, services, area served and attributes, fully completed",
+      "Keyword-mapped business description",
+      "First 10 photos uploaded and named properly",
+      "Q&A seeded with the questions customers actually ask",
+      "Maps link and review link handed to you, ready to share",
+    ],
+    excludes: [
+      "Ongoing posting, review management and monthly reporting (see Google Maps Profile & SEO)",
+      "Guaranteed verification timeline — that clock is Google's",
+      "Bought or incentivised reviews",
+    ],
+    capabilities: [
+      {
+        title: "Pay after it's live, not before",
+        body: "The invoice goes out once the listing is verified and visible on Maps, not on the day we start. That is the one risk a business owner is actually worried about with a setup they've never bought before, and it is the one we take on instead of them.",
+      },
+      {
+        title: "Prepared to pass first time",
+        body: "Verification is Google's process and Google's timeline — postcard typically 5 to 12 business days, instant methods where Google offers them. We cannot shorten that clock and won't claim to. What we control is submitting a profile built correctly enough not to trigger a second review.",
+      },
+      {
+        title: "Category first, everything else second",
+        body: "Primary category decides more of your visibility than any other single field. We set it by checking what the businesses already ranking for your terms actually use, not by picking the closest-sounding option in the dropdown.",
+      },
+      {
+        title: "One price, no retainer attached",
+        body: "This is the setup only. If you want ongoing posting, review requests and a monthly position report afterward, that's a separate service (Google Maps Profile & SEO) priced and sold separately — never bundled in without you asking for it.",
+      },
+    ],
+    phases: [
+      { step: "Information gathering", detail: "Business details, categories, service area and photos collected from you — 15 minutes on a call or over WhatsApp.", when: "Day 1" },
+      { step: "Build & submit", detail: "Profile built out in full and verification submitted the same day.", when: "Day 1" },
+      { step: "Verification", detail: "Google's process runs on Google's timeline. We track status and handle any request for more information.", when: "Google's clock" },
+      { step: "Handover", detail: "Maps link, review link and login access handed to you once the listing is live. Invoice goes out at this point.", when: "On go-live" },
+    ],
+    faqs: [
+      {
+        q: "How fast will my listing be live on Google Maps?",
+        a: "We build and submit the same day. Going live after that depends entirely on Google's verification method and queue — typically 5 to 12 business days for postcard verification, faster where Google offers an instant method for your business. Nobody can promise a date; anyone who does is guessing or lying.",
+      },
+      {
+        q: "What does 'pay after it's live' actually mean?",
+        a: "We invoice once your listing is verified and visible on Google Maps — not on the day we start work. The risk of a rejected or delayed verification sits with us, not with you.",
+      },
+      {
+        q: "Can you guarantee we'll rank on Maps for our main keyword?",
+        a: "No, and no honest provider can. Maps results are personalised by how far the searcher is from your premises, so there is no single 'position one' to sell. This service is the setup; ranking movement is the separate, ongoing Google Maps Profile & SEO service.",
+      },
+      {
+        q: "Do you buy reviews to make the profile look established?",
+        a: "No. Bought reviews are the fastest way to get a profile suspended, and we won't put a client's listing at that risk for a faster-looking start.",
+      },
+      {
+        q: "We already have a listing but it's a mess. Can you fix it instead of starting fresh?",
+        a: "Yes — claiming and rebuilding an existing profile is the same service and the same price, provided you can verify ownership or we can help you regain access to it.",
+      },
+    ],
+    keywords: [
+      "google business profile setup service",
+      "google my business setup service india",
+      "gmb verification service",
+      "google business profile setup india price",
+      "create google maps listing for business",
+    ],
+    stack: ["Google Business Profile", "Schema.org LocalBusiness", "Google Maps Platform"],
   },
 ];

@@ -197,6 +197,54 @@ export function articleLd(p: {
   };
 }
 
+export function localBusinessLd(): Json | null {
+  if (!site.address.street) return null;
+  return {
+    "@type": "LocalBusiness",
+    "@id": absoluteUrl("/#localbusiness"),
+    name: site.name,
+    parentOrganization: { "@id": ORG },
+    url: site.url,
+    telephone: site.contact.phoneE164,
+    email: site.contact.email,
+    priceRange: "₹₹",
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: site.address.street,
+      addressLocality: site.address.locality,
+      addressRegion: site.address.region,
+      postalCode: site.address.postalCode,
+      addressCountry: site.address.country,
+    },
+    geo: {
+      "@type": "GeoCoordinates",
+      latitude: site.address.lat,
+      longitude: site.address.lng,
+    },
+    ...(site.address.mapsUrl ? { hasMap: site.address.mapsUrl } : {}),
+    openingHoursSpecification: site.hours.map((h) => ({
+      "@type": "OpeningHoursSpecification",
+      dayOfWeek: h.days,
+      opens: h.opens,
+      closes: h.closes,
+    })),
+  };
+}
+
+export function itemListLd(name: string, items: { name: string; path: string }[]): Json | null {
+  if (!items.length) return null;
+  return {
+    "@type": "ItemList",
+    name,
+    itemListElement: items.map((item, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      name: item.name,
+      url: absoluteUrl(item.path),
+    })),
+  };
+}
+
 export function graph(...nodes: (Json | null | undefined)[]) {
   return { "@context": "https://schema.org", "@graph": nodes.filter(Boolean) };
 }

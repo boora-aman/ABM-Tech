@@ -25,6 +25,8 @@ export type Project = {
   /** Exposed by the X-ray hover: tables, endpoints, jobs. */
   guts: { label: string; items: string[] }[];
   serviceSlug: string;
+  /** Closest matching slug in content/industries.ts, where one genuinely fits. */
+  industrySlug?: string;
 };
 
 export const projects: Project[] = [
@@ -36,6 +38,7 @@ export const projects: Project[] = [
     year: "2025",
     spine: "Batch inventory · expiry control · GST billing",
     serviceSlug: "erp-system",
+    industrySlug: "healthcare-pharmacy",
     summary:
       "A retail pharmacy running 100–150 transactions a day on batch-level inventory, with expiry control and prescription-gated dispensing.",
     problem:
@@ -63,6 +66,7 @@ export const projects: Project[] = [
     year: "2025",
     spine: "Pipeline · dispatch · technician app",
     serviceSlug: "crm",
+    industrySlug: "field-home-services",
     summary:
       "Enquiry-to-invoice for a service business with technicians in the field, replacing a WhatsApp group and a shared spreadsheet.",
     problem:
@@ -90,6 +94,7 @@ export const projects: Project[] = [
     year: "2024",
     spine: "Shift reconciliation · 30+ reports · 3 sites",
     serviceSlug: "billing-platform-app",
+    industrySlug: "retail-wholesale",
     summary:
       "Multi-site billing and reconciliation where every shift closes with an attributed variance instead of a next-day paper argument.",
     problem:

@@ -7,7 +7,7 @@ import { Card, Rule, Label, Chip } from "@/components/ui/Panel";
 import { ButtonLink, Arrow, WhatsAppGlyph } from "@/components/ui/Button";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { services as seedServices } from "@/lib/content/services";
-import { getService, getServices, getProjects } from "@/lib/content/repo";
+import { getService, getServices, getProjects, getIndustries } from "@/lib/content/repo";
 import { pageMeta, graph, breadcrumbLd, serviceLd, faqLd } from "@/lib/seo";
 import { inr, inrShort } from "@/lib/utils";
 import { whatsappLink } from "@/lib/site.config";
@@ -29,7 +29,7 @@ export async function generateMetadata({ params }: RouteParams): Promise<Metadat
   const s = await getService(slug);
   if (!s) return pageMeta({ title: "Not found", description: "", noIndex: true });
   return pageMeta({
-    title: s.title,
+    title: s.seoTitle || s.title,
     description: s.summary,
     path: `/services/${s.slug}`,
     keywords: s.keywords,
@@ -38,15 +38,17 @@ export async function generateMetadata({ params }: RouteParams): Promise<Metadat
 
 export default async function ServicePage({ params }: RouteParams) {
   const { slug } = await params;
-  const [s, services, projects] = await Promise.all([
+  const [s, services, projects, industries] = await Promise.all([
     getService(slug),
     getServices(),
     getProjects(),
+    getIndustries(),
   ]);
   if (!s) notFound();
 
   const others = services.filter((x) => x.slug !== s.slug);
   const related = projects.filter((p) => p.serviceSlug === s.slug);
+  const relatedIndustries = industries.filter((i) => i.services.includes(s.slug));
 
   return (
     <>
@@ -286,26 +288,28 @@ export default async function ServicePage({ params }: RouteParams) {
               <div className="grid gap-5 md:grid-cols-2">
                 {related.map((p) => (
                   <Reveal key={p.slug}>
-                    <Card lift className="h-full p-6">
-                      <div className="mb-4 flex flex-wrap items-center gap-2">
-                        <Chip brand>{p.sector}</Chip>
-                        <Chip>{p.year}</Chip>
-                      </div>
-                      <h3 className="t-h3 mb-3 font-display">{p.title}</h3>
-                      <p className="mb-6 text-[0.875rem] leading-relaxed text-ink-dim">
-                        {p.summary}
-                      </p>
-                      <dl className="grid grid-cols-2 gap-4">
-                        {p.outcomes.slice(0, 2).map((o) => (
-                          <div key={o.metric}>
-                            <dd className="font-display text-base text-brand-ink">
-                              {o.value}
-                            </dd>
-                            <dt className="label mt-1">{o.metric}</dt>
-                          </div>
-                        ))}
-                      </dl>
-                    </Card>
+                    <Link href={`/work/${p.slug}`} className="block h-full">
+                      <Card lift className="h-full p-6">
+                        <div className="mb-4 flex flex-wrap items-center gap-2">
+                          <Chip brand>{p.sector}</Chip>
+                          <Chip>{p.year}</Chip>
+                        </div>
+                        <h3 className="t-h3 mb-3 font-display">{p.title}</h3>
+                        <p className="mb-6 text-[0.875rem] leading-relaxed text-ink-dim">
+                          {p.summary}
+                        </p>
+                        <dl className="grid grid-cols-2 gap-4">
+                          {p.outcomes.slice(0, 2).map((o) => (
+                            <div key={o.metric}>
+                              <dd className="font-display text-base text-brand-ink">
+                                {o.value}
+                              </dd>
+                              <dt className="label mt-1">{o.metric}</dt>
+                            </div>
+                          ))}
+                        </dl>
+                      </Card>
+                    </Link>
                   </Reveal>
                 ))}
               </div>
@@ -320,10 +324,39 @@ export default async function ServicePage({ params }: RouteParams) {
         </>
       )}
 
+      {/* -------------------------- Sectors that use this ------------------ */}
+      {relatedIndustries.length > 0 && (
+        <>
+          <Rule />
+          <section className="page-x py-16 sm:py-20">
+            <div className="bay">
+              <Reveal>
+                <Label className="mb-9">Sectors this usually shows up in</Label>
+              </Reveal>
+              <div className="flex flex-wrap gap-2">
+                {relatedIndustries.map((ind) => (
+                  <Link
+                    key={ind.slug}
+                    href={`/industries/${ind.slug}`}
+                    className="group/btn inline-flex items-center gap-3 rounded-sm border border-line px-4 py-2.5 transition-colors hover:border-line-strong"
+                  >
+                    <span className="font-mono text-[0.5625rem] tabular-nums text-brand/70">
+                      {ind.index}
+                    </span>
+                    <span className="text-[0.875rem]">{ind.name}</span>
+                    <Arrow />
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </section>
+        </>
+      )}
+
       <Rule />
       <Faq
         items={s.faqs}
-        
+
         label={`${s.short} FAQ`}
         title="Straight answers"
         lead="Including where the honest answer is 'no' or 'buy something else'."

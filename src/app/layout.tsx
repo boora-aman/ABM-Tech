@@ -8,7 +8,7 @@ import { Footer } from "@/components/shell/Footer";
 import { BackToTop } from "@/components/shell/BackToTop";
 import { themeScript } from "@/components/shell/Theme";
 import { JsonLd } from "@/components/seo/JsonLd";
-import { graph, organizationLd, websiteLd } from "@/lib/seo";
+import { graph, organizationLd, websiteLd, localBusinessLd } from "@/lib/seo";
 import { site } from "@/lib/site.config";
 
 const syne = Syne({
@@ -90,7 +90,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body>
-        <JsonLd data={graph(organizationLd(), websiteLd())} />
+        <JsonLd data={graph(organizationLd(), websiteLd(), localBusinessLd())} />
 
         <a
           href="#main"

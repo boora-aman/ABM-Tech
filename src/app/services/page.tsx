@@ -13,7 +13,7 @@ import { absoluteUrl } from "@/lib/site.config";
 export const metadata: Metadata = pageMeta({
   title: "Services — websites, CRM, ERP, billing, apps, automation & support",
   description:
-    "Thirteen services with published pricing, grouped by the part of the business they fix: websites and local search, CRM, ERP and digitisation, billing and e-commerce, mobile apps, dashboards, integrations and AI automation, plus hosting and support.",
+    "Fourteen services with published pricing, grouped by the part of the business they fix: websites and local search, Google Business Profile setup, CRM, ERP and digitisation, billing and e-commerce, mobile apps, dashboards, integrations and AI automation, plus hosting and support.",
   path: "/services",
   keywords: [
     "software development services india",

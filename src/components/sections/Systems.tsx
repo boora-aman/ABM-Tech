@@ -23,10 +23,12 @@ import { pick } from "@/lib/content/repo";
 export function Systems({
   pillars,
   services,
+  showHeading = true,
   settings = {},
 }: {
   pillars: Pillar[];
   services: Service[];
+  showHeading?: boolean;
   settings?: Record<string, unknown>;
 }) {
   const eyebrow = pick(settings, "systems.eyebrow", "The whole business");
@@ -48,21 +50,23 @@ export function Systems({
   return (
     <section id="systems" className="defer-paint band page-x py-20 sm:py-24">
       <div className="bay">
-        <div className="mb-12 grid gap-6 lg:grid-cols-[1fr_1fr] lg:items-end">
-          <div>
-            <Label className="mb-4">{eyebrow}</Label>
-            <h2 className="t-h1 max-w-xl">
-              {heading.map((line) => (
-                <span key={line}>
-                  {line}
-                  <br />
-                </span>
-              ))}
-              <span className="brand-text">{headingAccent}</span>
-            </h2>
+        {showHeading && (
+          <div className="mb-12 grid gap-6 lg:grid-cols-[1fr_1fr] lg:items-end">
+            <div>
+              <Label className="mb-4">{eyebrow}</Label>
+              <h2 className="t-h1 max-w-xl">
+                {heading.map((line) => (
+                  <span key={line}>
+                    {line}
+                    <br />
+                  </span>
+                ))}
+                <span className="brand-text">{headingAccent}</span>
+              </h2>
+            </div>
+            <p className="t-lead lg:pb-1">{lead}</p>
           </div>
-          <p className="t-lead lg:pb-1">{lead}</p>
-        </div>
+        )}
 
         <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
           {pillars.map((p) => (
@@ -74,7 +78,11 @@ export function Systems({
                 >
                   {p.index}
                 </span>
-                <h3 className="t-h3">{p.name}</h3>
+                <h3 className="t-h3">
+                  <Link href={`/systems/${p.key}`} className="hover:text-brand-ink">
+                    {p.name}
+                  </Link>
+                </h3>
               </div>
 
               <p className="mb-4 font-display text-[0.9375rem] font-semibold leading-snug text-brand-ink">

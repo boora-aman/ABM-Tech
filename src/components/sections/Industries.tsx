@@ -37,7 +37,11 @@ function IndustryCard({
         {ind.featured && <Chip brand>Shipped</Chip>}
       </div>
 
-      <h3 className="t-h3 mb-3">{ind.name}</h3>
+      <h3 className="t-h3 mb-3">
+        <Link href={`/industries/${ind.slug}`} className="hover:text-brand-ink">
+          {ind.name}
+        </Link>
+      </h3>
 
       <p className="mb-5 border-l-2 border-brand/30 pl-3.5 text-[0.875rem] leading-relaxed text-ink-dim italic">
         {ind.pain}

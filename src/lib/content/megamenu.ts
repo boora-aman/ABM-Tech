@@ -34,7 +34,7 @@ export async function getMenuPanels(): Promise<MenuPanel[]> {
 
   /* Services, grouped by the business loop each one fixes — the same grouping
      the /services page uses, so the header teaches the structure of the site
-     rather than presenting a flat list of thirteen names. */
+     rather than presenting a flat list of names. */
   const serviceColumns: MenuColumn[] = pillars
     .map((p) => ({
       title: p.name,

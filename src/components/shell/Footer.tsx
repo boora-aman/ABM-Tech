@@ -95,6 +95,10 @@ export async function Footer() {
             <h3 className="label mb-4">More</h3>
             <ul className="space-y-2.5">
               {[
+                { href: "/systems", label: "Systems" },
+                { href: "/compare", label: "Compare" },
+                { href: "/locations", label: "Locations" },
+                { href: "/faq", label: "FAQ" },
                 { href: "/privacy", label: "Privacy" },
                 { href: "/terms", label: "Terms" },
                 { href: "/feed.xml", label: "RSS feed" },

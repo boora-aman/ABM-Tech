@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { PageHead } from "@/components/sections/PageHead";
 import { Showcase } from "@/components/sections/Showcase";
 import { Cta } from "@/components/sections/Cta";
 import { Card, Rule, Label } from "@/components/ui/Panel";
+import { Arrow } from "@/components/ui/Button";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { getProjects, getSlides, getSettings } from "@/lib/content/repo";
 
@@ -45,7 +47,7 @@ export default async function WorkPage() {
               "@type": "ListItem",
               position: i + 1,
               name: p.title,
-              url: absoluteUrl("/work"),
+              url: absoluteUrl(`/work/${p.slug}`),
             })),
           },
         )}
@@ -78,7 +80,11 @@ export default async function WorkPage() {
                   <span>{p.year}</span>
                 </div>
 
-                <h3 className="t-h3 mb-3">{p.title}</h3>
+                <h3 className="t-h3 mb-3">
+                  <Link href={`/work/${p.slug}`} className="hover:text-brand-ink">
+                    {p.title}
+                  </Link>
+                </h3>
                 <p className="mb-6 text-[0.9375rem] leading-relaxed text-ink-dim">
                   {p.summary}
                 </p>
@@ -110,6 +116,14 @@ export default async function WorkPage() {
                     </div>
                   ))}
                 </dl>
+
+                <Link
+                  href={`/work/${p.slug}`}
+                  className="ul-draw mt-6 inline-flex items-center gap-2 self-start text-[0.8125rem] font-medium text-brand-ink"
+                >
+                  Full case study
+                  <Arrow />
+                </Link>
               </Card>
             ))}
           </div>

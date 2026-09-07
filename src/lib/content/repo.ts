@@ -112,6 +112,20 @@ export async function getIndustries(): Promise<Industry[]> {
   );
 }
 
+export async function getIndustry(slug: string): Promise<Industry | null> {
+  return withDb(
+    async () => {
+      const doc = await IndustryModel.findOne({
+        slug,
+        published: { $ne: false },
+      }).lean();
+      if (doc) return plain<Industry>([doc])[0];
+      return seedIndustries.find((i) => i.slug === slug) ?? null;
+    },
+    () => seedIndustries.find((i) => i.slug === slug) ?? null,
+  );
+}
+
 /* ------------------------------- Pillars -------------------------------- */
 
 export async function getPillars(): Promise<Pillar[]> {
@@ -127,6 +141,20 @@ export async function getPillars(): Promise<Pillar[]> {
   );
 }
 
+export async function getPillar(key: string): Promise<Pillar | null> {
+  return withDb(
+    async () => {
+      const doc = await PillarModel.findOne({
+        key,
+        published: { $ne: false },
+      }).lean();
+      if (doc) return plain<Pillar>([doc])[0];
+      return seedPillars.find((p) => p.key === key) ?? null;
+    },
+    () => seedPillars.find((p) => p.key === key) ?? null,
+  );
+}
+
 /* ------------------------------- Projects ------------------------------- */
 
 export async function getProjects(): Promise<Project[]> {
@@ -139,6 +167,20 @@ export async function getProjects(): Promise<Project[]> {
       return rows.length ? rows : seedProjects;
     },
     () => seedProjects,
+  );
+}
+
+export async function getProject(slug: string): Promise<Project | null> {
+  return withDb(
+    async () => {
+      const doc = await ProjectModel.findOne({
+        slug,
+        published: { $ne: false },
+      }).lean();
+      if (doc) return plain<Project>([doc])[0];
+      return seedProjects.find((p) => p.slug === slug) ?? null;
+    },
+    () => seedProjects.find((p) => p.slug === slug) ?? null,
   );
 }
 

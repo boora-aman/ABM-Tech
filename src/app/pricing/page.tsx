@@ -13,7 +13,7 @@ import { Reveal, Stagger, StaggerItem } from "@/components/motion";
 export const metadata: Metadata = pageMeta({
   title: "Pricing — every service, every figure, in the open",
   description:
-    "Transparent INR pricing across 13 services: websites from ₹6,000, integrations from ₹8,000, dashboards from ₹10,000, CRM from ₹12,000, ERP and admin-driven sites from ₹15,000, e-commerce from ₹18,000, full platforms from ₹20,000, mobile apps from ₹25,000, plus local SEO and support retainers from ₹4,000 a month.",
+    "Transparent INR pricing across 14 services: Google Business Profile setup from ₹2,499, websites from ₹6,000, integrations from ₹8,000, dashboards from ₹10,000, CRM from ₹12,000, ERP and admin-driven sites from ₹15,000, e-commerce from ₹18,000, full platforms from ₹20,000, mobile apps from ₹25,000, plus local SEO and support retainers from ₹4,000 a month.",
   path: "/pricing",
   keywords: [
     "crm development price india",

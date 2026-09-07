@@ -20,8 +20,8 @@ export const metadata: Metadata = pageMeta({
 
 const ABOUT_FAQS = [
   {
-    q: "You list 13 services across 12 sectors. Isn't that too broad to be good at?",
-    a: "It would be, if they were 13 unrelated products. They are not — they are the same six systems assembled differently, on one stack, by the same people. A billing app and a CRM share a data model, an auth layer and a deployment pipeline; the difference is which nouns they hold. What we do not do is claim depth we lack: sectors we have shipped in are marked as such, and if your problem needs specialist domain knowledge we do not have, we say so.",
+    q: "You list 14 services across 12 sectors. Isn't that too broad to be good at?",
+    a: "It would be, if they were 14 unrelated products. They are not — they are the same six systems assembled differently, on one stack, by the same people. A billing app and a CRM share a data model, an auth layer and a deployment pipeline; the difference is which nouns they hold. What we do not do is claim depth we lack: sectors we have shipped in are marked as such, and if your problem needs specialist domain knowledge we do not have, we say so.",
   },
   {
     q: "How big is the team?",

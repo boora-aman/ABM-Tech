@@ -297,6 +297,361 @@ Yes. That is the point, and it is not altruism. A client who can leave at any ti
       },
     ],
   },
+  /* ------------------------------------------------------------------- */
+  {
+    slug: "custom-software-development-cost-india-2026",
+    title: "What custom software actually costs in India in 2026",
+    excerpt:
+      "Real starting figures for CRM, ERP, billing, mobile apps and websites, and the four things that move a project above the floor — so you can tell whether a quote is honest before you've paid anything.",
+    keyTakeaway:
+      "Floors in 2026: a static website from ₹6,000, a dynamic site with an admin panel from ₹15,000, a CRM from ₹12,000, an ERP from ₹15,000, an e-commerce store from ₹18,000, a mobile app from ₹25,000. What moves a real project above the floor is migration from an existing system, multi-branch or multi-role complexity, and integrations with third-party APIs — ask about all three before you compare two quotes.",
+    tags: ["Pricing", "Buying software"],
+    author: "Aman Boora",
+    publishedAt: "2026-09-01",
+    published: true,
+    featured: true,
+    related: ["crm", "erp-system", "mobile-apps", "ecommerce"],
+    body: `Most software quotes in India are a range, delivered after a sales call, with no explanation for why your project sits where it does in that range. That's not because pricing custom software is impossible to do transparently — it's because an unpublished number is easier to move once you're already invested in the conversation.
+
+## The actual floors, published
+
+These are starting figures for a single-location, single-branch build with a standard process. Not a ceiling — a floor, for the smallest version of each category:
+
+- **Static business website** — from ₹6,000, delivered in 5–8 days
+- **Dynamic website with admin panel** — from ₹15,000, delivered in 2–3 weeks
+- **Custom CRM** — from ₹12,000, delivered in 3–5 weeks
+- **ERP / inventory system** — from ₹15,000, delivered in 4–8 weeks
+- **E-commerce store** — from ₹18,000, delivered in 4–6 weeks
+- **Mobile app (Android + iOS)** — from ₹25,000, delivered in 4–8 weeks
+- **Google Business Profile setup** — ₹2,499 one time, built and submitted the same day
+
+All figures are one-off project costs, exclusive of GST, against a written scope. A support retainer afterward — monitoring, patching, a change-request allowance — starts separately from ₹4,000 a month, and is optional.
+
+## Four things that move a project above the floor
+
+**Migration.** If you're moving off an existing system — a spreadsheet, Tally, another CRM — the data has to be mapped, imported and reconciled against a physical count or an existing report before go-live. This is real work, usually priced as its own line, and it's the single most common reason a quote lands above the floor.
+
+**Multi-branch or multi-role complexity.** A single-counter retail build and a three-branch operation with approval hierarchies are different projects, even though both are "an ERP." Ask specifically what the floor figure assumes — one location, one role, or several.
+
+**Third-party integrations.** A payment gateway, a WhatsApp Business API connection, an SMS gateway, a marketplace API — each is a real scoping item with its own edge cases (what happens when the gateway times out mid-transaction, for instance), not a checkbox.
+
+**Design and content depth.** A five-page static site and a fifty-page catalogue site are not the same project even if both are "a website." Page count and content volume move a static build's price more than almost anything else.
+
+## How to read a quote against this
+
+Ask three things on the first call, regardless of who you're talking to:
+
+1. **What does this specific figure assume?** One branch, one role, standard categories — or does it already account for your actual complexity?
+2. **What's excluded?** A quote with no exclusion list isn't fixed — it's a starting point for negotiation once you're already committed.
+3. **Is GST included or added?** Most published figures, including ours, are exclusive of GST — confirm which convention you're being quoted under before comparing two numbers.
+
+## Why publish this at all
+
+A published floor means the first call is about whether the work is right for you, not whether you can afford to ask. It also means a vendor can't quote the same scope differently to two different clients — which is the actual reason most software pricing stays hidden.
+
+See the [full published list with what each figure includes and excludes](/pricing).`,
+    faqs: [
+      {
+        q: "Are these prices negotiable?",
+        a: "The floor is fixed for the scope listed. If your requirement is genuinely smaller than the floor assumes, say so — sometimes the honest answer is a smaller, cheaper scope. What doesn't happen is the same scope quoted differently to two different people.",
+      },
+      {
+        q: "Why is a CRM cheaper than an ERP at these floors?",
+        a: "Data model complexity. A CRM's core data model — leads, stages, activities — is simpler than an ERP's, which typically spans inventory, purchasing, production and multi-role approvals from day one.",
+      },
+      {
+        q: "Do these figures include ongoing support after launch?",
+        a: "Thirty days of bug fixing is included in every project figure. Ongoing monitoring, patching and a change-request allowance beyond that is a separate, optional retainer starting from ₹4,000 a month.",
+      },
+    ],
+  },
+  /* ------------------------------------------------------------------- */
+  {
+    slug: "saas-vs-custom-software-cost-comparison",
+    title: "Per-seat SaaS vs owning the code: the three-year arithmetic",
+    excerpt:
+      "A per-seat SaaS subscription and a one-off custom build look like different categories of spend until you actually run the three-year numbers side by side. Here's the arithmetic, and where it genuinely favours the subscription.",
+    keyTakeaway:
+      "At 10 seats, a mid-tier CRM subscription commonly runs ₹1.5–4 lakh over three years and keeps rising with headcount; a one-off custom build with no per-seat fee is often cheaper past year one, and stays flat as the team grows. The subscription wins when you need its breadth (marketing automation, a large app ecosystem) or you're validating a process that isn't settled yet.",
+    tags: ["Pricing", "Buying software"],
+    author: "Aman Boora",
+    publishedAt: "2026-09-03",
+    published: true,
+    related: ["crm", "erp-system"],
+    body: `A ₹12,000 one-off quote and a ₹1,200-per-user-per-month subscription look incomparable at first glance — one's a project, one's an ongoing expense. They're comparable the moment you pick a time horizon and multiply.
+
+## The arithmetic, worked through
+
+Ten users on a mid-tier CRM at roughly ₹1,200/user/month:
+
+- Year 1: ₹1,44,000
+- Year 3 cumulative: ₹4,32,000
+- And that's before any per-user growth — hire two more people and the number moves immediately, with no new capability unlocked.
+
+A one-off custom build at ₹12,000, plus an optional ₹4,000/month support retainer:
+
+- Year 1: ₹12,000 + (₹4,000 × 12) = ₹60,000, or ₹12,000 alone if you skip the retainer
+- Year 3 cumulative: ₹1,56,000 with the retainer, or ₹12,000 without it
+- Adding five more users costs nothing — there's no per-seat fee to trigger
+
+The crossover point depends on your actual subscription tier and seat count, but for most mid-tier per-seat tools at ten or more users, it lands somewhere in year one.
+
+## What the subscription is actually buying
+
+This isn't an argument that SaaS is a bad deal — it's a genuinely different trade:
+
+- **Breadth.** A large per-seat product typically ships marketing automation, a partner ecosystem, prebuilt integrations and continuous feature releases you didn't have to commission.
+- **Zero implementation risk.** It works today, configured, not built — which matters if you need something live this week, not in three to five weeks.
+- **Someone else's maintenance burden.** Version upgrades, security patching and infrastructure are the vendor's problem entirely.
+
+If you'll genuinely use that breadth, the per-seat cost is the price of not building and maintaining it yourself — a fair trade, not a bad one.
+
+## Where the arithmetic actually flips
+
+The multiplication favours custom specifically when:
+
+- **Seat count is ten or more** and growing, so the per-seat fee compounds rather than staying flat.
+- **You're using a fraction of the product** — four modules out of forty, with the rest as sunk licence cost.
+- **Your process has already settled** — you know your pipeline stages, your approval chain, your reporting needs, so there's no discovery risk in building to them directly.
+- **You want to leave without losing your data model** — a subscription's data lives in its schema; a custom build's data model is yours from the first migration.
+
+## A worked example, not a rule
+
+We ran exactly this arithmetic for a services firm choosing between staying on a per-seat CRM at 14 seats and commissioning a custom build. At their seat count and growth rate, the subscription was already costing more per year than the custom build's total cost including a support retainer — the honest recommendation was to switch, and we said so on the first call rather than after taking the project.
+
+The point isn't that custom always wins this comparison — see our [Zoho CRM comparison](/compare/custom-crm-vs-zoho) for the cases where it genuinely doesn't. The point is that the comparison is worth running with your actual numbers before assuming either answer.`,
+    faqs: [
+      {
+        q: "How do I find our actual seat cost to run this comparison?",
+        a: "Check your current subscription invoice for the per-seat rate and multiply by your seat count and 36 months — that's your three-year baseline. Compare it against a custom build's one-off cost plus an optional support retainer over the same period.",
+      },
+      {
+        q: "Does this arithmetic apply to any SaaS product, or just CRMs?",
+        a: "The same multiplication works for any per-seat tool — helpdesk software, project management, HR systems. The crossover point moves with the specific per-seat rate, but the method is identical.",
+      },
+      {
+        q: "What if we're not sure our process will stay stable?",
+        a: "That's a real reason to stay on a subscription a little longer — a custom build assumes your process is settled enough to build to directly. If it's still changing month to month, the flexibility of a configurable SaaS tool is worth its premium.",
+      },
+    ],
+  },
+  /* ------------------------------------------------------------------- */
+  {
+    slug: "pharmacy-expiry-losses-discovered-too-late",
+    title: "Why pharmacy expiry losses are discovered too late",
+    excerpt:
+      "The write-off isn't the problem — discovering it after the supplier return window has closed is. Here's why generic billing software misses this, and what actually catches it in time.",
+    keyTakeaway:
+      "Generic billing treats a medicine as one product, when the same SKU sits on the shelf in multiple batches at multiple expiry dates. Batch-level stock with expiry alerts grouped by supplier, fired in tiers (90/60/30 days), is what turns an expiry loss discovered at stock-take into a return filed in time.",
+    tags: ["Healthcare", "Inventory"],
+    author: "Aman Boora",
+    publishedAt: "2026-09-05",
+    published: true,
+    related: ["erp-system", "billing-platform-app"],
+    body: `Ask a pharmacy owner when they discover an expired batch, and the answer is almost always "at stock-take" — which is also almost always after the supplier's return window has closed. The loss isn't a surprise by then. It's a cost that was locked in weeks earlier and only became visible late.
+
+## Why this happens with standard billing software
+
+Generic billing software models a medicine as one product with one stock count. The physical reality is different: the same SKU commonly sits on the shelf in two or three batches, at two or three expiry dates, sometimes at two or three printed MRPs after a price revision. If the software can't represent that, batch tracking moves to a paper notebook beside the till — and a paper notebook doesn't send an alert.
+
+## What actually catches it in time
+
+**Batch-level stock from the point of purchase entry.** Every GRN records the batch number and expiry date against the item, not just a quantity added to a single running total.
+
+**First-expiry-first-out dispensing, enforced at billing.** The system offers the oldest batch first automatically, so newer stock doesn't get sold ahead of older stock by default — which is what quietly turns a batch into a write-off in the first place.
+
+**Tiered alerts, grouped by supplier.** A single alert 90 days out is easy to ignore. Alerts at 90, 60 and 30 days, grouped by which supplier issued the batch, mean one return call can cover a dozen items instead of being filed one SKU at a time — which is often why the return doesn't get filed at all.
+
+**Reorder points from actual velocity, not a fixed minimum.** Overstocking a slow-moving item is how a batch outlives its own shelf life in the first place. Reorder points calculated from real sales velocity against supplier lead time reduce how often that happens.
+
+## The compliance layer this also has to carry
+
+Schedule H and H1 medicines need a prescription reference captured before dispensing — not as a paper trail kept separately, but gated at the point of sale so the sale itself cannot complete without it. That's the same system doing two jobs: catching expiry losses, and making an inspection defensible.
+
+## What this looks like running
+
+We built exactly this for a retail pharmacy running 100–150 transactions a day — batch-level inventory, supplier-grouped expiry tiers, and server-enforced prescription gating. [Read the full case study](/work/pharmacy-erp).
+
+If your pharmacy's discrepancy is currently small, the honest test is whether it's discovered every stock-take or only occasionally — a recurring small loss is still a recurring cost, and it's usually worth running the numbers on what a year of it actually adds up to before deciding whether to fix it.`,
+    faqs: [
+      {
+        q: "Does this replace our accounting software?",
+        a: "No — this is the operational and billing layer specific to pharmacy stock; your accounting software (commonly Tally) typically stays the book of record, with summarised entries posting across.",
+      },
+      {
+        q: "Can it handle a price revision on an existing batch already on the shelf?",
+        a: "Yes — batch-level modelling means a price revision applies to new purchase entries without changing the recorded cost or MRP of batches already in stock, which is exactly the case generic software collapses into one number.",
+      },
+      {
+        q: "Is this only useful for standalone pharmacies?",
+        a: "It applies anywhere batch and expiry genuinely matter — a clinic's in-house dispensary, a distributor, or a hospital pharmacy all hit the same underlying problem, even though the surrounding workflow differs.",
+      },
+    ],
+  },
+  /* ------------------------------------------------------------------- */
+  {
+    slug: "field-technician-app-what-they-actually-need",
+    title: "What a field technician actually needs on their phone",
+    excerpt:
+      "Not a slimmed-down version of the office dashboard. A field app has to work with no signal, capture proof in seconds, and never lose what someone already typed — here's the actual list, in order of what breaks first.",
+    keyTakeaway:
+      "In order of what breaks a field app first: offline capture that syncs later, not a live connection requirement; photo proof that attaches directly to the job and the invoice; a job list simple enough to use one-handed; and a manager view that updates from the field in near real time instead of at 7pm when everyone's back.",
+    tags: ["Field services", "Mobile apps"],
+    author: "Aman Boora",
+    publishedAt: "2026-09-06",
+    published: true,
+    related: ["mobile-apps", "crm"],
+    body: `Most field-service software is designed by someone sitting at a desk, for someone who isn't. The gap shows up immediately: a beautifully designed dashboard that requires a live connection, on a phone that's about to lose signal in a basement.
+
+## What actually breaks first
+
+**A live connection requirement.** This is the single most common design mistake. A technician standing in a basement, a lift shaft, or a rural service area with patchy coverage needs the app to keep working — capturing job status, notes and photos locally, and syncing automatically the moment signal returns. An app that blocks on a spinner until connectivity comes back is an app that doesn't get used.
+
+**Losing what was already typed.** A form that clears itself on a dropped connection, forcing a technician to retype job notes from memory, trains people to stop using the app at all — they'll go back to a paper pad, which is the exact problem the app was meant to solve.
+
+**Too many taps for a one-handed job.** A technician holding a tool in one hand needs a job status update in one or two taps, not a multi-screen form. Complexity that would be fine at a desk is friction that gets skipped in the field.
+
+**Photo proof that doesn't attach to anything.** A photo taken and saved to the phone's gallery, separate from the job record, is a photo that never makes it into the invoice or the customer's file. Proof capture has to write directly into the job it belongs to.
+
+## What a manager actually needs, which is different
+
+The manager's problem isn't the technician's problem. A manager needs to know, in near real time, which jobs are open, which technician is free, and which job has gone quiet — not a summary compiled at 7pm from technicians reporting in. That's a dispatch view built from the same job records the technician's app is writing to, not a separate report generated later.
+
+## Why this is usually the highest-value part of a CRM build for field services
+
+When we describe field-service builds, the enquiry pipeline and the dispatch view get most of the attention in a proposal — but the actual daily friction a business feels is almost always at the technician's end: a job assigned in a WhatsApp group that scrolls past, with nobody able to say why a customer from ten days ago never got called back. Fixing that specific gap is often the highest-return single change in the whole system.
+
+We built exactly this for a home-services business — enquiry pipeline, area-based dispatch, and a technician app built to work offline in basements and stairwells. [Read the full case study](/work/field-service-crm).`,
+    faqs: [
+      {
+        q: "Do technicians need training to use an offline-first app?",
+        a: "Less than you'd expect — the interface is deliberately simple because offline-first design forces simplicity anyway (fewer screens, fewer live lookups). Most rollouts include a short on-site session rather than formal training.",
+      },
+      {
+        q: "What happens if two technicians edit the same job while both are offline?",
+        a: "The sync logic resolves this by timestamp and by which fields actually changed, rather than one edit silently overwriting the other — this is scoped and tested explicitly during the build, not left to chance.",
+      },
+      {
+        q: "Does this work on older or budget Android phones, not just recent ones?",
+        a: "Yes — this is a deliberate design constraint, since field teams commonly use older or shared devices rather than the newest hardware. The build targets that reality rather than assuming a high-end phone.",
+      },
+    ],
+  },
+  /* ------------------------------------------------------------------- */
+  {
+    slug: "google-business-profile-verification-explained",
+    title: "How Google Business Profile verification actually works",
+    excerpt:
+      "Postcard, phone, video call, or instant — verification methods, real timelines, and why nobody, including us, can promise you a date. The honest version most GBP setup services won't publish.",
+    keyTakeaway:
+      "Postcard verification typically takes 5 to 12 business days from request to arrival; phone or instant verification, where Google offers it for your business, is faster but not something you can request — Google decides which method you're offered. Anyone quoting a fixed go-live date is guessing.",
+    tags: ["Local SEO", "Google Business Profile"],
+    author: "Aman Boora",
+    publishedAt: "2026-09-02",
+    published: true,
+    featured: true,
+    related: ["google-business-profile-setup", "maps-and-seo"],
+    body: `Almost every Google Business Profile setup offer promises speed. Almost none of them own the part that actually determines the timeline — because that part belongs to Google, not the agency.
+
+## The methods Google actually uses
+
+**Postcard verification.** Google mails a physical postcard to your business address with a verification code. This typically takes 5 to 12 business days to arrive, and the clock only starts once the profile is submitted correctly — an error in the address restarts it.
+
+**Phone or SMS verification.** Faster, sometimes instant, but only offered to some businesses and categories. You can't request this method; Google decides which option your submission is offered based on signals we don't control and can't influence.
+
+**Video verification.** Increasingly used for certain categories, requiring a short recorded walkthrough of the business premises and signage. Available only where Google offers it.
+
+**Instant verification via a linked Google Search Console account.** Rare, and only available where the business website is already verified in Search Console under the same account.
+
+## Why nobody can promise you a date
+
+Which method you're offered is decided by Google, based on category, business signals and location — not by anything an agency does. A setup service claiming "verified in 48 hours" is either offering a method Google hasn't guaranteed, or quietly hoping you don't ask what happens when it isn't instant.
+
+What we do instead: build and submit the profile the same day, tell you plainly which method Google is likely to offer based on your category, and set expectations before you pay — not after.
+
+## What actually determines whether verification passes the first time
+
+The verification step itself is usually mechanical. What causes rejections and delays is upstream of it:
+
+- **An address that doesn't match how it's registered elsewhere** — with your GST registration, other directories, or a previous claim on the same location.
+- **A category that doesn't match the business type Google can verify** at that address.
+- **Missing or inconsistent business details** submitted alongside the verification request.
+
+Preparing the profile correctly before submission is what "prepared to pass first time" actually means — not a claim about the verification method itself.
+
+## What we publish instead of a promise
+
+Our [Google Business Profile setup service](/services/google-business-profile-setup) is built and submitted the same day, for ₹2,499 one time — and the invoice goes out once the listing is actually live, not before. That's the risk we take on instead of promising a timeline we don't control.`,
+    faqs: [
+      {
+        q: "Can I request postcard verification instead of waiting to see what I'm offered?",
+        a: "No — Google's system decides which verification method to offer at submission time, based on your business category and other signals. You can't select a method in advance.",
+      },
+      {
+        q: "What happens if the postcard never arrives?",
+        a: "You can request a new one after a waiting period, or in some cases switch to an alternative method if Google offers one. This is a genuine failure mode worth planning for rather than assuming won't happen.",
+      },
+      {
+        q: "Does paying more speed up verification?",
+        a: "No — no agency, including us, can pay Google to expedite a specific business's verification. Anyone implying otherwise is describing something they don't control.",
+      },
+    ],
+  },
+  /* ------------------------------------------------------------------- */
+  {
+    slug: "google-business-profile-categories-explained",
+    title: "Primary vs secondary categories: the setting that decides the most",
+    excerpt:
+      "Category selection affects your Google Business Profile's visibility more than any other single field — and most businesses pick the closest-sounding option in the dropdown instead of the one competitors ranking for their terms actually use.",
+    keyTakeaway:
+      "Your primary category should match what the businesses already ranking for your target searches use, not the label that sounds closest to what you do. Secondary categories add coverage for adjacent searches but never override the primary category's weight — most profiles need one correct primary category more than five approximate secondary ones.",
+    tags: ["Local SEO", "Google Business Profile"],
+    author: "Aman Boora",
+    publishedAt: "2026-09-04",
+    published: true,
+    related: ["google-business-profile-setup", "maps-and-seo"],
+    body: `Ask ten business owners how they picked their Google Business Profile's primary category, and most will describe scrolling the dropdown until something sounded close enough. That single choice affects visibility more than reviews, photos, or posting frequency combined.
+
+## Why primary category matters this much
+
+Google's Maps ranking weighs category as one of its strongest signals for matching a search to a business — arguably stronger than the business description, the services listed, or even proximity within a reasonable radius. Two businesses with identical quality and identical distance from a searcher can rank completely differently if one has the category the search actually maps to and the other has an adjacent, approximate one.
+
+## How to actually choose it
+
+Don't start from what you'd call your own business. Start from what's already ranking:
+
+1. **Search your actual target terms** — not your business name, the phrases a customer would type.
+2. **Open the top few Maps results** and check their listed category (visible on the profile itself).
+3. **Match your primary category to the pattern you see**, not to the label that sounds most accurate to how you'd describe your own business.
+
+A restaurant that also does catering, for instance, might be tempted to set "Caterer" as primary because catering is the higher-margin service — but if the searches that actually reach you are "restaurant near me," the primary category needs to reflect the search, not the internal business priority.
+
+## What secondary categories are actually for
+
+Secondary categories extend which additional searches you can appear for — a restaurant might add "Caterer" and "Event venue" as secondary categories to also surface in those searches. But they don't compensate for a wrong primary category; Google weighs the primary far more heavily; a business with the right secondary categories and the wrong primary still underperforms one with just the right primary and no secondaries at all.
+
+**A common mistake:** stacking five or six secondary categories hoping for broader visibility. Beyond a handful of genuinely applicable categories, this dilutes rather than helps — Google's own guidance is to add categories only where they're accurate, not exhaustive.
+
+## What we actually do differently
+
+When we set up or audit a Google Business Profile, category research means checking who's actually ranking for your target searches first — not filling in the dropdown from memory. It's the single highest-leverage part of the whole setup, and the part most setup services skip past to get to photos and posting schedules faster.
+
+See the [full Google Business Profile setup service](/services/google-business-profile-setup) for what a proper setup includes, or the [ongoing Maps & SEO service](/services/maps-and-seo) if you already have a profile and want the ranking work done as a retainer.`,
+    faqs: [
+      {
+        q: "Can I change my primary category after the profile is already live?",
+        a: "Yes — category changes can be made at any time without restarting verification. It's worth revisiting if your business's focus has shifted or if the original category was chosen without checking competitors.",
+      },
+      {
+        q: "How many secondary categories should we actually use?",
+        a: "As many as are genuinely accurate, and no more — a handful applicable to real parts of your business is normal; a long list added hoping for broader reach usually dilutes rather than helps.",
+      },
+      {
+        q: "Does the category affect anything besides search ranking?",
+        a: "Yes — it also determines which attributes and features are available on your profile (menu for restaurants, service options for home services), so an inaccurate category can hide relevant fields customers expect to see.",
+      },
+    ],
+  },
 ];
 
 export const allTags = () =>
