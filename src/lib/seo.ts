@@ -124,8 +124,8 @@ export function breadcrumbLd(trail: { name: string; path: string }[]): Json {
   };
 }
 
-export function faqLd(faqs: { q: string; a: string }[]): Json | null {
-  if (!faqs.length) return null;
+export function faqLd(faqs: { q: string; a: string }[] | undefined | null): Json | null {
+  if (!faqs?.length) return null;
   return {
     "@type": "FAQPage",
     mainEntity: faqs.map((f) => ({

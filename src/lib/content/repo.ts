@@ -48,7 +48,9 @@ export async function getServices(): Promise<Service[]> {
         .sort({ order: 1, index: 1 })
         .lean();
       const rows = plain<Service & { order?: number }>(docs);
-      return rows.length ? rows : seedServices;
+      if (!rows.length) return seedServices;
+      const bySlug = new Map(seedServices.map((s) => [s.slug, s]));
+      return rows.map((r) => withSeedFallback(r, bySlug.get(r.slug)));
     },
     () => seedServices,
   );
@@ -61,8 +63,9 @@ export async function getService(slug: string): Promise<Service | null> {
         slug,
         published: { $ne: false },
       }).lean();
-      if (doc) return plain<Service>([doc])[0];
-      return seedServices.find((s) => s.slug === slug) ?? null;
+      const seedMatch = seedServices.find((s) => s.slug === slug);
+      if (doc) return withSeedFallback(plain<Service>([doc])[0], seedMatch);
+      return seedMatch ?? null;
     },
     () => seedServices.find((s) => s.slug === slug) ?? null,
   );
@@ -99,6 +102,16 @@ export async function getPost(slug: string): Promise<Post | null> {
 
 /* ------------------------------ Industries ------------------------------ */
 
+/** `.lean()` returns exactly the stored document — a row saved before a
+ *  schema field existed comes back missing that key entirely (`undefined`,
+ *  not `[]` or `""`). Spreading the seed first means a DB row only overrides
+ *  fields it actually has, so older admin-edited rows fall back to the
+ *  matching seed's value for any field added after they were last saved,
+ *  instead of the page crashing on `undefined.length`. */
+function withSeedFallback<T extends object>(dbRow: T, seedRow: T | undefined): T {
+  return seedRow ? { ...seedRow, ...dbRow } : dbRow;
+}
+
 export async function getIndustries(): Promise<Industry[]> {
   return withDb(
     async () => {
@@ -106,7 +119,9 @@ export async function getIndustries(): Promise<Industry[]> {
         .sort({ order: 1, index: 1 })
         .lean();
       const rows = plain<Industry>(docs);
-      return rows.length ? rows : seedIndustries;
+      if (!rows.length) return seedIndustries;
+      const bySlug = new Map(seedIndustries.map((i) => [i.slug, i]));
+      return rows.map((r) => withSeedFallback(r, bySlug.get(r.slug)));
     },
     () => seedIndustries,
   );
@@ -119,8 +134,9 @@ export async function getIndustry(slug: string): Promise<Industry | null> {
         slug,
         published: { $ne: false },
       }).lean();
-      if (doc) return plain<Industry>([doc])[0];
-      return seedIndustries.find((i) => i.slug === slug) ?? null;
+      const seedMatch = seedIndustries.find((i) => i.slug === slug);
+      if (doc) return withSeedFallback(plain<Industry>([doc])[0], seedMatch);
+      return seedMatch ?? null;
     },
     () => seedIndustries.find((i) => i.slug === slug) ?? null,
   );
@@ -135,7 +151,9 @@ export async function getPillars(): Promise<Pillar[]> {
         .sort({ order: 1, index: 1 })
         .lean();
       const rows = plain<Pillar>(docs);
-      return rows.length ? rows : seedPillars;
+      if (!rows.length) return seedPillars;
+      const byKey = new Map(seedPillars.map((p) => [p.key, p]));
+      return rows.map((r) => withSeedFallback(r, byKey.get(r.key)));
     },
     () => seedPillars,
   );
@@ -148,8 +166,9 @@ export async function getPillar(key: string): Promise<Pillar | null> {
         key,
         published: { $ne: false },
       }).lean();
-      if (doc) return plain<Pillar>([doc])[0];
-      return seedPillars.find((p) => p.key === key) ?? null;
+      const seedMatch = seedPillars.find((p) => p.key === key);
+      if (doc) return withSeedFallback(plain<Pillar>([doc])[0], seedMatch);
+      return seedMatch ?? null;
     },
     () => seedPillars.find((p) => p.key === key) ?? null,
   );
@@ -164,7 +183,9 @@ export async function getProjects(): Promise<Project[]> {
         .sort({ order: 1, index: 1 })
         .lean();
       const rows = plain<Project>(docs);
-      return rows.length ? rows : seedProjects;
+      if (!rows.length) return seedProjects;
+      const bySlug = new Map(seedProjects.map((p) => [p.slug, p]));
+      return rows.map((r) => withSeedFallback(r, bySlug.get(r.slug)));
     },
     () => seedProjects,
   );
@@ -177,8 +198,9 @@ export async function getProject(slug: string): Promise<Project | null> {
         slug,
         published: { $ne: false },
       }).lean();
-      if (doc) return plain<Project>([doc])[0];
-      return seedProjects.find((p) => p.slug === slug) ?? null;
+      const seedMatch = seedProjects.find((p) => p.slug === slug);
+      if (doc) return withSeedFallback(plain<Project>([doc])[0], seedMatch);
+      return seedMatch ?? null;
     },
     () => seedProjects.find((p) => p.slug === slug) ?? null,
   );
