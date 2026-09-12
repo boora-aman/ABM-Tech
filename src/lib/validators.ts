@@ -274,3 +274,22 @@ export const socialStatusWriteSchema = z
     batch: z.string().trim().max(60).optional().or(z.literal("")),
   })
   .strict();
+
+export const adminUserCreateSchema = z
+  .object({
+    email: z.string().trim().toLowerCase().email().max(200),
+    name: z.string().trim().max(120).optional().or(z.literal("")),
+    role: z.enum(["owner", "editor"]),
+    /* Twelve, not eight. This account can rewrite every price on the site, so
+       the floor is a passphrase rather than a password. */
+    password: z.string().min(12, "Use at least 12 characters").max(200),
+  })
+  .strict();
+
+export const adminUserUpdateSchema = z
+  .object({
+    role: z.enum(["owner", "editor"]).optional(),
+    name: z.string().trim().max(120).optional(),
+    password: z.string().min(12, "Use at least 12 characters").max(200).optional(),
+  })
+  .strict();

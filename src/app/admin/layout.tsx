@@ -103,7 +103,10 @@ export default async function AdminLayout({
               { href: "/admin/social", label: "Social posts" },
               { href: "/admin/leads", label: "Leads" },
               ...(role === "owner"
-                ? [{ href: "/admin/keys", label: "API keys" }]
+                ? [
+                    { href: "/admin/users", label: "Users" },
+                    { href: "/admin/keys", label: "API keys" },
+                  ]
                 : []),
             ]}
           />
