@@ -1,4 +1,5 @@
 import { withDb, plain, isDbConfigured } from "@/lib/db/mongoose";
+import { site } from "@/lib/site.config";
 import {
   ServiceModel,
   PostModel,
@@ -9,6 +10,7 @@ import {
   SettingModel,
   GlobalFaqModel,
   CommitmentModel,
+  SiteDetailsModel,
 } from "@/lib/db/models";
 
 import { services as seedServices, type Service } from "./services";
@@ -292,4 +294,141 @@ export function pick<T>(settings: Record<string, unknown>, key: string, fallback
   if (v === undefined || v === null || v === "") return fallback;
   if (Array.isArray(fallback) && !Array.isArray(v)) return fallback;
   return v as T;
+}
+
+/* ------------------------------ Site details ----------------------------- */
+
+/**
+ * The business details — contact, address, hours, socials — merged over the
+ * committed defaults in site.config.ts.
+ *
+ * Returns the SAME SHAPE as `site`, so a consumer swaps `site` for the result
+ * and nothing else changes. That is what kept this from becoming a rewrite of
+ * all 31 files that import the config.
+ *
+ * Every field falls back individually: an empty document, a cleared field or
+ * an unreachable database all render the committed value rather than a blank
+ * footer or a broken LocalBusiness node.
+ */
+/* `site` is declared `as const`, so `typeof site` narrows every string to its
+   literal value — "2024" rather than string — and nothing from the database
+   can be assigned to it. The shape is therefore widened explicitly here, which
+   also documents what a consumer can rely on. */
+export type SiteConfig = Omit<
+  typeof site,
+  | "legalName" | "tagline" | "description" | "founded"
+  | "contact" | "address" | "hours" | "serviceAreas" | "socials" | "verification"
+> & {
+  legalName: string;
+  tagline: string;
+  description: string;
+  founded: string;
+  contact: {
+    email: string;
+    phoneE164: string;
+    phoneDisplay: string;
+    whatsapp: string;
+    whatsappPrefill: string;
+  };
+  address: {
+    street: string;
+    locality: string;
+    region: string;
+    postalCode: string;
+    country: string;
+    countryName: string;
+    lat: number;
+    lng: number;
+    mapsUrl: string;
+  };
+  hours: { days: string[]; opens: string; closes: string }[];
+  serviceAreas: string[];
+  socials: { key: string; label: string; url: string }[];
+  verification: { google: string };
+};
+
+/** The committed config widened to the mutable SiteConfig shape. Used both as
+ *  the fallback and as the base every database value is merged over. */
+function baseConfig(): SiteConfig {
+  return {
+    ...site,
+    legalName: site.legalName,
+    tagline: site.tagline,
+    description: site.description,
+    founded: site.founded,
+    contact: { ...site.contact },
+    address: { ...site.address },
+    hours: site.hours.map((h) => ({ ...h, days: [...h.days] })),
+    serviceAreas: [...site.serviceAreas],
+    socials: site.socials.map((x) => ({ key: x.key, label: x.label, url: x.url })),
+    verification: { ...site.verification },
+  };
+}
+
+export async function getSiteConfig(): Promise<SiteConfig> {
+  const base = baseConfig();
+  const row = await withDb(
+    async () => {
+      const doc = await SiteDetailsModel.findOne({ key: "site" }).lean();
+      return doc ? plain<Record<string, unknown>>([doc])[0] : null;
+    },
+    () => null,
+  );
+  if (!row) return base;
+
+  const str = (v: unknown, fallback: string) =>
+    typeof v === "string" && v.trim() ? v.trim() : fallback;
+  const num = (v: unknown, fallback: number) =>
+    typeof v === "number" && Number.isFinite(v) ? v : fallback;
+  const social = (key: string, fallback: string) =>
+    str(row[key], fallback);
+
+  return {
+    ...base,
+    legalName: str(row.legalName, base.legalName),
+    tagline: str(row.tagline, base.tagline),
+    description: str(row.description, base.description),
+    founded: str(row.founded, base.founded),
+
+    contact: {
+      email: str(row.email, base.contact.email),
+      phoneE164: str(row.phoneE164, base.contact.phoneE164),
+      phoneDisplay: str(row.phoneDisplay, base.contact.phoneDisplay),
+      whatsapp: str(row.whatsapp, base.contact.whatsapp),
+      whatsappPrefill: str(row.whatsappPrefill, base.contact.whatsappPrefill),
+    },
+
+    address: {
+      ...base.address,
+      street: str(row.street, base.address.street),
+      locality: str(row.locality, base.address.locality),
+      region: str(row.region, base.address.region),
+      postalCode: str(row.postalCode, base.address.postalCode),
+      lat: num(row.lat, base.address.lat),
+      lng: num(row.lng, base.address.lng),
+      mapsUrl: str(row.mapsUrl, base.address.mapsUrl),
+    },
+
+    hours: Array.isArray(row.hours) && row.hours.length
+      ? (row.hours as SiteConfig["hours"])
+      : base.hours,
+
+    serviceAreas:
+      Array.isArray(row.serviceAreas) && row.serviceAreas.length
+        ? (row.serviceAreas as string[])
+        : base.serviceAreas,
+
+    socials: base.socials.map((x) => ({ ...x, url: social(x.key, x.url) })),
+
+    verification: {
+      google: str(row.googleVerification, base.verification.google),
+    },
+  };
+}
+
+/** WhatsApp link built from the live config rather than the committed one. */
+export function whatsappLinkFor(cfg: SiteConfig, message?: string) {
+  return `https://wa.me/${cfg.contact.whatsapp}?text=${encodeURIComponent(
+    message ?? cfg.contact.whatsappPrefill,
+  )}`;
 }

@@ -1,16 +1,16 @@
 import Link from "next/link";
 import { Logo } from "@/components/brand/Logo";
 import { Rule } from "@/components/ui/Panel";
-import { getServices } from "@/lib/content/repo";
-import { site, nav, isPlaceholder } from "@/lib/site.config";
+import { getServices, getSiteConfig } from "@/lib/content/repo";
+import { nav, isPlaceholder } from "@/lib/site.config";
 import { inrShort } from "@/lib/utils";
 
 /** Footer. Doubles as the crawlable index — every service linked with its
  *  price, and the contact block matches the Organization JSON-LD exactly. */
 export async function Footer() {
-  const services = await getServices();
+  const [services, cfg] = await Promise.all([getServices(), getSiteConfig()]);
   const year = new Date().getFullYear();
-  const socials = site.socials.filter((s) => s.url && !isPlaceholder(s.url));
+  const socials = cfg.socials.filter((s) => s.url && !isPlaceholder(s.url));
 
   return (
     <footer className="defer-paint mt-8 border-t border-line no-print">
@@ -23,22 +23,22 @@ export async function Footer() {
                 <span className="font-display text-[1.0625rem] font-semibold tracking-[0.01em]">
                   ABM Tech
                 </span>
-                <span className="label mt-1.5 text-[0.625rem]!">{site.tagline}</span>
+                <span className="label mt-1.5 text-[0.625rem]!">{cfg.tagline}</span>
               </span>
             </Link>
             <p className="mb-5 max-w-xs text-[0.875rem] leading-relaxed text-ink-dim">
-              {site.description}
+              {cfg.description}
             </p>
             <address className="space-y-1.5 text-[0.875rem] not-italic text-ink-dim">
-              <a href={`tel:${site.contact.phoneE164}`} className="block hover:text-brand-ink">
-                {site.contact.phoneDisplay}
+              <a href={`tel:${cfg.contact.phoneE164}`} className="block hover:text-brand-ink">
+                {cfg.contact.phoneDisplay}
               </a>
-              <a href={`mailto:${site.contact.email}`} className="block hover:text-brand-ink">
-                {site.contact.email}
+              <a href={`mailto:${cfg.contact.email}`} className="block hover:text-brand-ink">
+                {cfg.contact.email}
               </a>
-              {!isPlaceholder(site.address.locality) && (
+              {!isPlaceholder(cfg.address.locality) && (
                 <span className="block">
-                  {site.address.locality}, {site.address.region}, {site.address.countryName}
+                  {cfg.address.locality}, {cfg.address.region}, {cfg.address.countryName}
                 </span>
               )}
             </address>
@@ -120,7 +120,7 @@ export async function Footer() {
       <div className="page-x py-5">
         <div className="bay flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center">
           <p className="label normal-case tracking-normal!">
-            © {year} {site.legalName}. All rights reserved.
+            © {year} {cfg.legalName}. All rights reserved.
           </p>
           <p className="label normal-case tracking-normal!">
             Fixed price · No lock-in · You own the code

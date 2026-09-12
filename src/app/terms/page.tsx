@@ -4,6 +4,7 @@ import { Rule } from "@/components/ui/Panel";
 import { Markdown } from "@/lib/markdown";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { pageMeta, graph, breadcrumbLd } from "@/lib/seo";
+import { getSiteConfig, type SiteConfig } from "@/lib/content/repo";
 import { site } from "@/lib/site.config";
 
 export const metadata: Metadata = pageMeta({
@@ -13,7 +14,12 @@ export const metadata: Metadata = pageMeta({
   path: "/terms",
 });
 
-const BODY = `These terms cover engagements with ${site.legalName}. A signed proposal or written scope takes precedence wherever the two differ.
+/* Built per request rather than at module load: these pages tell a reader
+   which address to email about their data, and a module-scope constant would
+   keep quoting the old one after the contact details were changed in the
+   admin — which is the one place on the site where a stale address actually
+   matters. */
+const bodyFor = (cfg: SiteConfig) => `These terms cover engagements with ${site.legalName}. A signed proposal or written scope takes precedence wherever the two differ.
 
 ## Scope and pricing
 
@@ -69,9 +75,11 @@ These terms are governed by the laws of India, and the courts at our registered 
 
 ## Contact
 
-Questions about these terms go to ${site.contact.email}.`;
+Questions about these terms go to ${cfg.contact.email}.`;
 
-export default function TermsPage() {
+export default async function TermsPage() {
+  const cfg = await getSiteConfig();
+  const BODY = bodyFor(cfg);
   return (
     <>
       <JsonLd

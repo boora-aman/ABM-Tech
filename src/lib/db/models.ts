@@ -248,6 +248,72 @@ const CommitmentSchema = new Schema(
   timestamps,
 );
 
+/* ------------------------------ Site details ----------------------------- */
+
+/**
+ * The business details that used to live only in site.config.ts and env vars:
+ * contact, address, opening hours, social profiles, service areas.
+ *
+ * A SINGLETON — one document, `key: "site"`. These are not a collection and
+ * modelling them as one would invite a second row that silently wins.
+ *
+ * Everything is optional. Each field falls back to the committed value in
+ * site.config.ts, so an empty document changes nothing and clearing a field
+ * restores the default rather than blanking the footer.
+ *
+ * NAP fields (name, address, phone) feed LocalBusiness and Organization
+ * schema. They must stay byte-identical to the Google Business Profile —
+ * mismatched details across site, schema and listings actively suppress local
+ * ranking rather than merely failing to help.
+ */
+const SiteDetailsSchema = new Schema(
+  {
+    key: { type: String, required: true, unique: true, default: "site" },
+
+    legalName: String,
+    tagline: String,
+    description: String,
+    founded: String,
+
+    email: String,
+    phoneE164: String,
+    phoneDisplay: String,
+    whatsapp: String,
+    whatsappPrefill: String,
+
+    street: String,
+    locality: String,
+    region: String,
+    postalCode: String,
+    lat: Number,
+    lng: Number,
+    mapsUrl: String,
+
+    /** [{ days: ["Mo",…], opens: "10:00", closes: "19:00" }] */
+    hours: {
+      type: [
+        new Schema(
+          { days: { type: [String], default: [] }, opens: String, closes: String },
+          { _id: false },
+        ),
+      ],
+      default: undefined,
+    },
+
+    serviceAreas: { type: [String], default: undefined },
+
+    instagram: String,
+    facebook: String,
+    linkedin: String,
+    github: String,
+    x: String,
+    youtube: String,
+
+    googleVerification: String,
+  },
+  timestamps,
+);
+
 /* ------------------------------ Social post ------------------------------ */
 
 /**
@@ -352,6 +418,7 @@ export const SlideModel = register("Slide", SlideSchema);
 export const SettingModel = register("Setting", SettingSchema);
 export const GlobalFaqModel = register("GlobalFaq", GlobalFaqSchema);
 export const CommitmentModel = register("Commitment", CommitmentSchema);
+export const SiteDetailsModel = register("SiteDetails", SiteDetailsSchema);
 export const SocialStatusModel = register("SocialStatus", SocialStatusSchema);
 export const LeadModel = register("Lead", LeadSchema);
 export const AdminUserModel = register("AdminUser", AdminUserSchema);

@@ -6,6 +6,7 @@ import {
   getCommitments,
   getIndustries,
   getPillars,
+  getSiteConfig,
 } from "@/lib/content/repo";
 import { site, absoluteUrl } from "@/lib/site.config";
 import { inr } from "@/lib/utils";
@@ -31,6 +32,7 @@ export async function GET() {
       getIndustries(),
       getPillars(),
     ]);
+  const cfg = await getSiteConfig();
 
   const L: string[] = [
     `# ${site.name}`,
@@ -43,11 +45,11 @@ export async function GET() {
     "",
     `- **What we build:** The six systems every business runs on — websites and local search visibility, CRM and lead capture, ERP/inventory/operations, billing and payments, mobile apps for field work, and dashboards, integrations and AI automation. ${services.length} services in total, listed below with published starting prices.`,
     `- **Sectors modelled:** ${industries.map((i) => i.name).join(", ")}. Production systems have shipped in retail pharmacy, retail and distribution, logistics, and home/field services; other sectors are modelled rather than claimed as portfolio.`,
-    `- **Founded:** ${site.founded}. Based in India, serving ${site.serviceAreas.join(" and ")}.`,
+    `- **Founded:** ${cfg.founded}. Based in India, serving ${cfg.serviceAreas.join(" and ")}.`,
     `- **Pricing model:** Fixed price against a written scope. No hourly billing, no per-seat licences. All figures in INR, exclusive of GST. Published in full at ${absoluteUrl("/pricing")}.`,
     `- **Code ownership:** Clients own all code from the first commit; it lives in their Git organisation and deploys to their accounts.`,
     `- **Support:** 30 days of bug fixing included with every build. Retainers thereafter are optional and cancel with 30 days' notice.`,
-    `- **Contact:** ${site.contact.email} · ${site.contact.phoneDisplay} · ${absoluteUrl("/contact")}`,
+    `- **Contact:** ${cfg.contact.email} · ${cfg.contact.phoneDisplay} · ${absoluteUrl("/contact")}`,
     "",
     "## The six systems we build",
     "",

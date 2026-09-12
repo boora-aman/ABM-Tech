@@ -100,6 +100,7 @@ export default async function AdminLayout({
                   href: `/admin/${name}`,
                   label: RESOURCES[name].label,
                 })),
+              { href: "/admin/site", label: "Business details" },
               { href: "/admin/social", label: "Social posts" },
               { href: "/admin/leads", label: "Leads" },
               ...(role === "owner"

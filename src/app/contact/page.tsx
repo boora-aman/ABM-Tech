@@ -6,9 +6,9 @@ import { Faq } from "@/components/sections/Faq";
 import { Card, Rule, Label } from "@/components/ui/Panel";
 import { ButtonLink, Arrow, WhatsAppGlyph } from "@/components/ui/Button";
 import { JsonLd } from "@/components/seo/JsonLd";
-import { getServices } from "@/lib/content/repo";
+import { getServices, getSiteConfig, whatsappLinkFor } from "@/lib/content/repo";
 import { pageMeta, graph, breadcrumbLd, organizationLd, faqLd } from "@/lib/seo";
-import { site, whatsappLink, isPlaceholder } from "@/lib/site.config";
+import { site, isPlaceholder } from "@/lib/site.config";
 
 export const metadata: Metadata = pageMeta({
   title: "Contact — describe the problem, get a fixed quote",
@@ -40,8 +40,8 @@ const CONTACT_FAQS = [
 export const revalidate = 3600;
 
 export default async function ContactPage() {
-  const services = await getServices();
-  const addressReady = !isPlaceholder(site.address.locality);
+  const [services, cfg] = await Promise.all([getServices(), getSiteConfig()]);
+  const addressReady = !isPlaceholder(cfg.address.locality);
 
   return (
     <>
@@ -51,7 +51,7 @@ export default async function ContactPage() {
             { name: "Home", path: "/" },
             { name: "Contact", path: "/contact" },
           ]),
-          organizationLd(),
+          organizationLd(cfg),
           faqLd(CONTACT_FAQS),
           {
             "@type": "ContactPage",
@@ -81,19 +81,19 @@ export default async function ContactPage() {
               better if you want to describe something properly.
             </p>
             <div className="flex flex-col gap-2">
-              <ButtonLink href={whatsappLink()} variant="whatsapp" size="md" external className="w-full">
+              <ButtonLink href={whatsappLinkFor(cfg)} variant="whatsapp" size="md" external className="w-full">
                 <WhatsAppGlyph />
                 WhatsApp us
                 <Arrow />
               </ButtonLink>
               <ButtonLink
-                href={`tel:${site.contact.phoneE164}`}
+                href={`tel:${cfg.contact.phoneE164}`}
                 variant="outline"
                 size="md"
                 external
                 className="w-full"
               >
-                {site.contact.phoneDisplay}
+                {cfg.contact.phoneDisplay}
               </ButtonLink>
             </div>
           </Card>
@@ -111,26 +111,26 @@ export default async function ContactPage() {
               </Card>
             }
           >
-            <ContactForm services={services} />
+            <ContactForm services={services} whatsappHref={whatsappLinkFor(cfg)} />
           </Suspense>
 
           <div className="flex flex-col gap-5">
             <Card className="p-6">
               <Label className="mb-6">Direct lines</Label>
               <ul className="space-y-4">
-                <Line label="Phone" value={site.contact.phoneDisplay} href={`tel:${site.contact.phoneE164}`} />
-                <Line label="Email" value={site.contact.email} href={`mailto:${site.contact.email}`} />
+                <Line label="Phone" value={cfg.contact.phoneDisplay} href={`tel:${cfg.contact.phoneE164}`} />
+                <Line label="Email" value={cfg.contact.email} href={`mailto:${cfg.contact.email}`} />
                 <Line
                   label="Hours"
-                  value={`${site.hours[0].opens}–${site.hours[0].closes} IST · Mon–Sat`}
+                  value={`${cfg.hours[0].opens}–${cfg.hours[0].closes} IST · Mon–Sat`}
                 />
                 {addressReady && (
                   <Line
                     label="Based in"
-                    value={`${site.address.locality}, ${site.address.region}`}
+                    value={`${cfg.address.locality}, ${cfg.address.region}`}
                   />
                 )}
-                <Line label="Serving" value={site.serviceAreas.join(" · ")} />
+                <Line label="Serving" value={cfg.serviceAreas.join(" · ")} />
               </ul>
             </Card>
 

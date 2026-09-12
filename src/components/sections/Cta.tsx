@@ -1,10 +1,17 @@
 import { Card, Label, Tick } from "@/components/ui/Panel";
 import { ButtonLink, Arrow, WhatsAppGlyph } from "@/components/ui/Button";
 import { site, whatsappLink } from "@/lib/site.config";
-import { pick } from "@/lib/content/repo";
+import { pick, whatsappLinkFor, type SiteConfig } from "@/lib/content/repo";
 
 /** Closing call to action. Server component, no motion. */
-export function Cta({ settings = {} }: { settings?: Record<string, unknown> }) {
+export function Cta({
+  settings = {},
+  cfg,
+}: {
+  settings?: Record<string, unknown>;
+  cfg?: SiteConfig;
+}) {
+  const contact = cfg?.contact ?? site.contact;
   const eyebrow = pick(settings, "cta.eyebrow", "Next step");
   const title = pick(settings, "cta.heading", ["Tell us what's slowing"]);
   const titleAccent = pick(settings, "cta.headingAccent", "the business down.");
@@ -50,18 +57,18 @@ export function Cta({ settings = {} }: { settings?: Record<string, unknown> }) {
               Get a free quote
               <Arrow />
             </ButtonLink>
-            <ButtonLink href={whatsappLink()} variant="whatsapp" size="lg" external className="w-full">
+            <ButtonLink href={cfg ? whatsappLinkFor(cfg) : whatsappLink()} variant="whatsapp" size="lg" external className="w-full">
               <WhatsAppGlyph />
               WhatsApp us
             </ButtonLink>
             <ButtonLink
-              href={`tel:${site.contact.phoneE164}`}
+              href={`tel:${contact.phoneE164}`}
               variant="ghost"
               size="lg"
               external
               className="w-full"
             >
-              {site.contact.phoneDisplay}
+              {contact.phoneDisplay}
             </ButtonLink>
           </div>
         </Card>

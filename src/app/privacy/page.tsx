@@ -4,7 +4,7 @@ import { Rule } from "@/components/ui/Panel";
 import { Markdown } from "@/lib/markdown";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { pageMeta, graph, breadcrumbLd } from "@/lib/seo";
-import { site } from "@/lib/site.config";
+import { getSiteConfig, type SiteConfig } from "@/lib/content/repo";
 
 export const metadata: Metadata = pageMeta({
   title: "Privacy policy",
@@ -13,7 +13,12 @@ export const metadata: Metadata = pageMeta({
   path: "/privacy",
 });
 
-const BODY = `We collect as little as possible and sell none of it. This page says exactly what happens to what you send us.
+/* Built per request rather than at module load: these pages tell a reader
+   which address to email about their data, and a module-scope constant would
+   keep quoting the old one after the contact details were changed in the
+   admin — which is the one place on the site where a stale address actually
+   matters. */
+const bodyFor = (cfg: SiteConfig) => `We collect as little as possible and sell none of it. This page says exactly what happens to what you send us.
 
 ## What we collect
 
@@ -37,7 +42,7 @@ Enquiries are retained while commercially relevant, and for a maximum of 24 mont
 
 ## Your rights
 
-You can ask us to tell you what we hold, correct anything wrong, delete it entirely, or stop processing it. Email ${site.contact.email} and we will action it within seven working days. There is no form to fill in and we will not ask you to justify the request.
+You can ask us to tell you what we hold, correct anything wrong, delete it entirely, or stop processing it. Email ${cfg.contact.email} and we will action it within seven working days. There is no form to fill in and we will not ask you to justify the request.
 
 ## Cookies
 
@@ -57,9 +62,11 @@ If this policy changes materially we will update the date below. We will not qui
 
 ## Contact
 
-Questions go to ${site.contact.email}, or call ${site.contact.phoneDisplay} during working hours.`;
+Questions go to ${cfg.contact.email}, or call ${cfg.contact.phoneDisplay} during working hours.`;
 
-export default function PrivacyPage() {
+export default async function PrivacyPage() {
+  const cfg = await getSiteConfig();
+  const BODY = bodyFor(cfg);
   return (
     <>
       <JsonLd

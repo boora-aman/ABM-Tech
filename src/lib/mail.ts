@@ -10,7 +10,17 @@ import type { LeadInput } from "./validators";
 
 const KEY = process.env.RESEND_API_KEY;
 const FROM = process.env.RESEND_FROM ?? "ABM Tech <onboarding@resend.dev>";
-const TO = process.env.LEAD_NOTIFY_TO ?? site.contact.email;
+/* Resolved per send rather than at module load: the notification address is
+   editable in the admin, and a module-scope constant would keep mailing the
+   old one until the next deploy. LEAD_NOTIFY_TO still wins where set. */
+function notifyTo(cfg?: SiteLike) {
+  return process.env.LEAD_NOTIFY_TO ?? (cfg?.contact.email ?? site.contact.email);
+}
+
+type SiteLike = {
+  contact: { email: string; phoneDisplay: string; whatsapp: string; whatsappPrefill: string };
+  hours: readonly { opens: string; closes: string }[];
+};
 
 export const isMailConfigured = () => Boolean(KEY);
 const resend = KEY ? new Resend(KEY) : null;
@@ -73,7 +83,7 @@ function notificationHtml(lead: LeadInput) {
     </div>`);
 }
 
-function acknowledgementHtml(lead: LeadInput) {
+function acknowledgementHtml(lead: LeadInput, c: SiteLike, wa: string) {
   return SHELL(`
     <h1 style="margin:0 0 14px;font-size:23px;letter-spacing:-0.025em">Thanks, ${esc(
       lead.name.split(" ")[0],
@@ -95,11 +105,11 @@ function acknowledgementHtml(lead: LeadInput) {
     </div>
     <p style="margin:0 0 20px;font-size:14px;line-height:1.7;color:#9ba1ad">
       Need it faster? WhatsApp is quickest during working hours
-      (${site.hours[0].opens}–${site.hours[0].closes} IST, Mon–Sat).
+      (${c.hours[0].opens}–${c.hours[0].closes} IST, Mon–Sat).
     </p>
-    <a href="${whatsappLink()}" style="display:inline-block;background:linear-gradient(100deg,#ff4500,#ff8c00);color:#fff;text-decoration:none;font-weight:600;font-size:14px;padding:12px 20px;border-radius:6px">Continue on WhatsApp</a>
+    <a href="${wa}" style="display:inline-block;background:linear-gradient(100deg,#ff4500,#ff8c00);color:#fff;text-decoration:none;font-weight:600;font-size:14px;padding:12px 20px;border-radius:6px">Continue on WhatsApp</a>
     <div style="margin-top:24px;padding-top:18px;border-top:1px solid rgba(255,255,255,0.07);font-size:12px;line-height:1.7;color:#6b7280">
-      ${esc(site.contact.email)} · ${esc(site.contact.phoneDisplay)}<br>
+      ${esc(c.contact.email)} · ${esc(c.contact.phoneDisplay)}<br>
       We use your details to reply to you and nothing else. No mailing list.
     </div>`);
 }
@@ -107,7 +117,15 @@ function acknowledgementHtml(lead: LeadInput) {
 export type NotifyResult = { notified: boolean; acknowledged: boolean; skipped?: string };
 
 /** Never throws — a mail failure must not fail the lead submission. */
-export async function notifyLead(lead: LeadInput): Promise<NotifyResult> {
+export async function notifyLead(
+  lead: LeadInput,
+  cfg?: SiteLike,
+): Promise<NotifyResult> {
+  const c: SiteLike = cfg ?? site;
+  const TO = notifyTo(cfg);
+  const wa = cfg
+    ? `https://wa.me/${cfg.contact.whatsapp}?text=${encodeURIComponent(cfg.contact.whatsappPrefill)}`
+    : whatsappLink();
   if (!resend) {
     return {
       notified: false,
@@ -127,9 +145,9 @@ export async function notifyLead(lead: LeadInput): Promise<NotifyResult> {
     resend.emails.send({
       from: FROM,
       to: [lead.email],
-      replyTo: site.contact.email,
+      replyTo: c.contact.email,
       subject: `We've got your enquiry — ${site.name}`,
-      html: acknowledgementHtml(lead),
+      html: acknowledgementHtml(lead, c, wa),
     }),
   ]);
 

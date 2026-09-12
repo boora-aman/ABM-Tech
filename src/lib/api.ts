@@ -133,3 +133,20 @@ export function rateLimited(keyId: string) {
   }
   return recent.length > MAX_PER_WINDOW;
 }
+
+/**
+ * Invalidate the ROOT LAYOUT and therefore every route beneath it.
+ *
+ * `revalidatePath("/")` refreshes only the page cache entry for "/". Anything
+ * rendered by the layout — the header, the footer, the Organization and
+ * LocalBusiness JSON-LD — is a separate cache entry and keeps serving the old
+ * value. Site-wide details live in exactly those places, so they need the
+ * layout type rather than a long list of page paths.
+ */
+export function bumpEverything() {
+  try {
+    revalidatePath("/", "layout");
+  } catch (err) {
+    console.error("[revalidate] root layout failed:", err);
+  }
+}

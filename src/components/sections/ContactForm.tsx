@@ -30,7 +30,15 @@ type State =
   | { kind: "sent" }
   | { kind: "error"; message: string };
 
-export function ContactForm({ services }: { services: Service[] }) {
+export function ContactForm({
+  services,
+  whatsappHref,
+}: {
+  services: Service[];
+  /** Built server-side from the live config; falls back to the committed one. */
+  whatsappHref?: string;
+}) {
+  const waHref = whatsappHref ?? whatsappLink();
   const params = useSearchParams();
   const formRef = useRef<HTMLFormElement>(null);
   const renderedAt = useRef(0);
@@ -124,7 +132,7 @@ export function ContactForm({ services }: { services: Service[] }) {
           </p>
           <Rule className="my-7" />
           <div className="flex flex-wrap gap-3">
-            <ButtonLink href={whatsappLink()} variant="whatsapp" size="lg" external>
+            <ButtonLink href={waHref} variant="whatsapp" size="lg" external>
               <WhatsAppGlyph />
               Continue on WhatsApp
               <Arrow />
@@ -206,7 +214,7 @@ export function ContactForm({ services }: { services: Service[] }) {
               </>
             )}
           </Button>
-          <ButtonLink href={whatsappLink()} variant="whatsapp" size="lg" external>
+          <ButtonLink href={waHref} variant="whatsapp" size="lg" external>
             <WhatsAppGlyph />
             Or WhatsApp instead
           </ButtonLink>

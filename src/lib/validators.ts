@@ -293,3 +293,63 @@ export const adminUserUpdateSchema = z
     password: z.string().min(12, "Use at least 12 characters").max(200).optional(),
   })
   .strict();
+
+/* Every field optional: the site-details document is a set of OVERRIDES over
+   site.config.ts, so an empty string means "use the committed value" rather
+   than "blank the footer". */
+const optStr = (max: number) => z.string().trim().max(max).optional().or(z.literal(""));
+
+export const siteDetailsWriteSchema = z
+  .object({
+    legalName: optStr(160),
+    tagline: optStr(120),
+    description: optStr(600),
+    founded: optStr(8),
+
+    email: z.string().trim().toLowerCase().email().max(200).optional().or(z.literal("")),
+    phoneE164: z
+      .string()
+      .trim()
+      .regex(/^\+[1-9]\d{7,14}$/, "Use international format, e.g. +919119756710")
+      .optional()
+      .or(z.literal("")),
+    phoneDisplay: optStr(40),
+    whatsapp: z
+      .string()
+      .trim()
+      .regex(/^[1-9]\d{7,14}$/, "Digits only with country code, e.g. 919119756710")
+      .optional()
+      .or(z.literal("")),
+    whatsappPrefill: optStr(300),
+
+    street: optStr(200),
+    locality: optStr(80),
+    region: optStr(80),
+    postalCode: optStr(12),
+    lat: z.number().min(-90).max(90).optional(),
+    lng: z.number().min(-180).max(180).optional(),
+    mapsUrl: z.string().trim().url().max(500).optional().or(z.literal("")),
+
+    hours: z
+      .array(
+        z.object({
+          days: z.array(z.enum(["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"])).min(1),
+          opens: z.string().regex(/^\d{2}:\d{2}$/, "Use HH:MM"),
+          closes: z.string().regex(/^\d{2}:\d{2}$/, "Use HH:MM"),
+        }),
+      )
+      .max(7)
+      .optional(),
+
+    serviceAreas: z.array(z.string().trim().min(1).max(80)).max(20).optional(),
+
+    instagram: z.string().trim().url().max(400).optional().or(z.literal("")),
+    facebook: z.string().trim().url().max(400).optional().or(z.literal("")),
+    linkedin: z.string().trim().url().max(400).optional().or(z.literal("")),
+    github: z.string().trim().url().max(400).optional().or(z.literal("")),
+    x: z.string().trim().url().max(400).optional().or(z.literal("")),
+    youtube: z.string().trim().url().max(400).optional().or(z.literal("")),
+
+    googleVerification: optStr(120),
+  })
+  .strict();

@@ -61,23 +61,45 @@ export function pageMeta({
 
 type Json = Record<string, unknown>;
 
-export function organizationLd(): Json {
-  const sameAs = site.socials.map((s) => s.url).filter(Boolean);
+/** The subset of the site config the structured-data builders read. Declared
+ *  structurally so both the committed `as const` object and the widened
+ *  runtime config satisfy it. */
+type SiteLike = {
+  name: string;
+  legalName: string;
+  url: string;
+  description: string;
+  founded: string;
+  contact: { email: string; phoneE164: string };
+  address: {
+    street: string; locality: string; region: string; postalCode: string;
+    country: string; lat: number; lng: number; mapsUrl: string;
+  };
+  hours: readonly { days: readonly string[]; opens: string; closes: string }[];
+  socials: readonly { url: string }[];
+};
+
+/* `cfg` is the live config from the database when the caller has it. It is
+   optional so the ~20 synchronous call sites that only need branding keep
+   working unchanged; the pages that emit NAP data pass it in. */
+export function organizationLd(cfg?: SiteLike): Json {
+  const c = cfg ?? site;
+  const sameAs = c.socials.map((s) => s.url).filter(Boolean);
   return {
     "@type": "Organization",
     "@id": ORG,
-    name: site.name,
-    legalName: site.legalName,
-    url: site.url,
-    description: site.description,
-    foundingDate: site.founded,
+    name: c.name,
+    legalName: c.legalName,
+    url: c.url,
+    description: c.description,
+    foundingDate: c.founded,
     logo: { "@type": "ImageObject", url: absoluteUrl("/icon.svg") },
     ...(sameAs.length ? { sameAs } : {}),
     contactPoint: [
       {
         "@type": "ContactPoint",
-        telephone: site.contact.phoneE164,
-        email: site.contact.email,
+        telephone: c.contact.phoneE164,
+        email: c.contact.email,
         contactType: "sales",
         areaServed: "IN",
         availableLanguage: ["English", "Hindi"],
@@ -85,18 +107,18 @@ export function organizationLd(): Json {
     ],
     address: {
       "@type": "PostalAddress",
-      ...(site.address.street ? { streetAddress: site.address.street } : {}),
-      addressLocality: site.address.locality,
-      addressRegion: site.address.region,
-      ...(site.address.postalCode ? { postalCode: site.address.postalCode } : {}),
-      addressCountry: site.address.country,
+      ...(c.address.street ? { streetAddress: c.address.street } : {}),
+      addressLocality: c.address.locality,
+      addressRegion: c.address.region,
+      ...(c.address.postalCode ? { postalCode: c.address.postalCode } : {}),
+      addressCountry: c.address.country,
     },
     geo: {
       "@type": "GeoCoordinates",
-      latitude: site.address.lat,
-      longitude: site.address.lng,
+      latitude: c.address.lat,
+      longitude: c.address.lng,
     },
-    ...(site.address.mapsUrl ? { hasMap: site.address.mapsUrl } : {}),
+    ...(c.address.mapsUrl ? { hasMap: c.address.mapsUrl } : {}),
   };
 }
 
@@ -197,32 +219,33 @@ export function articleLd(p: {
   };
 }
 
-export function localBusinessLd(): Json | null {
-  if (!site.address.street) return null;
+export function localBusinessLd(cfg?: SiteLike): Json | null {
+  const c = cfg ?? site;
+  if (!c.address.street) return null;
   return {
     "@type": "LocalBusiness",
     "@id": absoluteUrl("/#localbusiness"),
-    name: site.name,
+    name: c.name,
     parentOrganization: { "@id": ORG },
-    url: site.url,
-    telephone: site.contact.phoneE164,
-    email: site.contact.email,
+    url: c.url,
+    telephone: c.contact.phoneE164,
+    email: c.contact.email,
     priceRange: "₹₹",
     address: {
       "@type": "PostalAddress",
-      streetAddress: site.address.street,
-      addressLocality: site.address.locality,
-      addressRegion: site.address.region,
-      postalCode: site.address.postalCode,
-      addressCountry: site.address.country,
+      streetAddress: c.address.street,
+      addressLocality: c.address.locality,
+      addressRegion: c.address.region,
+      postalCode: c.address.postalCode,
+      addressCountry: c.address.country,
     },
     geo: {
       "@type": "GeoCoordinates",
-      latitude: site.address.lat,
-      longitude: site.address.lng,
+      latitude: c.address.lat,
+      longitude: c.address.lng,
     },
-    ...(site.address.mapsUrl ? { hasMap: site.address.mapsUrl } : {}),
-    openingHoursSpecification: site.hours.map((h) => ({
+    ...(c.address.mapsUrl ? { hasMap: c.address.mapsUrl } : {}),
+    openingHoursSpecification: c.hours.map((h) => ({
       "@type": "OpeningHoursSpecification",
       dayOfWeek: h.days,
       opens: h.opens,

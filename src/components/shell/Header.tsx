@@ -7,6 +7,7 @@ import { Wordmark } from "@/components/brand/Logo";
 import { ButtonLink, Arrow } from "@/components/ui/Button";
 import { ThemeToggle } from "./Theme";
 import { nav, site } from "@/lib/site.config";
+import type { SiteConfig } from "@/lib/content/repo";
 import type { MenuPanel } from "@/lib/content/megamenu";
 import { cn } from "@/lib/utils";
 
@@ -24,7 +25,16 @@ import { cn } from "@/lib/utils";
    both variants at once.
    ========================================================================== */
 
-export function Header({ panels = [] }: { panels?: MenuPanel[] }) {
+export function Header({
+  panels = [],
+  cfg,
+}: {
+  panels?: MenuPanel[];
+  /** Live contact details. Optional so the committed config still renders if
+   *  a caller has not fetched them. */
+  cfg?: SiteConfig;
+}) {
+  const contact = cfg?.contact ?? site.contact;
   const pathname = usePathname();
   const [lifted, setLifted] = useState(false);
   /* Both menus store the route they were opened on. Comparing that against
@@ -157,10 +167,10 @@ export function Header({ panels = [] }: { panels?: MenuPanel[] }) {
 
           <div className="ml-auto flex shrink-0 items-center gap-2 lg:ml-4">
             <a
-              href={`tel:${site.contact.phoneE164}`}
+              href={`tel:${contact.phoneE164}`}
               className="hidden text-[0.8125rem] font-medium text-ink-dim transition-colors hover:text-brand-ink xl:block"
             >
-              {site.contact.phoneDisplay}
+              {contact.phoneDisplay}
             </a>
             <ThemeToggle />
             <span className="hidden sm:block">
@@ -297,7 +307,7 @@ export function Header({ panels = [] }: { panels?: MenuPanel[] }) {
           </ul>
           <div className="bay mt-4 grid grid-cols-2 gap-2 pb-2">
             <ButtonLink
-              href={`tel:${site.contact.phoneE164}`}
+              href={`tel:${contact.phoneE164}`}
               variant="outline"
               external
               className="w-full"

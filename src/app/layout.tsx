@@ -4,6 +4,7 @@ import "./globals.css";
 
 import { Header } from "@/components/shell/Header";
 import { getMenuPanels } from "@/lib/content/megamenu";
+import { getSiteConfig } from "@/lib/content/repo";
 import { Footer } from "@/components/shell/Footer";
 import { BackToTop } from "@/components/shell/BackToTop";
 import { themeScript } from "@/components/shell/Theme";
@@ -76,7 +77,7 @@ export const viewport: Viewport = {
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   // Built from the content repo so a service renamed in the admin is renamed
   // in the header without a redeploy.
-  const panels = await getMenuPanels();
+  const [panels, cfg] = await Promise.all([getMenuPanels(), getSiteConfig()]);
 
   return (
     <html
@@ -90,7 +91,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body>
-        <JsonLd data={graph(organizationLd(), websiteLd(), localBusinessLd())} />
+        <JsonLd data={graph(organizationLd(cfg), websiteLd(), localBusinessLd(cfg))} />
 
         <a
           href="#main"
@@ -99,7 +100,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           Skip to content
         </a>
 
-        <Header panels={panels} />
+        <Header panels={panels} cfg={cfg} />
         <main id="main">{children}</main>
         <Footer />
         <BackToTop />

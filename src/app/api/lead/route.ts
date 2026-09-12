@@ -3,6 +3,7 @@ import { leadSchema } from "@/lib/validators";
 import { connectDb, isDbConfigured } from "@/lib/db/mongoose";
 import { LeadModel } from "@/lib/db/models";
 import { notifyLead, isMailConfigured } from "@/lib/mail";
+import { getSiteConfig } from "@/lib/content/repo";
 
 /* ==========================================================================
    POST /api/lead
@@ -107,7 +108,9 @@ export async function POST(req: Request) {
     }
   }
 
-  const mail = await notifyLead(lead);
+  // Live config so a contact detail changed in the admin is reflected in the
+  // notification and the acknowledgement without a redeploy.
+  const mail = await notifyLead(lead, await getSiteConfig());
 
   // Last-resort channel. With neither Mongo nor Resend configured the enquiry
   // would otherwise vanish; deployment logs are the fallback of record.
