@@ -148,6 +148,8 @@ export async function billingIdentity(): Promise<PdfBiz> {
   return {
     name: cfg.name,
     legalName: cfg.legalName,
+    url: cfg.url,
+    tagline: cfg.tagline,
     email: cfg.contact.email,
     phoneDisplay: cfg.contact.phoneDisplay,
     line1: cfg.address.street,

@@ -1,5 +1,5 @@
 import {
-  Document, Page, Text, View, StyleSheet,
+  Document, Page, Text, View, StyleSheet, Svg, Path, Rect,
 } from "@react-pdf/renderer";
 import { computeTotals, inrMoney, amountInWords, type Line } from "@/lib/billing";
 
@@ -30,20 +30,79 @@ const FAINT = "#8A9099";
 const LINE = "#DCD9D2";
 const PAPER = "#F4F2ED";
 
+/* The three bar fills and the apex datum of the real mark. Drawn as vector
+   primitives rather than loaded as an image: an <Image> is a file read (or a
+   fetch) on every single render, and it is the one thing on the page that can
+   fail and leave a hole where the logo should be. These are the same
+   coordinates as public/icon.svg, so the printed mark and the favicon are the
+   same drawing. */
+const HOT = "#FF4500";
+const MID = "#FF6A00";
+const WARM = "#FF8C00";
+const TEAL = "#00F5D4";
+
+function Mark({ size = 26 }: { size?: number }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 40 40">
+      <Path d="M4 31.5 L9.2 31.5 L13.4 20.5 L8.2 20.5 Z" fill={HOT} />
+      <Path d="M13 31.5 L18.2 31.5 L24.4 14.5 L19.2 14.5 Z" fill={MID} />
+      <Path d="M22 31.5 L27.2 31.5 L35.4 8.5 L30.2 8.5 Z" fill={WARM} />
+      <Rect x="4" y="33.6" width="31.4" height="1.6" rx="0.4" fill={HOT} opacity={0.45} />
+      <Rect x="34.4" y="4.6" width="3" height="3" rx="0.8" fill={TEAL} />
+    </Svg>
+  );
+}
+
 const s = StyleSheet.create({
-  page: { padding: 40, fontSize: 9, color: INK, fontFamily: "Helvetica" },
+  /* paddingBottom reserves the footer's band. The footer is absolutely
+     positioned, so without the reservation a long terms block runs underneath
+     it and the two overprint. */
+  page: {
+    paddingTop: 38, paddingHorizontal: 40, paddingBottom: 74,
+    fontSize: 9, color: INK, fontFamily: "Helvetica",
+  },
 
-  topRule: { height: 3, backgroundColor: BRAND, marginBottom: 22 },
+  /* The mark's own three fills, stepped across the rule — the same trick the
+     logo uses to avoid a gradient id. */
+  topRule: { flexDirection: "row", height: 3, marginBottom: 20 },
+  topRuleA: { flex: 1, backgroundColor: HOT },
+  topRuleB: { flex: 1, backgroundColor: MID },
+  topRuleC: { flex: 2, backgroundColor: WARM },
 
-  head: { flexDirection: "row", justifyContent: "space-between", marginBottom: 26 },
-  bizName: { fontSize: 17, fontFamily: "Helvetica-Bold", letterSpacing: -0.4 },
-  bizLine: { fontSize: 8, color: DIM, marginTop: 2 },
+  head: { flexDirection: "row", justifyContent: "space-between", marginBottom: 8 },
+
+  lockup: { flexDirection: "row", alignItems: "center", marginBottom: 9 },
+  lockupText: { marginLeft: 8 },
+  bizName: { fontSize: 16, fontFamily: "Helvetica-Bold", letterSpacing: -0.3 },
+  bizTagline: {
+    fontSize: 6, color: FAINT, letterSpacing: 1.6,
+    fontFamily: "Helvetica-Bold", marginTop: 2.5,
+  },
+  bizLine: { fontSize: 8, color: DIM, marginTop: 2, lineHeight: 1.5 },
+
+  /* Registration numbers sit in their own tinted strip. Stacked with the
+     address they read as more address, and an auditor looking for the Udyam
+     number should not have to find it inside a paragraph. */
+  regs: {
+    flexDirection: "row", marginTop: 9, backgroundColor: PAPER,
+    borderRadius: 3, paddingVertical: 5, paddingHorizontal: 9,
+  },
+  reg: { marginRight: 16 },
+  regLabel: { fontSize: 6, color: FAINT, letterSpacing: 0.9, fontFamily: "Helvetica-Bold" },
+  regValue: { fontSize: 8, marginTop: 1.5 },
 
   docTitle: {
     fontSize: 15, fontFamily: "Helvetica-Bold", color: BRAND,
     textAlign: "right", letterSpacing: 0.4,
   },
-  docMeta: { fontSize: 8.5, color: DIM, textAlign: "right", marginTop: 3 },
+  docNumber: {
+    fontSize: 9.5, fontFamily: "Helvetica-Bold", textAlign: "right", marginTop: 4,
+  },
+  metaRow: { flexDirection: "row", justifyContent: "flex-end", marginTop: 4 },
+  metaLabel: { fontSize: 7, color: FAINT, letterSpacing: 0.7, fontFamily: "Helvetica-Bold" },
+  metaValue: { fontSize: 8.5, color: DIM, width: 74, textAlign: "right" },
+
+  headRule: { height: 0.5, backgroundColor: LINE, marginTop: 16, marginBottom: 18 },
 
   panels: { flexDirection: "row", gap: 14, marginBottom: 20 },
   panel: { flex: 1, backgroundColor: PAPER, padding: 11, borderRadius: 3 },
@@ -103,16 +162,22 @@ const s = StyleSheet.create({
   },
 
   foot: {
-    position: "absolute", bottom: 28, left: 40, right: 40,
+    position: "absolute", bottom: 26, left: 40, right: 40,
     borderTopWidth: 0.5, borderTopColor: LINE, paddingTop: 8,
-    flexDirection: "row", justifyContent: "space-between",
   },
+  footTop: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  footLockup: { flexDirection: "row", alignItems: "center" },
+  footName: { fontSize: 8, fontFamily: "Helvetica-Bold", marginLeft: 5 },
   footText: { fontSize: 7.5, color: FAINT },
+  footDetail: { fontSize: 7, color: FAINT, marginTop: 3.5, lineHeight: 1.5 },
 });
 
 export type PdfBiz = {
   name: string;
   legalName: string;
+  /** Printed in the header and footer — a document is a marketing surface too. */
+  url?: string;
+  tagline?: string;
   email: string;
   phoneDisplay: string;
   line1?: string;
@@ -160,8 +225,23 @@ export function InvoiceDoc({ doc, biz }: { doc: PdfDoc; biz: PdfBiz }) {
   const paid = Number(doc.amountPaid ?? 0);
   const due = Math.max(0, t.total - paid);
 
-  const bizAddr = [biz.line1, [biz.city, biz.region].filter(Boolean).join(", "), biz.postalCode]
-    .filter(Boolean).join("\n");
+  const bizAddrParts = [
+    biz.line1,
+    [biz.city, biz.region].filter(Boolean).join(", "),
+    biz.postalCode,
+  ].filter(Boolean);
+  const bizAddr = bizAddrParts.join("\n");
+  const bizAddrOneLine = bizAddrParts.join(", ");
+  /* The scheme is noise on paper — nobody types it and it lengthens the line.
+     A trailing slash likewise. */
+  const webHost = (biz.url ?? "").replace(/^https?:\/\//, "").replace(/\/$/, "");
+
+  const regs = [
+    biz.gstin ? { label: "GSTIN", value: biz.gstin } : null,
+    biz.udyam ? { label: "UDYAM / MSME", value: biz.udyam } : null,
+    biz.pan ? { label: "PAN", value: biz.pan } : null,
+  ].filter(Boolean) as { label: string; value: string }[];
+
   const cl = doc.client;
   const clientAddr = [cl.line1, cl.line2, [cl.city, cl.state].filter(Boolean).join(", "), cl.postalCode]
     .filter(Boolean).join("\n");
@@ -173,33 +253,65 @@ export function InvoiceDoc({ doc, biz }: { doc: PdfDoc; biz: PdfBiz }) {
       subject={`${title} for ${cl.company || cl.name || "client"}`}
     >
       <Page size="A4" style={s.page}>
-        <View style={s.topRule} />
+        <View style={s.topRule}>
+          <View style={s.topRuleA} />
+          <View style={s.topRuleB} />
+          <View style={s.topRuleC} />
+        </View>
 
         <View style={s.head}>
           <View>
-            <Text style={s.bizName}>{biz.legalName || biz.name}</Text>
+            <View style={s.lockup}>
+              <Mark size={28} />
+              <View style={s.lockupText}>
+                <Text style={s.bizName}>{biz.legalName || biz.name}</Text>
+                {biz.tagline ? (
+                  <Text style={s.bizTagline}>{biz.tagline.toUpperCase()}</Text>
+                ) : null}
+              </View>
+            </View>
+
             {bizAddr ? <Text style={s.bizLine}>{bizAddr}</Text> : null}
             <Text style={s.bizLine}>
-              {biz.email}
-              {biz.phoneDisplay ? `  ·  ${biz.phoneDisplay}` : ""}
+              {[biz.phoneDisplay, biz.email].filter(Boolean).join("  ·  ")}
             </Text>
-            {biz.gstin ? <Text style={s.bizLine}>GSTIN {biz.gstin}</Text> : null}
-            {biz.udyam ? <Text style={s.bizLine}>Udyam {biz.udyam}</Text> : null}
-            {biz.pan ? <Text style={s.bizLine}>PAN {biz.pan}</Text> : null}
+            {webHost ? <Text style={s.bizLine}>{webHost}</Text> : null}
           </View>
 
           <View>
             <Text style={s.docTitle}>{title}</Text>
-            <Text style={s.docMeta}>{doc.number}</Text>
-            <Text style={s.docMeta}>Dated {dateIn(doc.issueDate)}</Text>
+            <Text style={s.docNumber}>{doc.number}</Text>
+            <View style={s.metaRow}>
+              <Text style={s.metaLabel}>DATED</Text>
+              <Text style={s.metaValue}>{dateIn(doc.issueDate)}</Text>
+            </View>
             {isQuote && doc.validUntil ? (
-              <Text style={s.docMeta}>Valid until {dateIn(doc.validUntil)}</Text>
+              <View style={s.metaRow}>
+                <Text style={s.metaLabel}>VALID UNTIL</Text>
+                <Text style={s.metaValue}>{dateIn(doc.validUntil)}</Text>
+              </View>
             ) : null}
             {!isQuote && doc.dueDate ? (
-              <Text style={s.docMeta}>Due {dateIn(doc.dueDate)}</Text>
+              <View style={s.metaRow}>
+                <Text style={s.metaLabel}>DUE</Text>
+                <Text style={s.metaValue}>{dateIn(doc.dueDate)}</Text>
+              </View>
             ) : null}
           </View>
         </View>
+
+        {regs.length ? (
+          <View style={s.regs}>
+            {regs.map((r) => (
+              <View key={r.label} style={s.reg}>
+                <Text style={s.regLabel}>{r.label}</Text>
+                <Text style={s.regValue}>{r.value}</Text>
+              </View>
+            ))}
+          </View>
+        ) : null}
+
+        <View style={s.headRule} />
 
         <View style={s.panels}>
           <View style={s.panel}>
@@ -341,14 +453,30 @@ export function InvoiceDoc({ doc, biz }: { doc: PdfDoc; biz: PdfBiz }) {
           </View>
         ) : null}
 
+        {/* `fixed` repeats this on every page. A two-page invoice whose second
+            sheet carries no contact details is a second sheet nobody can act
+            on. */}
         <View style={s.foot} fixed>
-          <Text style={s.footText}>
-            {biz.legalName || biz.name} · {biz.email}
+          <View style={s.footTop}>
+            <View style={s.footLockup}>
+              <Mark size={12} />
+              <Text style={s.footName}>{biz.legalName || biz.name}</Text>
+            </View>
+            {/* The number rides in the footer so that a second sheet, separated
+                from the first in somebody's pile of paper, still says which
+                document it belongs to. */}
+            <Text
+              style={s.footText}
+              render={({ pageNumber, totalPages }) =>
+                `${doc.number}   ·   Page ${pageNumber} of ${totalPages}`
+              }
+            />
+          </View>
+          <Text style={s.footDetail}>
+            {[bizAddrOneLine, webHost, biz.email, biz.phoneDisplay]
+              .filter(Boolean)
+              .join("   ·   ")}
           </Text>
-          <Text
-            style={s.footText}
-            render={({ pageNumber, totalPages }) => `Page ${pageNumber} of ${totalPages}`}
-          />
         </View>
       </Page>
     </Document>
