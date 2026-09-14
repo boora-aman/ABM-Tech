@@ -103,6 +103,8 @@ export default async function AdminLayout({
               { href: "/admin/site", label: "Business details" },
               { href: "/admin/social", label: "Social posts" },
               { href: "/admin/leads", label: "Leads" },
+              { href: "/admin/clients", label: "Clients" },
+              { href: "/admin/billing", label: "Billing" },
               ...(role === "owner"
                 ? [
                     { href: "/admin/users", label: "Users" },

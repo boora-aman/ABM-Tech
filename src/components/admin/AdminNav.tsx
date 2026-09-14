@@ -53,7 +53,10 @@ export function AdminNav({ items }: { items: AdminNavItem[] }) {
             {items.map((it) => {
               const active = isActive(it.href);
               return (
-                <li key={it.href}>
+                /* shrink-0: a flex item defaults to shrinking below its own
+                   content width, which squeezed thirteen pills into the row and
+                   overlapped every label. The row is meant to scroll. */
+                <li key={it.href} className="shrink-0">
                   <Link
                     href={it.href}
                     aria-current={active ? "page" : undefined}

@@ -351,5 +351,115 @@ export const siteDetailsWriteSchema = z
     youtube: z.string().trim().url().max(400).optional().or(z.literal("")),
 
     googleVerification: optStr(120),
+
+    /* Billing identity. GSTIN is accepted and validated now even though the
+       business is not registered — the day it is, this becomes a field to fill
+       in rather than a schema change, and the PDF already prints it. */
+    gstin: z
+      .string()
+      .trim()
+      .toUpperCase()
+      .regex(/^\d{2}[A-Z]{5}\d{4}[A-Z][A-Z0-9]Z[A-Z0-9]$/, "That is not a valid GSTIN")
+      .optional()
+      .or(z.literal("")),
+    udyam: optStr(40),
+    pan: z
+      .string()
+      .trim()
+      .toUpperCase()
+      .regex(/^[A-Z]{5}\d{4}[A-Z]$/, "That is not a valid PAN")
+      .optional()
+      .or(z.literal("")),
+    bankName: optStr(120),
+    bankAccount: optStr(40),
+    bankIfsc: z
+      .string()
+      .trim()
+      .toUpperCase()
+      .regex(/^[A-Z]{4}0[A-Z0-9]{6}$/, "That is not a valid IFSC")
+      .optional()
+      .or(z.literal("")),
+    upi: optStr(80),
+    defaultTaxRate: z.number().min(0).max(100).optional(),
+    invoiceTerms: optStr(3000),
+    quotationTerms: optStr(3000),
+  })
+  .strict();
+
+/* ------------------------------- Billing --------------------------------- */
+
+const money = z.number().min(0).max(99_99_99_999);
+const isoDay = z.string().trim().regex(/^\d{4}-\d{2}-\d{2}$/, "Use YYYY-MM-DD");
+
+export const clientWriteSchema = z
+  .object({
+    name: z.string().trim().min(2, "Name is required").max(120),
+    company: z.string().trim().max(160).optional().or(z.literal("")),
+    email: z.string().trim().toLowerCase().email().max(200).optional().or(z.literal("")),
+    phone: z.string().trim().max(24).optional().or(z.literal("")),
+    /* Validated whenever present, even though the business is not registered —
+       a client's GSTIN is their number, not ours, and a wrong one on an
+       invoice is their problem to unpick later. */
+    gstin: z
+      .string()
+      .trim()
+      .regex(/^\d{2}[A-Z]{5}\d{4}[A-Z][A-Z0-9]Z[A-Z0-9]$/, "That is not a valid GSTIN")
+      .optional()
+      .or(z.literal("")),
+    line1: z.string().trim().max(200).optional().or(z.literal("")),
+    line2: z.string().trim().max(200).optional().or(z.literal("")),
+    city: z.string().trim().max(80).optional().or(z.literal("")),
+    state: z.string().trim().max(80).optional().or(z.literal("")),
+    postalCode: z.string().trim().max(12).optional().or(z.literal("")),
+    country: z.string().trim().max(80).optional().or(z.literal("")),
+    notes: z.string().trim().max(2000).optional().or(z.literal("")),
+    archived: z.boolean().optional(),
+  })
+  .strict();
+
+const lineSchema = z.object({
+  description: z.string().trim().min(1, "Every line needs a description").max(500),
+  hsn: z.string().trim().max(12).optional().or(z.literal("")),
+  qty: z.number().min(0).max(1_000_000),
+  unit: z.string().trim().max(16).optional().or(z.literal("")),
+  rate: money,
+  discountPct: z.number().min(0).max(100),
+});
+
+export const billingDocWriteSchema = z
+  .object({
+    kind: z.enum(["quotation", "invoice"]),
+    clientId: z.string().trim().min(1, "Choose a client"),
+    issueDate: isoDay,
+    validUntil: isoDay.optional().or(z.literal("")),
+    dueDate: isoDay.optional().or(z.literal("")),
+    lines: z.array(lineSchema).min(1, "Add at least one line").max(60),
+    discountPct: z.number().min(0).max(100),
+    taxRate: z.number().min(0).max(100),
+    taxMode: z.enum(["none", "cgst_sgst", "igst"]),
+    notes: z.string().trim().max(3000).optional().or(z.literal("")),
+    terms: z.string().trim().max(3000).optional().or(z.literal("")),
+    status: z
+      .enum(["draft", "sent", "accepted", "declined", "expired",
+             "partial", "paid", "overdue", "cancelled"])
+      .optional(),
+  })
+  .strict();
+
+export const paymentWriteSchema = z
+  .object({
+    amount: money.refine((v) => v > 0, "Amount must be more than zero"),
+    date: isoDay,
+    method: z.enum(["upi", "neft", "imps", "rtgs", "cash", "cheque", "card", "other"]),
+    reference: z.string().trim().max(120).optional().or(z.literal("")),
+    note: z.string().trim().max(500).optional().or(z.literal("")),
+  })
+  .strict();
+
+export const sendDocSchema = z
+  .object({
+    to: z.string().trim().toLowerCase().email("Enter a valid email address").max(200),
+    subject: z.string().trim().max(200).optional().or(z.literal("")),
+    message: z.string().trim().max(4000).optional().or(z.literal("")),
   })
   .strict();

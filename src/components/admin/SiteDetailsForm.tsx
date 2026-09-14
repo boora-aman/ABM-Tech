@@ -92,6 +92,35 @@ const GROUPS: { title: string; note?: string; fields: Field[] }[] = [
     ],
   },
   {
+    title: "Billing identity",
+    note: "Printed on every quotation and invoice. You are not GST registered, so leave GSTIN empty — documents then read \u201cInvoice\u201d rather than \u201cTax Invoice\u201d, charge no tax, and carry a line saying so. Fill your Udyam number in instead; it is the registration you have and it belongs on the document. The day you do register, filling GSTIN in here switches every future document over.",
+    fields: [
+      { name: "udyam", label: "Udyam / MSME number", placeholder: "UDYAM-UK-05-0000000" },
+      {
+        name: "gstin",
+        label: "GSTIN",
+        placeholder: "(not registered \u2014 leave empty)",
+        hint: "Only fill this in once you actually hold a GST registration.",
+      },
+      { name: "pan", label: "PAN" },
+      { name: "bankName", label: "Bank name", placeholder: "HDFC Bank" },
+      { name: "bankAccount", label: "Account number" },
+      { name: "bankIfsc", label: "IFSC" },
+      { name: "upi", label: "UPI ID", hint: "Shown in the PAY TO panel on invoices." },
+      {
+        name: "invoiceTerms",
+        label: "Default invoice terms",
+        type: "textarea",
+        hint: "Prefilled on new invoices. Editable per document.",
+      },
+      {
+        name: "quotationTerms",
+        label: "Default quotation terms",
+        type: "textarea",
+      },
+    ],
+  },
+  {
     title: "Social profiles",
     note: "These feed sameAs in Organization schema — an entity-identity claim. Only one website should list a given profile; two sites claiming the same accounts tells search engines the brands are one entity. An empty field renders no icon rather than a dead link.",
     fields: [

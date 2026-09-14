@@ -160,6 +160,45 @@ Optional: `MONGODB_URI` to store enquiries, `RESEND_API_KEY` to email them.
 Without either, a lead is still written to the deployment log — a missing
 integration never loses a lead.
 
+## Billing
+
+Quotations and invoices live at `/admin/billing`, clients at `/admin/clients`.
+Both are rendered to PDF with `@react-pdf/renderer` — pure JavaScript, no
+headless Chrome, because the VPS also runs a Frappe bench and cannot spare the
+memory a Puppeteer instance wants.
+
+**Not GST registered.** Documents therefore print as *Invoice* rather than
+*Tax Invoice*, charge no tax, show the Udyam/MSME number, and carry an explicit
+"Not registered for GST" line. The GSTIN, CGST/SGST and IGST paths are all
+built and dormant: fill GSTIN in under Business details the day you register
+and every future document switches over, with no code change.
+
+A few decisions worth knowing before changing anything here:
+
+- **Money is integer paise wherever a total is derived.** Floating-point rupees
+  drift across a dozen lines, and an invoice one paisa out from the sum of its
+  own lines is one somebody has to explain. `computeTotals` in
+  `src/lib/billing.ts` is the single implementation — the editor, the API and
+  the PDF all call it, so what you type and what the client receives cannot
+  disagree. That file imports nothing, deliberately: it is shared with the
+  browser, and a database import there drags the mongo driver into the bundle.
+- **The client is a snapshot, not a join.** An invoice records who it was sent
+  to. Editing a client changes the *next* document, never an issued one.
+- **Numbers are gapless and atomic** (`ABM/INV/26-27/001`), from a `$inc`
+  counter per kind per financial year. A number is consumed even if the create
+  then fails — a gap is a far smaller problem than a repeat.
+- **Status is derived from payments, never typed.** A status you can set by
+  hand is one that stops matching the money underneath it.
+- **An invoice with payments against it is locked.** Cancel and reissue rather
+  than editing amounts under a recorded receipt. Only an untouched draft can be
+  deleted; everything else is cancelled, so the sequence stays gapless.
+- **Unlike leads, billing has no seed fallback.** Content degrades to the
+  committed copy when the database is away; an invoice cannot.
+
+Emailing a document needs `RESEND_API_KEY` and a `RESEND_FROM` address on a
+domain verified in Resend. `sentAt` is written only after the send actually
+succeeds.
+
 ## SEO
 
 One connected `@graph` per page (`Organization`, `WebSite`, `Service` + `Offer`,

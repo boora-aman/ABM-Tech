@@ -248,6 +248,147 @@ const CommitmentSchema = new Schema(
   timestamps,
 );
 
+/* =========================== BILLING ==================================== */
+
+/**
+ * A client you invoice. Separate from Lead: a lead is an enquiry, a client is
+ * somebody with a billing address you have issued a document to.
+ *
+ * `gstin` and `state` are present but unused while the business is not GST
+ * registered. They are here so switching registration on later is a settings
+ * change rather than a migration — and `state` is what decides CGST+SGST
+ * versus IGST the moment it matters.
+ */
+const ClientSchema = new Schema(
+  {
+    name: { type: String, required: true },
+    company: String,
+    email: { type: String, lowercase: true, index: true },
+    phone: String,
+    gstin: String,
+    line1: String,
+    line2: String,
+    city: String,
+    state: String,
+    postalCode: String,
+    country: { type: String, default: "India" },
+    notes: String,
+    archived: { type: Boolean, default: false, index: true },
+  },
+  timestamps,
+);
+
+const LineSchema = new Schema(
+  {
+    description: { type: String, required: true },
+    /** SAC for services, HSN for goods. Dormant until GST registration. */
+    hsn: String,
+    qty: { type: Number, default: 1 },
+    unit: { type: String, default: "nos" },
+    rate: { type: Number, default: 0 },
+    /** Per-line discount in percent. */
+    discountPct: { type: Number, default: 0 },
+  },
+  { _id: false },
+);
+
+/**
+ * One quotation or one invoice. A single model because they share almost
+ * every field and converting a quote into an invoice is then a copy rather
+ * than a translation.
+ *
+ * `client` is a SNAPSHOT taken when the document is issued, not a live join.
+ * An invoice is a record of what was sent; if the client later moves office,
+ * last year's invoice must still show the address it was sent to.
+ */
+const BillingDocSchema = new Schema(
+  {
+    kind: { type: String, enum: ["quotation", "invoice"], required: true, index: true },
+    /** Human-facing, unique, gapless per financial year. */
+    number: { type: String, required: true, unique: true, index: true },
+    /** Indian financial year the number belongs to, e.g. "26-27". */
+    fy: { type: String, required: true, index: true },
+    seq: { type: Number, required: true },
+
+    clientId: { type: Schema.Types.ObjectId, ref: "Client", index: true },
+    client: {
+      name: String, company: String, email: String, phone: String,
+      gstin: String, line1: String, line2: String, city: String,
+      state: String, postalCode: String, country: String,
+    },
+
+    issueDate: { type: String, required: true },
+    /** Quotations expire; invoices fall due. */
+    validUntil: String,
+    dueDate: String,
+
+    lines: { type: [LineSchema], default: [] },
+
+    /** Discount applied to the whole document, in percent. */
+    discountPct: { type: Number, default: 0 },
+    /** 0 while unregistered. The arithmetic runs regardless so switching on
+     *  GST does not change how totals are computed, only the rate. */
+    taxRate: { type: Number, default: 0 },
+    taxMode: {
+      type: String,
+      enum: ["none", "cgst_sgst", "igst"],
+      default: "none",
+    },
+
+    status: {
+      type: String,
+      enum: ["draft", "sent", "accepted", "declined", "expired",
+             "partial", "paid", "overdue", "cancelled"],
+      default: "draft",
+      index: true,
+    },
+
+    notes: String,
+    terms: String,
+
+    /** Quote ↔ invoice lineage, so neither is issued from the same quote twice. */
+    convertedFromId: { type: Schema.Types.ObjectId, ref: "BillingDoc" },
+    convertedToId: { type: Schema.Types.ObjectId, ref: "BillingDoc" },
+
+    sentAt: Date,
+    lastSentTo: String,
+  },
+  timestamps,
+);
+
+/** Part payments against an invoice. */
+const PaymentSchema = new Schema(
+  {
+    docId: { type: Schema.Types.ObjectId, ref: "BillingDoc", required: true, index: true },
+    amount: { type: Number, required: true },
+    date: { type: String, required: true },
+    method: {
+      type: String,
+      enum: ["upi", "neft", "imps", "rtgs", "cash", "cheque", "card", "other"],
+      default: "upi",
+    },
+    reference: String,
+    note: String,
+  },
+  timestamps,
+);
+
+/**
+ * Gapless sequence per document kind per financial year.
+ *
+ * A separate counter incremented atomically, rather than counting existing
+ * documents: two people creating an invoice in the same second would
+ * otherwise both read the same count and mint the same number. Invoice
+ * numbering that repeats or skips is the kind of thing an auditor notices.
+ */
+const CounterSchema = new Schema(
+  {
+    key: { type: String, required: true, unique: true, index: true },
+    seq: { type: Number, default: 0 },
+  },
+  timestamps,
+);
+
 /* ------------------------------ Site details ----------------------------- */
 
 /**
@@ -310,6 +451,21 @@ const SiteDetailsSchema = new Schema(
     youtube: String,
 
     googleVerification: String,
+
+    /* Billing identity, printed on quotations and invoices. `gstin` stays
+       empty while the business is not registered; filling it in is what
+       switches documents from "Invoice" to "Tax Invoice" and turns the tax
+       arithmetic on. */
+    gstin: String,
+    udyam: String,
+    pan: String,
+    bankName: String,
+    bankAccount: String,
+    bankIfsc: String,
+    upi: String,
+    defaultTaxRate: Number,
+    invoiceTerms: String,
+    quotationTerms: String,
   },
   timestamps,
 );
@@ -418,6 +574,10 @@ export const SlideModel = register("Slide", SlideSchema);
 export const SettingModel = register("Setting", SettingSchema);
 export const GlobalFaqModel = register("GlobalFaq", GlobalFaqSchema);
 export const CommitmentModel = register("Commitment", CommitmentSchema);
+export const ClientModel = register("Client", ClientSchema);
+export const BillingDocModel = register("BillingDoc", BillingDocSchema);
+export const PaymentModel = register("Payment", PaymentSchema);
+export const CounterModel = register("Counter", CounterSchema);
 export const SiteDetailsModel = register("SiteDetails", SiteDetailsSchema);
 export const SocialStatusModel = register("SocialStatus", SocialStatusSchema);
 export const LeadModel = register("Lead", LeadSchema);

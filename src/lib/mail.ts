@@ -159,3 +159,66 @@ export async function notifyLead(
     acknowledged: ack.status === "fulfilled",
   };
 }
+
+/* ==========================================================================
+   BILLING — a quotation or invoice, with the PDF attached.
+   Unlike notifyLead this DOES throw. A lead that fails to email is still
+   captured; a document the operator believes they sent, and did not, is worse
+   than an error message.
+   ========================================================================== */
+
+export type DocMailInput = {
+  to: string;
+  subject: string;
+  /** Optional covering note from the operator, plain text. */
+  message?: string;
+  heading: string;
+  number: string;
+  amount: string;
+  dueLabel?: string;
+  replyTo: string;
+  fromName: string;
+  filename: string;
+  pdf: Buffer;
+};
+
+export async function sendDocumentEmail(input: DocMailInput) {
+  if (!resend) throw new Error("Email is not configured — set RESEND_API_KEY.");
+
+  const note = input.message
+    ? `<p style="margin:0 0 20px;font-size:14px;line-height:1.7;color:#c9ced8;white-space:pre-line">${esc(input.message)}</p>`
+    : "";
+
+  const html = SHELL(`
+    <h1 style="margin:0 0 6px;font-size:21px;letter-spacing:-0.02em">${esc(input.heading)}</h1>
+    <p style="margin:0 0 22px;font-size:12px;letter-spacing:0.06em;text-transform:uppercase;color:#9ba1ad">${esc(input.number)}</p>
+    ${note}
+    <table style="width:100%;border-collapse:collapse;font-size:14px;margin-bottom:22px">
+      <tr>
+        <td style="padding:10px 0;border-top:1px solid rgba(255,255,255,0.07);color:#9ba1ad">Amount</td>
+        <td style="padding:10px 0;border-top:1px solid rgba(255,255,255,0.07);text-align:right;font-weight:600">${esc(input.amount)}</td>
+      </tr>
+      ${
+        input.dueLabel
+          ? `<tr><td style="padding:10px 0;border-top:1px solid rgba(255,255,255,0.07);color:#9ba1ad">${esc(input.dueLabel.split("|")[0])}</td><td style="padding:10px 0;border-top:1px solid rgba(255,255,255,0.07);text-align:right">${esc(input.dueLabel.split("|")[1] ?? "")}</td></tr>`
+          : ""
+      }
+    </table>
+    <p style="margin:0;font-size:13px;line-height:1.7;color:#9ba1ad">
+      The full document is attached as a PDF. Reply to this email with any questions.
+    </p>
+    <div style="margin-top:24px;padding-top:18px;border-top:1px solid rgba(255,255,255,0.07);font-size:12px;color:#6b7280">
+      ${esc(input.fromName)} · ${esc(input.replyTo)}
+    </div>`);
+
+  const { error } = await resend.emails.send({
+    from: FROM,
+    to: [input.to],
+    replyTo: input.replyTo,
+    subject: input.subject,
+    html,
+    attachments: [{ filename: input.filename, content: input.pdf.toString("base64") }],
+  });
+  if (error) throw new Error(error.message || "Resend rejected the message.");
+  return { sent: true as const };
+}
