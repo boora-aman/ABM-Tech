@@ -47,6 +47,8 @@ export async function POST(_req: Request, { params }: Ctx) {
     taxMode: quote.taxMode,
     notes: quote.notes,
     terms: quote.terms,
+    termsIds: quote.termsIds,
+    customTerms: quote.customTerms,
     status: "draft",
     convertedFromId: quote._id,
   });

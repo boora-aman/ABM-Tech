@@ -153,6 +153,13 @@ const s = StyleSheet.create({
     marginBottom: 4, fontFamily: "Helvetica-Bold",
   },
   blockText: { fontSize: 8.5, color: DIM, lineHeight: 1.5 },
+  /* Each clause gets its own row with a gap. Run together they are a wall of
+     grey that nobody reads, which defeats the point of having terms. */
+  clause: { flexDirection: "row", marginBottom: 3.5 },
+  clauseNum: {
+    width: 13, fontSize: 8.5, color: FAINT, fontFamily: "Helvetica-Bold",
+  },
+  clauseText: { flex: 1, fontSize: 8.5, color: DIM, lineHeight: 1.45 },
 
   paidStamp: {
     marginTop: 10, alignSelf: "flex-start",
@@ -241,6 +248,11 @@ export function InvoiceDoc({ doc, biz }: { doc: PdfDoc; biz: PdfBiz }) {
     biz.udyam ? { label: "UDYAM / MSME", value: biz.udyam } : null,
     biz.pan ? { label: "PAN", value: biz.pan } : null,
   ].filter(Boolean) as { label: string; value: string }[];
+
+  const terms = (doc.terms ?? "")
+    .split("\n")
+    .map((l) => l.trim())
+    .filter(Boolean);
 
   const cl = doc.client;
   const clientAddr = [cl.line1, cl.line2, [cl.city, cl.state].filter(Boolean).join(", "), cl.postalCode]
@@ -437,10 +449,20 @@ export function InvoiceDoc({ doc, biz }: { doc: PdfDoc; biz: PdfBiz }) {
           </View>
         ) : null}
 
-        {doc.terms ? (
+        {terms.length ? (
           <View style={s.block}>
-            <Text style={s.blockLabel}>TERMS</Text>
-            <Text style={s.blockText}>{doc.terms}</Text>
+            <Text style={s.blockLabel}>TERMS &amp; CONDITIONS</Text>
+            {terms.map((line, i) => {
+              /* The composer numbers them; the number is pulled out so wrapped
+                 text hangs under the text rather than under the digit. */
+              const m = /^(\d+)\.\s*(.*)$/.exec(line);
+              return (
+                <View key={i} style={s.clause} wrap={false}>
+                  <Text style={s.clauseNum}>{m ? `${m[1]}.` : "\u00B7"}</Text>
+                  <Text style={s.clauseText}>{m ? m[2] : line}</Text>
+                </View>
+              );
+            })}
           </View>
         ) : null}
 

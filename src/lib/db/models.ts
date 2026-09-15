@@ -344,7 +344,14 @@ const BillingDocSchema = new Schema(
     },
 
     notes: String,
+    /* The composed, printed terms — a snapshot, like the client block. An
+       issued document keeps saying what it said when it was sent, so editing
+       the clause library never rewrites a past invoice. */
     terms: String,
+    /** Which library clauses were ticked, so a reopened draft re-ticks them. */
+    termsIds: { type: [String], default: [] },
+    /** Anything typed in beyond the library clauses. */
+    customTerms: String,
 
     /** Quote ↔ invoice lineage, so neither is issued from the same quote twice. */
     convertedFromId: { type: Schema.Types.ObjectId, ref: "BillingDoc" },

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/Button";
 import { Card, Label, Chip, Rule } from "@/components/ui/Panel";
 import { computeTotals, inrMoney, type Line } from "@/lib/billing";
 import type { Client } from "@/components/admin/ClientManager";
+import { clausesFor, presetIdsFor } from "@/lib/billing-terms";
 import { cn } from "@/lib/utils";
 
 /* ==========================================================================
@@ -37,6 +38,8 @@ type Doc = {
   status: string;
   notes?: string;
   terms?: string;
+  termsIds?: string[];
+  customTerms?: string;
   convertedToId?: string;
   convertedFromId?: string;
   sentAt?: string;
@@ -67,7 +70,8 @@ type Draft = {
   taxRate: number;
   taxMode: "none" | "cgst_sgst" | "igst";
   notes: string;
-  terms: string;
+  termsIds: string[];
+  customTerms: string;
 };
 
 const today = () => new Date().toISOString().slice(0, 10);
@@ -76,6 +80,10 @@ const plusDays = (n: number) => {
   d.setDate(d.getDate() + n);
   return d.toISOString().slice(0, 10);
 };
+
+/* A short list beats a free-text box: "nos"/"Nos"/"no.s" across three
+   invoices looks careless on a document somebody files. */
+const UNITS = ["nos", "hour", "day", "week", "month", "year", "page", "licence", "lot"];
 
 const blankLine = (): Line => ({ description: "", qty: 1, unit: "nos", rate: 0, discountPct: 0 });
 
@@ -91,7 +99,8 @@ function blankDraft(kind: "quotation" | "invoice"): Draft {
     taxRate: 0,
     taxMode: "none",
     notes: "",
-    terms: "",
+    termsIds: presetIdsFor(kind),
+    customTerms: "",
   };
 }
 
@@ -132,6 +141,10 @@ export function BillingManager() {
   const [tab, setTab] = useState<"quotation" | "invoice" | "receivables">("invoice");
   const [docs, setDocs] = useState<Doc[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
+  /* Whether a GSTIN is configured. It decides two things in here: the SAC/HSN
+     column and the tax controls. Both are meaningless without a registration
+     and were the clutter in the line editor. */
+  const [gstOn, setGstOn] = useState(false);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [draft, setDraft] = useState<Draft | null>(null);
@@ -140,13 +153,19 @@ export function BillingManager() {
   const [msg, setMsg] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
 
   const load = useCallback(async () => {
-    const [d, c] = await Promise.all([
+    const [d, c, site] = await Promise.all([
       fetch("/api/admin/billing/docs", { cache: "no-store" }).then((r) => r.json()),
       fetch("/api/admin/billing/clients", { cache: "no-store" }).then((r) => r.json()),
+      /* Tolerated failure: without a database this returns 503, and a missing
+         GSTIN is exactly the "not registered" case anyway. */
+      fetch("/api/admin/site", { cache: "no-store" })
+        .then((r) => r.json())
+        .catch(() => ({ ok: false })),
     ]);
     if (d.ok) setDocs(d.data as Doc[]);
     else setMsg({ kind: "err", text: d.error });
     if (c.ok) setClients(c.data as Client[]);
+    setGstOn(Boolean(site?.ok && (site.data as { gstin?: string })?.gstin));
   }, []);
 
   useEffect(() => {
@@ -193,6 +212,12 @@ export function BillingManager() {
     [draft],
   );
 
+  /* One template for the header and every row, so they cannot drift apart
+     when the SAC column appears. */
+  const cols = gstOn
+    ? "md:grid-cols-[minmax(0,1fr)_5rem_3.5rem_5.5rem_6rem_4rem_7rem_1.5rem]"
+    : "md:grid-cols-[minmax(0,1fr)_3.5rem_5.5rem_6rem_4rem_7rem_1.5rem]";
+
   const setLine = (i: number, patch: Partial<Line>) =>
     setDraft((d) =>
       d ? { ...d, lines: d.lines.map((l, k) => (k === i ? { ...l, ...patch } : l)) } : d,
@@ -220,7 +245,8 @@ export function BillingManager() {
       taxRate: Number(draft.taxRate) || 0,
       taxMode: draft.taxMode,
       notes: draft.notes,
-      terms: draft.terms,
+      termsIds: draft.termsIds,
+      customTerms: draft.customTerms,
     };
     const saved = await call(
       draft.id ? `/api/admin/billing/docs/${draft.id}` : "/api/admin/billing/docs",
@@ -250,7 +276,8 @@ export function BillingManager() {
       taxRate: doc.taxRate,
       taxMode: doc.taxMode,
       notes: doc.notes ?? "",
-      terms: doc.terms ?? "",
+      termsIds: doc.termsIds ?? [],
+      customTerms: doc.customTerms ?? "",
     });
     setOpen(null);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -448,11 +475,17 @@ export function BillingManager() {
           <Rule className="my-6" />
 
           {/* Lines */}
-          <div className="mb-2 hidden gap-2 px-1 text-[0.6875rem] tracking-[0.08em] text-ink-faint uppercase md:grid md:grid-cols-[minmax(0,1fr)_5rem_4rem_7rem_4rem_7rem_1.5rem]">
+          <div
+            className={cn(
+              "mb-2 hidden gap-2 px-1 text-[0.6875rem] tracking-[0.08em] text-ink-faint uppercase md:grid",
+              cols,
+            )}
+          >
             <span>Description</span>
-            <span>SAC/HSN</span>
+            {gstOn && <span>SAC/HSN</span>}
             <span>Qty</span>
-            <span>Unit / Rate</span>
+            <span>Unit</span>
+            <span>Rate</span>
             <span>Disc %</span>
             <span className="text-right">Amount</span>
             <span />
@@ -462,7 +495,10 @@ export function BillingManager() {
             {draft.lines.map((l, i) => (
               <div
                 key={i}
-                className="grid gap-2 rounded-sm border border-line p-3 md:grid-cols-[minmax(0,1fr)_5rem_4rem_7rem_4rem_7rem_1.5rem] md:items-center md:border-0 md:p-0 md:[&>*]:min-w-0"
+                className={cn(
+                  "grid gap-2 rounded-sm border border-line p-3 md:items-center md:border-0 md:p-0 md:[&>*]:min-w-0",
+                  cols,
+                )}
               >
                 <input
                   className={input}
@@ -470,42 +506,51 @@ export function BillingManager() {
                   value={l.description}
                   onChange={(e) => setLine(i, { description: e.target.value })}
                 />
-                <input
-                  className={input}
-                  placeholder="SAC"
-                  value={l.hsn ?? ""}
-                  onChange={(e) => setLine(i, { hsn: e.target.value })}
-                />
+                {gstOn && (
+                  <input
+                    className={input}
+                    placeholder="SAC"
+                    value={l.hsn ?? ""}
+                    onChange={(e) => setLine(i, { hsn: e.target.value })}
+                  />
+                )}
                 <input
                   className={input}
                   type="number"
                   min={0}
                   step="any"
+                  aria-label="Quantity"
                   value={l.qty}
                   onChange={(e) => setLine(i, { qty: Number(e.target.value) })}
                 />
-                <div className="grid min-w-0 gap-1">
-                  <input
-                    className={input}
-                    placeholder="unit"
-                    value={l.unit ?? ""}
-                    onChange={(e) => setLine(i, { unit: e.target.value })}
-                  />
-                  <input
-                    className={input}
-                    type="number"
-                    min={0}
-                    step="any"
-                    value={l.rate}
-                    onChange={(e) => setLine(i, { rate: Number(e.target.value) })}
-                  />
-                </div>
+                <select
+                  className={input}
+                  aria-label="Unit"
+                  value={l.unit ?? "nos"}
+                  onChange={(e) => setLine(i, { unit: e.target.value })}
+                >
+                  {UNITS.map((u) => (
+                    <option key={u} value={u}>
+                      {u}
+                    </option>
+                  ))}
+                </select>
+                <input
+                  className={input}
+                  type="number"
+                  min={0}
+                  step="any"
+                  aria-label="Rate"
+                  value={l.rate}
+                  onChange={(e) => setLine(i, { rate: Number(e.target.value) })}
+                />
                 <input
                   className={input}
                   type="number"
                   min={0}
                   max={100}
                   step="any"
+                  aria-label="Discount percent"
                   value={l.discountPct}
                   onChange={(e) => setLine(i, { discountPct: Number(e.target.value) })}
                 />
@@ -552,16 +597,60 @@ export function BillingManager() {
                   onChange={(e) => setDraft({ ...draft, notes: e.target.value })}
                 />
               </Field>
-              <Field label="Terms">
+              {/* Terms are ticked, not typed. Retyping them is how two
+                  documents end up promising different things about the same
+                  work. The text is composed server-side from what is ticked. */}
+              <fieldset className="grid gap-2.5">
+                <legend className="mb-1.5 text-[0.8125rem] font-medium">
+                  Terms &amp; conditions
+                </legend>
+                {clausesFor(draft.kind).map((c) => {
+                  const on = draft.termsIds.includes(c.id);
+                  return (
+                    <label
+                      key={c.id}
+                      className={cn(
+                        "flex cursor-pointer gap-3 rounded-sm border p-3 transition-colors",
+                        on ? "border-brand/40 bg-tint" : "border-line hover:border-line-strong",
+                      )}
+                    >
+                      <input
+                        type="checkbox"
+                        className="mt-0.5 size-4 shrink-0 accent-[var(--color-brand)]"
+                        checked={on}
+                        onChange={() =>
+                          setDraft({
+                            ...draft,
+                            termsIds: on
+                              ? draft.termsIds.filter((x) => x !== c.id)
+                              : [...draft.termsIds, c.id],
+                          })
+                        }
+                      />
+                      <span className="min-w-0">
+                        <span className="block text-[0.8125rem] font-medium">{c.label}</span>
+                        <span className="mt-0.5 block text-[0.75rem] leading-relaxed text-ink-dim">
+                          {c.text}
+                        </span>
+                      </span>
+                    </label>
+                  );
+                })}
+              </fieldset>
+
+              <Field
+                label="Anything else"
+                hint="Added as the last numbered term. Leave empty if the ticked clauses cover it."
+              >
                 <textarea
                   className={cn(input, "resize-y")}
-                  rows={3}
-                  value={draft.terms}
-                  onChange={(e) => setDraft({ ...draft, terms: e.target.value })}
+                  rows={2}
+                  value={draft.customTerms}
+                  onChange={(e) => setDraft({ ...draft, customTerms: e.target.value })}
                 />
               </Field>
 
-              <div className="grid gap-5 sm:grid-cols-3">
+              <div className={cn("grid gap-5", gstOn ? "sm:grid-cols-3" : "sm:grid-cols-1")}>
                 <Field label="Overall discount %">
                   <input
                     className={input}
@@ -573,36 +662,42 @@ export function BillingManager() {
                     onChange={(e) => setDraft({ ...draft, discountPct: Number(e.target.value) })}
                   />
                 </Field>
-                {/* Dormant until the business registers. Left in place so that
-                    switching on GST later is a setting, not a rebuild. */}
-                <Field label="Tax" hint="Leave at none while not GST registered.">
-                  <select
-                    className={input}
-                    value={draft.taxMode}
-                    onChange={(e) =>
-                      setDraft({
-                        ...draft,
-                        taxMode: e.target.value as Draft["taxMode"],
-                      })
-                    }
-                  >
-                    <option value="none">None</option>
-                    <option value="cgst_sgst">CGST + SGST</option>
-                    <option value="igst">IGST</option>
-                  </select>
-                </Field>
-                <Field label="Tax rate %">
-                  <input
-                    className={input}
-                    type="number"
-                    min={0}
-                    max={100}
-                    step="any"
-                    disabled={draft.taxMode === "none"}
-                    value={draft.taxRate}
-                    onChange={(e) => setDraft({ ...draft, taxRate: Number(e.target.value) })}
-                  />
-                </Field>
+
+                {/* The tax controls appear only once a GSTIN is configured.
+                    Charging tax without a registration is not a thing you
+                    should be one stray click away from doing, and the two
+                    dropdowns were the bulk of the clutter in here. The
+                    arithmetic underneath is unchanged and already handles
+                    CGST/SGST and IGST. */}
+                {gstOn ? (
+                  <>
+                    <Field label="Tax">
+                      <select
+                        className={input}
+                        value={draft.taxMode}
+                        onChange={(e) =>
+                          setDraft({ ...draft, taxMode: e.target.value as Draft["taxMode"] })
+                        }
+                      >
+                        <option value="none">None</option>
+                        <option value="cgst_sgst">CGST + SGST</option>
+                        <option value="igst">IGST</option>
+                      </select>
+                    </Field>
+                    <Field label="Tax rate %">
+                      <input
+                        className={input}
+                        type="number"
+                        min={0}
+                        max={100}
+                        step="any"
+                        disabled={draft.taxMode === "none"}
+                        value={draft.taxRate}
+                        onChange={(e) => setDraft({ ...draft, taxRate: Number(e.target.value) })}
+                      />
+                    </Field>
+                  </>
+                ) : null}
               </div>
             </div>
 

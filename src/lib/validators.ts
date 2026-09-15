@@ -438,7 +438,10 @@ export const billingDocWriteSchema = z
     taxRate: z.number().min(0).max(100),
     taxMode: z.enum(["none", "cgst_sgst", "igst"]),
     notes: z.string().trim().max(3000).optional().or(z.literal("")),
-    terms: z.string().trim().max(3000).optional().or(z.literal("")),
+    /* `terms` is composed on the server from these two — the client cannot
+       post arbitrary terms text in place of the clauses it claims. */
+    termsIds: z.array(z.string().trim().max(40)).max(40).optional(),
+    customTerms: z.string().trim().max(3000).optional().or(z.literal("")),
     status: z
       .enum(["draft", "sent", "accepted", "declined", "expired",
              "partial", "paid", "overdue", "cancelled"])

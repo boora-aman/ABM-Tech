@@ -2,6 +2,7 @@ import { requireSession } from "@/lib/auth";
 import { plain } from "@/lib/db/mongoose";
 import { BillingDocModel, ClientModel } from "@/lib/db/models";
 import { billingDocWriteSchema } from "@/lib/validators";
+import { composeTerms } from "@/lib/billing-terms";
 import { listDocs, nextNumber, requireDb, BillingUnavailable } from "@/lib/billing-repo";
 import { ok, fail } from "@/lib/api";
 
@@ -50,6 +51,9 @@ export async function POST(req: Request) {
   const c = client as Record<string, string>;
   const created = await BillingDocModel.create({
     ...d,
+    /* Composed here, not accepted from the client: the printed terms must be
+       the clauses that were actually ticked. */
+    terms: composeTerms(d.termsIds ?? [], d.customTerms),
     number,
     seq,
     fy,

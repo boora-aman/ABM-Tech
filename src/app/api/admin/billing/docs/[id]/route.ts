@@ -2,6 +2,7 @@ import { requireSession } from "@/lib/auth";
 import { plain } from "@/lib/db/mongoose";
 import { BillingDocModel, PaymentModel } from "@/lib/db/models";
 import { billingDocWriteSchema } from "@/lib/validators";
+import { composeTerms } from "@/lib/billing-terms";
 import { getDoc, listPayments, syncStatus, requireDb, BillingUnavailable } from "@/lib/billing-repo";
 import { ok, fail } from "@/lib/api";
 
@@ -64,7 +65,17 @@ export async function PATCH(req: Request, { params }: Ctx) {
   }
 
   // The number and the client snapshot are never editable.
-  const { ...safe } = parsed.data;
+  const safe: Record<string, unknown> = { ...parsed.data };
+
+  /* Recompose whenever either half of the terms changed, falling back to what
+     is already stored for the half that did not. */
+  if (parsed.data.termsIds !== undefined || parsed.data.customTerms !== undefined) {
+    const row = existing as { termsIds?: string[]; customTerms?: string };
+    safe.terms = composeTerms(
+      parsed.data.termsIds ?? row.termsIds ?? [],
+      parsed.data.customTerms ?? row.customTerms,
+    );
+  }
   const saved = await BillingDocModel.findByIdAndUpdate(id, { $set: safe }, { new: true }).lean();
   await syncStatus(id);
   return ok(plain([saved])[0]);

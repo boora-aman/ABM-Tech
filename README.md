@@ -192,6 +192,16 @@ A few decisions worth knowing before changing anything here:
 - **An invoice with payments against it is locked.** Cancel and reissue rather
   than editing amounts under a recorded receipt. Only an untouched draft can be
   deleted; everything else is cancelled, so the sequence stays gapless.
+- **Terms are ticked, not typed.** `src/lib/billing-terms.ts` holds the clause
+  library; the editor shows them as checkboxes and the server composes the
+  numbered block from what was ticked. The composed TEXT is stored on the
+  document, not a pointer to the library — editing a clause changes the next
+  document and never a past one. The ticked ids are kept alongside only so a
+  reopened draft re-ticks its boxes.
+- **The SAC/HSN column and the tax controls appear only once a GSTIN is set.**
+  Both are meaningless without a registration, and charging tax is not
+  something you should be one stray click away from. The arithmetic underneath
+  is unchanged.
 - **Unlike leads, billing has no seed fallback.** Content degrades to the
   committed copy when the database is away; an invoice cannot.
 
