@@ -8,6 +8,9 @@
  *   ADMIN_NAME='Their Name'
  *   ADMIN_ROLE=owner        # defaults to `editor`
  *
+ * Passwords must be at least 12 characters, except where MONGODB_URI points at
+ * this machine — a local throwaway database is not worth the friction.
+ *
  * There is no sign-up route on the site, so this is how the FIRST account
  * comes into existence; after that, an owner adds people at /admin/users.
  * Re-running it against an existing email resets that password, which is also
@@ -31,7 +34,16 @@ async function main() {
     console.error("Set ADMIN_EMAIL and ADMIN_PASSWORD.");
     process.exit(1);
   }
-  if (password.length < 12) {
+  /* The length floor exists because this account can edit the whole site, and
+     a hosted database is reachable from the internet. A database on this
+     machine is not, so a throwaway password there is a convenience rather than
+     a risk, and the floor only stops people setting up a local copy. Judged on
+     where the data lives rather than on a flag, because a flag is something
+     somebody eventually passes in production. */
+  const uri = process.env.MONGODB_URI ?? "";
+  const isLocalDb = /@?(localhost|127\.0\.0\.1|\[::1\]|0\.0\.0\.0)[:/]/.test(uri);
+
+  if (password.length < 12 && !isLocalDb) {
     console.error("Use at least 12 characters. This account can edit the whole site.");
     process.exit(1);
   }
@@ -50,6 +62,14 @@ async function main() {
   // is slow enough to make offline cracking expensive and fast enough that a
   // login does not feel sluggish.
   const passwordHash = await bcrypt.hash(password, 12);
+
+  if (password.length < 12) {
+    console.warn(
+      `\n  ! Short password accepted because MONGODB_URI points at this machine.\n` +
+        `    Do not reuse it anywhere the database is reachable from outside.\n` +
+        `    Note the dev server also answers on your LAN address.\n`,
+    );
+  }
 
   const existing = await AdminUserModel.findOne({ email }).lean();
   const owners = await AdminUserModel.countDocuments({ role: "owner" });

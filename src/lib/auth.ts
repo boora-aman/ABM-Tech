@@ -16,9 +16,15 @@ import { AdminUserModel } from "./db/models";
    Sessions are JWT-backed httpOnly cookies with an 8-hour lifetime.
    ========================================================================== */
 
+/* A shape check, not a strength control. Password strength is enforced where
+   passwords are SET — 12 characters at /api/admin/users, and the same floor in
+   seed:admin except against a database on this machine. A minimum here only
+   decides which existing passwords are allowed to be typed in, and at 8 it
+   silently refused locally-seeded accounts: the login failed before bcrypt was
+   ever consulted, which reads as a wrong password rather than a rule. */
 const credentialsSchema = z.object({
   email: z.string().email(),
-  password: z.string().min(8),
+  password: z.string().min(1).max(200),
 });
 
 /**
