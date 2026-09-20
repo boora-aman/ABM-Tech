@@ -1,9 +1,9 @@
 import { requireSession } from "@/lib/auth";
-import { plain } from "@/lib/db/mongoose";
 import { BillingDocModel, ClientModel } from "@/lib/db/models";
 import { billingDocWriteSchema } from "@/lib/validators";
 import { composeTerms } from "@/lib/billing-terms";
-import { listDocs, nextNumber, requireDb, BillingUnavailable } from "@/lib/billing-repo";
+import { isLongForm, presetSections } from "@/lib/billing-sections";
+import { getDoc, listDocs, nextNumber, requireDb, BillingUnavailable } from "@/lib/billing-repo";
 import { ok, fail } from "@/lib/api";
 
 export const runtime = "nodejs";
@@ -46,6 +46,11 @@ export async function POST(req: Request) {
   const client = await ClientModel.findById(d.clientId).lean();
   if (!client) return fail("That client no longer exists.", 404);
 
+  /* A quotation or an invoice without a line is an empty promise; the schema
+     cannot enforce it because an agreement legitimately has none. */
+  if (!isLongForm(d.kind) && d.lines.length === 0)
+    return fail("Add at least one line.", 422);
+
   const { number, seq, fy } = await nextNumber(d.kind);
 
   const c = client as Record<string, string>;
@@ -54,6 +59,10 @@ export async function POST(req: Request) {
     /* Composed here, not accepted from the client: the printed terms must be
        the clauses that were actually ticked. */
     terms: composeTerms(d.termsIds ?? [], d.customTerms),
+    /* A long document created without prose gets the standard set, so an
+       empty proposal is never what lands on a client's desk. */
+    sections:
+      d.sections ?? (isLongForm(d.kind) ? presetSections(d.kind) : []),
     number,
     seq,
     fy,
@@ -66,5 +75,7 @@ export async function POST(req: Request) {
     },
   });
 
-  return ok(plain([created])[0], { status: 201 });
+  /* Returned the same shape as GET — totals and balance included — so the
+     caller never has to guess which endpoint gives the enriched row. */
+  return ok(await getDoc(String(created._id)), { status: 201 });
 }

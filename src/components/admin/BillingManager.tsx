@@ -6,6 +6,9 @@ import { Card, Label, Chip, Rule } from "@/components/ui/Panel";
 import { computeTotals, inrMoney, type Line } from "@/lib/billing";
 import type { Client } from "@/components/admin/ClientManager";
 import { clausesFor, presetIdsFor } from "@/lib/billing-terms";
+import { presetSections, isLongForm, type Section } from "@/lib/billing-sections";
+import { SectionEditor } from "@/components/admin/SectionEditor";
+import { services } from "@/lib/content/services";
 import { cn } from "@/lib/utils";
 
 /* ==========================================================================
@@ -22,9 +25,11 @@ import { cn } from "@/lib/utils";
 
 type Totals = ReturnType<typeof computeTotals>;
 
+type DocKind = "quotation" | "invoice" | "proposal" | "agreement";
+
 type Doc = {
   id: string;
-  kind: "quotation" | "invoice";
+  kind: DocKind;
   number: string;
   client: Record<string, string | undefined>;
   clientId?: string;
@@ -38,6 +43,8 @@ type Doc = {
   status: string;
   notes?: string;
   terms?: string;
+  sections?: Section[];
+  sowRef?: string;
   termsIds?: string[];
   customTerms?: string;
   convertedToId?: string;
@@ -60,7 +67,7 @@ type Payment = {
 
 type Draft = {
   id?: string;
-  kind: "quotation" | "invoice";
+  kind: DocKind;
   clientId: string;
   issueDate: string;
   validUntil: string;
@@ -70,6 +77,8 @@ type Draft = {
   taxRate: number;
   taxMode: "none" | "cgst_sgst" | "igst";
   notes: string;
+  sections: Section[];
+  sowRef: string;
   termsIds: string[];
   customTerms: string;
 };
@@ -87,19 +96,33 @@ const UNITS = ["nos", "hour", "day", "week", "month", "year", "page", "licence",
 
 const blankLine = (): Line => ({ description: "", qty: 1, unit: "nos", rate: 0, discountPct: 0 });
 
-function blankDraft(kind: "quotation" | "invoice"): Draft {
+const KIND_LABEL: Record<DocKind, string> = {
+  quotation: "quotation",
+  invoice: "invoice",
+  proposal: "proposal",
+  agreement: "service agreement",
+};
+
+function blankDraft(kind: DocKind): Draft {
   return {
     kind,
     clientId: "",
     issueDate: today(),
-    validUntil: kind === "quotation" ? plusDays(15) : "",
+    validUntil: kind === "quotation" || kind === "proposal" ? plusDays(15) : "",
     dueDate: kind === "invoice" ? plusDays(14) : "",
-    lines: [blankLine()],
+    /* An agreement carries no price. Starting it with an empty line would put
+       a stray zero-rupee row on a contract. */
+    lines: kind === "agreement" ? [] : [blankLine()],
     discountPct: 0,
     taxRate: 0,
     taxMode: "none",
     notes: "",
-    termsIds: presetIdsFor(kind),
+    sections: isLongForm(kind) ? presetSections(kind) : [],
+    sowRef: "",
+    /* An agreement states its own terms in full, as numbered clauses. Bolting
+       the short-form terms list onto the end of it would say the same things
+       twice, in two voices. */
+    termsIds: kind === "agreement" ? [] : presetIdsFor(kind === "proposal" ? "quotation" : kind),
     customTerms: "",
   };
 }
@@ -138,7 +161,7 @@ function Field({
 }
 
 export function BillingManager() {
-  const [tab, setTab] = useState<"quotation" | "invoice" | "receivables">("invoice");
+  const [tab, setTab] = useState<DocKind | "receivables">("invoice");
   const [docs, setDocs] = useState<Doc[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
   /* Whether a GSTIN is configured. It decides two things in here: the SAC/HSN
@@ -245,6 +268,8 @@ export function BillingManager() {
       taxRate: Number(draft.taxRate) || 0,
       taxMode: draft.taxMode,
       notes: draft.notes,
+      sections: draft.sections,
+      sowRef: draft.sowRef,
       termsIds: draft.termsIds,
       customTerms: draft.customTerms,
     };
@@ -271,11 +296,13 @@ export function BillingManager() {
       issueDate: doc.issueDate,
       validUntil: doc.validUntil ?? "",
       dueDate: doc.dueDate ?? "",
-      lines: doc.lines.length ? doc.lines : [blankLine()],
+      lines: doc.lines.length || doc.kind === "agreement" ? doc.lines : [blankLine()],
       discountPct: doc.discountPct,
       taxRate: doc.taxRate,
       taxMode: doc.taxMode,
       notes: doc.notes ?? "",
+      sections: doc.sections ?? [],
+      sowRef: doc.sowRef ?? "",
       termsIds: doc.termsIds ?? [],
       customTerms: doc.customTerms ?? "",
     });
@@ -388,7 +415,13 @@ export function BillingManager() {
           <h2 className="t-h3">Quotations &amp; invoices</h2>
         </div>
         {!draft && (
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
+            <Button variant="ghost" onClick={() => setDraft(blankDraft("agreement"))}>
+              + Agreement
+            </Button>
+            <Button variant="outline" onClick={() => setDraft(blankDraft("proposal"))}>
+              + Proposal
+            </Button>
             <Button variant="outline" onClick={() => setDraft(blankDraft("quotation"))}>
               + Quotation
             </Button>
@@ -417,7 +450,7 @@ export function BillingManager() {
         <Card raised className="p-6 sm:p-7">
           <div className="mb-5 flex items-center justify-between gap-3">
             <h3 className="t-h3">
-              {draft.id ? "Edit" : "New"} {draft.kind === "quotation" ? "quotation" : "invoice"}
+              {draft.id ? "Edit" : "New"} {KIND_LABEL[draft.kind]}
             </h3>
             <Button variant="ghost" size="sm" onClick={() => setDraft(null)}>
               Close
@@ -451,7 +484,15 @@ export function BillingManager() {
                 onChange={(e) => setDraft({ ...draft, issueDate: e.target.value })}
               />
             </Field>
-            {draft.kind === "quotation" ? (
+            {draft.kind === "agreement" ? (
+              <Field label="Against quotation / project" hint="Optional. Printed in the agreement details.">
+                <input
+                  className={input}
+                  value={draft.sowRef}
+                  onChange={(e) => setDraft({ ...draft, sowRef: e.target.value })}
+                />
+              </Field>
+            ) : draft.kind === "quotation" || draft.kind === "proposal" ? (
               <Field label="Valid until">
                 <input
                   type="date"
@@ -475,6 +516,8 @@ export function BillingManager() {
           <Rule className="my-6" />
 
           {/* Lines */}
+          {draft.kind !== "agreement" && (
+          <>
           <div
             className={cn(
               "mb-2 hidden gap-2 px-1 text-[0.6875rem] tracking-[0.08em] text-ink-faint uppercase md:grid",
@@ -576,14 +619,48 @@ export function BillingManager() {
             ))}
           </div>
 
-          <Button
-            variant="ghost"
-            size="sm"
-            className="mt-3"
-            onClick={() => setDraft({ ...draft, lines: [...draft.lines, blankLine()] })}
-          >
-            + Add line
-          </Button>
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setDraft({ ...draft, lines: [...draft.lines, blankLine()] })}
+            >
+              + Add line
+            </Button>
+
+            {/* The catalogue is the site's own services file, not a second
+                price list. Two lists of prices drift, and the one on the
+                invoice is the one the client holds you to. */}
+            <select
+              className={cn(input, "w-auto max-w-full")}
+              value=""
+              aria-label="Add a line from the service catalogue"
+              onChange={(e) => {
+                const svc = services.find((x) => x.slug === e.target.value);
+                if (!svc) return;
+                const next: Line = {
+                  description: `${svc.title} — ${svc.summary}`,
+                  qty: 1,
+                  unit: svc.priceMode === "retainer" ? "month" : "nos",
+                  rate: svc.from,
+                  discountPct: 0,
+                };
+                const lines = draft.lines.filter((l) => l.description.trim());
+                setDraft({ ...draft, lines: [...lines, next] });
+              }}
+            >
+              <option value="">+ From catalogue…</option>
+              {services.map((svc) => (
+                <option key={svc.slug} value={svc.slug}>
+                  {svc.title}
+                  {svc.from ? ` — from ${inrMoney(svc.from)}` : " — on request"}
+                  {svc.priceMode === "retainer" ? "/mo" : ""}
+                </option>
+              ))}
+            </select>
+          </div>
+          </>
+          )}
 
           <Rule className="my-6" />
 
@@ -597,14 +674,25 @@ export function BillingManager() {
                   onChange={(e) => setDraft({ ...draft, notes: e.target.value })}
                 />
               </Field>
+              {isLongForm(draft.kind) && (
+                <SectionEditor
+                  kind={draft.kind as "proposal" | "agreement"}
+                  sections={draft.sections}
+                  onChange={(sections) => setDraft({ ...draft, sections })}
+                />
+              )}
+
               {/* Terms are ticked, not typed. Retyping them is how two
                   documents end up promising different things about the same
-                  work. The text is composed server-side from what is ticked. */}
+                  work. The text is composed server-side from what is ticked.
+                  An agreement states its terms as full clauses instead. */}
+              {draft.kind !== "agreement" && (
+              <>
               <fieldset className="grid gap-2.5">
                 <legend className="mb-1.5 text-[0.8125rem] font-medium">
                   Terms &amp; conditions
                 </legend>
-                {clausesFor(draft.kind).map((c) => {
+                {clausesFor(draft.kind === "proposal" ? "quotation" : draft.kind as "quotation" | "invoice").map((c) => {
                   const on = draft.termsIds.includes(c.id);
                   return (
                     <label
@@ -649,7 +737,10 @@ export function BillingManager() {
                   onChange={(e) => setDraft({ ...draft, customTerms: e.target.value })}
                 />
               </Field>
+              </>
+              )}
 
+              {draft.kind !== "agreement" && (
               <div className={cn("grid gap-5", gstOn ? "sm:grid-cols-3" : "sm:grid-cols-1")}>
                 <Field label="Overall discount %">
                   <input
@@ -699,8 +790,10 @@ export function BillingManager() {
                   </>
                 ) : null}
               </div>
+              )}
             </div>
 
+            {draft.kind !== "agreement" ? (
             <Card className="h-fit p-5">
               <dl className="grid gap-2 text-[0.875rem]">
                 <div className="flex justify-between">
@@ -732,6 +825,15 @@ export function BillingManager() {
                 </div>
               </dl>
             </Card>
+            ) : (
+              <Card className="h-fit p-5">
+                <p className="text-[0.8125rem] leading-relaxed text-ink-dim">
+                  An agreement carries no price. The money lives in the
+                  quotation or proposal it sits on top of, and this document
+                  governs how the work is run.
+                </p>
+              </Card>
+            )}
           </div>
 
           <div className="mt-6 flex flex-wrap gap-3">
@@ -741,7 +843,8 @@ export function BillingManager() {
               disabled={
                 busy ||
                 !draft.clientId ||
-                !draft.lines.some((l) => l.description.trim())
+                (draft.kind !== "agreement" &&
+                  !draft.lines.some((l) => l.description.trim()))
               }
             >
               {busy ? "Saving…" : draft.id ? "Save changes" : "Create"}
@@ -766,6 +869,8 @@ export function BillingManager() {
           [
             ["invoice", "Invoices"],
             ["quotation", "Quotations"],
+            ["proposal", "Proposals"],
+            ["agreement", "Agreements"],
             ["receivables", "Receivables"],
           ] as const
         ).map(([k, label]) => (
@@ -803,7 +908,7 @@ export function BillingManager() {
         <Card className="p-6 text-[0.875rem] text-ink-dim">
           {tab === "receivables"
             ? "Nothing outstanding. Every issued invoice is settled."
-            : `No ${tab === "invoice" ? "invoices" : "quotations"} yet.`}
+            : `No ${KIND_LABEL[tab as DocKind]}s yet.`}
         </Card>
       ) : (
         <div className="grid gap-3">
@@ -827,7 +932,11 @@ export function BillingManager() {
                   </p>
                 </button>
                 <div className="text-right">
-                  <p className="font-semibold tabular-nums">Rs. {inrMoney(doc.totals.total)}</p>
+                  {doc.kind === "agreement" ? (
+                    <p className="text-[0.8125rem] text-ink-faint">no price</p>
+                  ) : (
+                    <p className="font-semibold tabular-nums">Rs. {inrMoney(doc.totals.total)}</p>
+                  )}
                   {doc.kind === "invoice" && doc.paid > 0 && (
                     <p className="mt-0.5 text-[0.8125rem] text-ink-dim tabular-nums">
                       paid {inrMoney(doc.paid)} · due {inrMoney(doc.balance)}
@@ -839,6 +948,12 @@ export function BillingManager() {
               {open === doc.id && (
                 <>
                   <Rule className="my-4" />
+                  {(doc.sections?.length ?? 0) > 0 && (
+                    <p className="mb-3 text-[0.8125rem] text-ink-dim">
+                      {doc.sections!.length} sections ·{" "}
+                      {doc.sections!.map((x) => x.heading).join(" · ")}
+                    </p>
+                  )}
                   <ul className="mb-4 grid gap-1.5 text-[0.8125rem]">
                     {doc.lines.map((l, i) => (
                       <li key={i} className="flex justify-between gap-4">
@@ -904,7 +1019,8 @@ export function BillingManager() {
                         Record payment
                       </Button>
                     )}
-                    {doc.kind === "quotation" && !doc.convertedToId && (
+                    {(doc.kind === "quotation" || doc.kind === "proposal") &&
+                      !doc.convertedToId && (
                       <Button variant="outline" size="sm" onClick={() => convert(doc)} disabled={busy}>
                         Raise invoice
                       </Button>

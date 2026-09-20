@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 type Ctx = { params: Promise<{ id: string }> };
 
 /**
- * Turn an accepted quotation into an invoice.
+ * Turn an accepted quotation or proposal into an invoice.
  *
  * A copy, not a change of `kind`: the quotation is what the client agreed to
  * and has to stay readable afterwards, with its own number, under its own
@@ -26,9 +26,10 @@ export async function POST(_req: Request, { params }: Ctx) {
   const { id } = await params;
   const quote = await BillingDocModel.findById(id).lean();
   if (!quote) return fail("Not found.", 404);
-  if (quote.kind !== "quotation") return fail("That is already an invoice.", 409);
+  if (quote.kind !== "quotation" && quote.kind !== "proposal")
+    return fail("Only a quotation or a proposal can be turned into an invoice.", 409);
   if (quote.convertedToId)
-    return fail("This quotation has already been invoiced.", 409, { invoiceId: String(quote.convertedToId) });
+    return fail("This has already been invoiced.", 409, { invoiceId: String(quote.convertedToId) });
 
   const { number, seq, fy } = await nextNumber("invoice");
   const today = new Date().toISOString().slice(0, 10);
@@ -47,6 +48,9 @@ export async function POST(_req: Request, { params }: Ctx) {
     taxMode: quote.taxMode,
     notes: quote.notes,
     terms: quote.terms,
+    /* The invoice records the money, not the argument for it — the proposal
+       keeps its own prose and its own number. */
+    sowRef: quote.number,
     termsIds: quote.termsIds,
     customTerms: quote.customTerms,
     status: "draft",

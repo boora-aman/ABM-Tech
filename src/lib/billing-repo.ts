@@ -2,6 +2,7 @@ import { Types } from "mongoose";
 import { connectDb, isDbConfigured, plain } from "@/lib/db/mongoose";
 import { BillingDocModel, PaymentModel, ClientModel, CounterModel } from "@/lib/db/models";
 import { computeTotals, financialYear, type Line } from "@/lib/billing";
+import type { Section } from "@/lib/billing-sections";
 import { getSiteConfig } from "@/lib/content/repo";
 import type { PdfBiz } from "@/lib/pdf/InvoiceDoc";
 
@@ -13,6 +14,8 @@ import type { PdfBiz } from "@/lib/pdf/InvoiceDoc";
    plausible-looking invoice from stale data would be worse than showing an
    error, so every function here requires a live connection and says so.
    ========================================================================== */
+
+export type DocKind = "quotation" | "invoice" | "proposal" | "agreement";
 
 export class BillingUnavailable extends Error {
   constructor() {
@@ -28,7 +31,7 @@ export async function requireDb() {
 
 export type DocRow = {
   id: string;
-  kind: "quotation" | "invoice";
+  kind: DocKind;
   number: string;
   fy: string;
   clientId?: string;
@@ -43,6 +46,8 @@ export type DocRow = {
   status: string;
   notes?: string;
   terms?: string;
+  sections?: Section[];
+  sowRef?: string;
   convertedToId?: string;
   convertedFromId?: string;
   sentAt?: string;
@@ -67,7 +72,7 @@ export async function withMoney(doc: DocRow) {
 
 const toObjectId = (id: string) => new Types.ObjectId(id);
 
-export async function listDocs(kind?: "quotation" | "invoice") {
+export async function listDocs(kind?: DocKind) {
   await requireDb();
   const docs = await BillingDocModel.find(kind ? { kind } : {})
     .sort({ createdAt: -1 })
@@ -166,7 +171,12 @@ export async function billingIdentity(): Promise<PdfBiz> {
   };
 }
 
-const PREFIX = { quotation: "QT", invoice: "INV" } as const;
+const PREFIX = {
+  quotation: "QT",
+  invoice: "INV",
+  proposal: "PROP",
+  agreement: "MSA",
+} as const;
 
 /**
  * Reserve the next number for a kind and financial year.
@@ -180,7 +190,7 @@ const PREFIX = { quotation: "QT", invoice: "INV" } as const;
  * how you end up with two invoices sharing one.
  */
 export async function nextNumber(
-  kind: "quotation" | "invoice",
+  kind: DocKind,
   fy = financialYear(),
 ): Promise<{ number: string; seq: number; fy: string }> {
   const counter = await CounterModel.findOneAndUpdate(

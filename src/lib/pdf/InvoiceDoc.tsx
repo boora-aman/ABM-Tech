@@ -2,6 +2,8 @@ import {
   Document, Page, Text, View, StyleSheet, Svg, Path, Rect,
 } from "@react-pdf/renderer";
 import { computeTotals, inrMoney, amountInWords, type Line } from "@/lib/billing";
+import { isLongForm, type Section } from "@/lib/billing-sections";
+import { SectionBlock, SignatureBlock, FactsTable } from "@/lib/pdf/Blocks";
 
 /* The document is set in Helvetica, one of the PDF standard-14 faces, so that
    no font file has to be downloaded or embedded on every render. Those faces
@@ -201,7 +203,7 @@ export type PdfBiz = {
 };
 
 export type PdfDoc = {
-  kind: "quotation" | "invoice";
+  kind: "quotation" | "invoice" | "proposal" | "agreement";
   number: string;
   issueDate: string;
   validUntil?: string;
@@ -215,6 +217,10 @@ export type PdfDoc = {
   terms?: string;
   status?: string;
   amountPaid?: number;
+  /** Proposals and agreements: the prose, already edited by the operator. */
+  sections?: Section[];
+  /** The quotation or proposal this document is raised against. */
+  sowRef?: string;
 };
 
 const dateIn = (v?: string) => {
@@ -228,7 +234,32 @@ const dateIn = (v?: string) => {
 export function InvoiceDoc({ doc, biz }: { doc: PdfDoc; biz: PdfBiz }) {
   const t = computeTotals(doc.lines, doc.discountPct, doc.taxRate, doc.taxMode);
   const isQuote = doc.kind === "quotation";
-  const title = isQuote ? "QUOTATION" : biz.gstin ? "TAX INVOICE" : "INVOICE";
+  const long = isLongForm(doc.kind);
+  const isAgreement = doc.kind === "agreement";
+  const title =
+    doc.kind === "proposal"
+      ? "SERVICE PROPOSAL"
+      : isAgreement
+        ? "MASTER SERVICE AGREEMENT"
+        : isQuote
+          ? "QUOTATION"
+          : biz.gstin
+            ? "TAX INVOICE"
+            : "INVOICE";
+
+  const sections = doc.sections ?? [];
+  const noun =
+    doc.kind === "proposal"
+      ? "proposal"
+      : doc.kind === "agreement"
+        ? "agreement"
+        : isQuote
+          ? "quotation"
+          : "invoice";
+  /* An agreement has no price. A proposal usually does, but can be sent before
+     the numbers settle, so the money block is driven by whether there are
+     lines rather than by the kind. */
+  const hasMoney = doc.lines.length > 0 && !isAgreement;
   const paid = Number(doc.amountPaid ?? 0);
   const due = Math.max(0, t.total - paid);
 
@@ -257,6 +288,30 @@ export function InvoiceDoc({ doc, biz }: { doc: PdfDoc; biz: PdfBiz }) {
   const cl = doc.client;
   const clientAddr = [cl.line1, cl.line2, [cl.city, cl.state].filter(Boolean).join(", "), cl.postalCode]
     .filter(Boolean).join("\n");
+
+  const partyLabel = isAgreement
+    ? "THE CLIENT"
+    : isQuote || doc.kind === "proposal"
+      ? "PREPARED FOR"
+      : "BILL TO";
+
+  /* The facts a long document is read against: who, when, until when, and
+     which quotation it sits on top of. On an invoice the same facts live in
+     the header, where there is room for them because there is no prose. */
+  const facts: [string, string][] = long
+    ? ([
+        [isAgreement ? "Agreement no." : "Proposal no.", doc.number],
+        [isAgreement ? "Agreement date" : "Date", dateIn(doc.issueDate)],
+        doc.validUntil ? ["Valid until", dateIn(doc.validUntil)] : null,
+        [isAgreement ? "Client" : "Prepared for", cl.company || cl.name || ""],
+        cl.email || cl.phone
+          ? ["Client contact", [cl.name, cl.email, cl.phone].filter(Boolean).join("  ·  ")]
+          : null,
+        [isAgreement ? "Provider" : "Prepared by", biz.legalName || biz.name],
+        doc.sowRef ? [isAgreement ? "Project / SOW" : "Against quotation", doc.sowRef] : null,
+      ].filter(Boolean) as [string, string][])
+    : [];
+
 
   return (
     <Document
@@ -327,7 +382,7 @@ export function InvoiceDoc({ doc, biz }: { doc: PdfDoc; biz: PdfBiz }) {
 
         <View style={s.panels}>
           <View style={s.panel}>
-            <Text style={s.panelLabel}>{isQuote ? "PREPARED FOR" : "BILL TO"}</Text>
+            <Text style={s.panelLabel}>{partyLabel}</Text>
             <Text style={s.panelName}>{cl.company || cl.name}</Text>
             {cl.company && cl.name ? <Text style={s.panelText}>{cl.name}</Text> : null}
             {clientAddr ? <Text style={s.panelText}>{clientAddr}</Text> : null}
@@ -336,7 +391,17 @@ export function InvoiceDoc({ doc, biz }: { doc: PdfDoc; biz: PdfBiz }) {
             {cl.phone ? <Text style={s.panelText}>{cl.phone}</Text> : null}
           </View>
 
-          {!isQuote && (biz.bankAccount || biz.upi) ? (
+          {/* An agreement is between two named parties, so the second panel
+              names the provider rather than asking for money. */}
+          {isAgreement ? (
+            <View style={s.panel}>
+              <Text style={s.panelLabel}>THE PROVIDER</Text>
+              <Text style={s.panelName}>{biz.legalName || biz.name}</Text>
+              {bizAddr ? <Text style={s.panelText}>{bizAddr}</Text> : null}
+              {biz.email ? <Text style={s.panelText}>{biz.email}</Text> : null}
+              {biz.phoneDisplay ? <Text style={s.panelText}>{biz.phoneDisplay}</Text> : null}
+            </View>
+          ) : !isQuote && !long && (biz.bankAccount || biz.upi) ? (
             <View style={s.panel}>
               <Text style={s.panelLabel}>PAY TO</Text>
               {biz.bankName ? <Text style={s.panelText}>{biz.bankName}</Text> : null}
@@ -347,7 +412,11 @@ export function InvoiceDoc({ doc, biz }: { doc: PdfDoc; biz: PdfBiz }) {
           ) : null}
         </View>
 
-        <View style={s.tHead}>
+        {long ? <FactsTable rows={facts} /> : null}
+
+        {hasMoney ? (
+          <>
+        <View style={[s.tHead, long ? { marginTop: 22 } : {}]}>
           <Text style={[s.tHeadCell, s.cDesc]}>DESCRIPTION</Text>
           <Text style={[s.tHeadCell, s.cQty]}>QTY</Text>
           <Text style={[s.tHeadCell, s.cRate]}>RATE</Text>
@@ -438,9 +507,15 @@ export function InvoiceDoc({ doc, biz }: { doc: PdfDoc; biz: PdfBiz }) {
           <Text style={s.wordsText}>{amountInWords(t.total)}</Text>
         </View>
 
-        {!isQuote && due <= 0 && paid > 0 ? (
+        {!isQuote && !long && due <= 0 && paid > 0 ? (
           <Text style={s.paidStamp}>PAID IN FULL</Text>
         ) : null}
+          </>
+        ) : null}
+
+        {sections.map((sec, i) => (
+          <SectionBlock key={sec.id || i} section={sec} index={i + 1} />
+        ))}
 
         {doc.notes ? (
           <View style={s.block}>
@@ -466,13 +541,23 @@ export function InvoiceDoc({ doc, biz }: { doc: PdfDoc; biz: PdfBiz }) {
           </View>
         ) : null}
 
-        {!biz.gstin ? (
+        {/* Only where there is money to not have taxed. An agreement states no
+            price at all, so a line about tax on it is nonsense. */}
+        {!biz.gstin && hasMoney ? (
           <View style={s.block}>
             <Text style={s.blockText}>
-              Not registered for GST. No tax has been charged on this{" "}
-              {isQuote ? "quotation" : "invoice"}.
+              Not registered for GST. No tax has been charged on this {noun}.
             </Text>
           </View>
+        ) : null}
+
+        {long ? (
+          <SignatureBlock
+            left={biz.legalName || biz.name}
+            right={cl.company || cl.name || "Client"}
+            leftLabel={isAgreement ? "FOR THE PROVIDER" : "FOR " + (biz.legalName || biz.name).toUpperCase()}
+            rightLabel={isAgreement ? "FOR THE CLIENT" : "ACCEPTED BY THE CLIENT"}
+          />
         ) : null}
 
         {/* `fixed` repeats this on every page. A two-page invoice whose second

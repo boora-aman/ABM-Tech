@@ -303,7 +303,12 @@ const LineSchema = new Schema(
  */
 const BillingDocSchema = new Schema(
   {
-    kind: { type: String, enum: ["quotation", "invoice"], required: true, index: true },
+    kind: {
+      type: String,
+      enum: ["quotation", "invoice", "proposal", "agreement"],
+      required: true,
+      index: true,
+    },
     /** Human-facing, unique, gapless per financial year. */
     number: { type: String, required: true, unique: true, index: true },
     /** Indian financial year the number belongs to, e.g. "26-27". */
@@ -348,6 +353,31 @@ const BillingDocSchema = new Schema(
        issued document keeps saying what it said when it was sent, so editing
        the clause library never rewrites a past invoice. */
     terms: String,
+    /* The prose half of a proposal or an agreement: headings and bodies copied
+       from the section library at create time and edited from there. Stored in
+       full, like the client block — an issued document keeps the words it was
+       issued with. */
+    sections: {
+      type: [
+        new Schema(
+          {
+            id: String,
+            heading: String,
+            kind: { type: String, enum: ["text", "bullets", "table", "checklist"], default: "text" },
+            body: String,
+            items: [String],
+            columns: [String],
+            rows: [[String]],
+          },
+          { _id: false },
+        ),
+      ],
+      default: [],
+    },
+
+    /** Proposal or agreement: the quotation it is raised against, free text. */
+    sowRef: String,
+
     /** Which library clauses were ticked, so a reopened draft re-ticks them. */
     termsIds: { type: [String], default: [] },
     /** Anything typed in beyond the library clauses. */

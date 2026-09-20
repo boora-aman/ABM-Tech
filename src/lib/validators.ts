@@ -428,12 +428,15 @@ const lineSchema = z.object({
 
 export const billingDocWriteSchema = z
   .object({
-    kind: z.enum(["quotation", "invoice"]),
+    kind: z.enum(["quotation", "invoice", "proposal", "agreement"]),
     clientId: z.string().trim().min(1, "Choose a client"),
     issueDate: isoDay,
     validUntil: isoDay.optional().or(z.literal("")),
     dueDate: isoDay.optional().or(z.literal("")),
-    lines: z.array(lineSchema).min(1, "Add at least one line").max(60),
+    /* An agreement carries no money at all, and a proposal can be sent before
+       the numbers are settled, so the floor of one line cannot be universal.
+       The editor still refuses to save a quotation or invoice without one. */
+    lines: z.array(lineSchema).max(60),
     discountPct: z.number().min(0).max(100),
     taxRate: z.number().min(0).max(100),
     taxMode: z.enum(["none", "cgst_sgst", "igst"]),
@@ -442,6 +445,23 @@ export const billingDocWriteSchema = z
        post arbitrary terms text in place of the clauses it claims. */
     termsIds: z.array(z.string().trim().max(40)).max(40).optional(),
     customTerms: z.string().trim().max(3000).optional().or(z.literal("")),
+    sowRef: z.string().trim().max(120).optional().or(z.literal("")),
+    sections: z
+      .array(
+        z
+          .object({
+            id: z.string().trim().max(60),
+            heading: z.string().trim().min(1).max(200),
+            kind: z.enum(["text", "bullets", "table", "checklist"]),
+            body: z.string().max(20000).optional().or(z.literal("")),
+            items: z.array(z.string().max(2000)).max(60).optional(),
+            columns: z.array(z.string().max(200)).max(8).optional(),
+            rows: z.array(z.array(z.string().max(2000)).max(8)).max(60).optional(),
+          })
+          .strict(),
+      )
+      .max(40)
+      .optional(),
     status: z
       .enum(["draft", "sent", "accepted", "declined", "expired",
              "partial", "paid", "overdue", "cancelled"])

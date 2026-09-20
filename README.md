@@ -192,6 +192,24 @@ A few decisions worth knowing before changing anything here:
 - **An invoice with payments against it is locked.** Cancel and reissue rather
   than editing amounts under a recorded receipt. Only an untouched draft can be
   deleted; everything else is cancelled, so the sequence stays gapless.
+- **Four kinds of document, one model.** Quotation, invoice, proposal and
+  service agreement differ by numbering prefix, what the header says, and
+  whether the page carries money. A proposal is a quotation with an argument
+  attached; an agreement has no price at all, and the money lives in the
+  quotation it names.
+- **Proposals and agreements arrive prefilled.** `src/lib/billing-sections.ts`
+  holds the section library — executive summary, scope tables, inclusions,
+  exclusions, support, acceptance checklist, and the 21 clauses of the MSA.
+  Creating a document copies them onto it, where every heading, paragraph,
+  bullet and table cell is editable, and sections can be reordered, removed or
+  added back. What is stored is the finished text, not a pointer: an issued
+  document keeps the words it was issued with.
+  **The agreement clauses are a working draft, not legal advice, and have not
+  been reviewed by a lawyer.**
+- **Line items can be pulled from the site's own service catalogue**
+  (`src/lib/content/services.ts`), rather than a second price list kept beside
+  it. Two lists of prices drift, and the one on the invoice is the one the
+  client holds you to.
 - **Terms are ticked, not typed.** `src/lib/billing-terms.ts` holds the clause
   library; the editor shows them as checkboxes and the server composes the
   numbered block from what was ticked. The composed TEXT is stored on the
