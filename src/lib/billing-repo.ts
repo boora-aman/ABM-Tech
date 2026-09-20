@@ -1,9 +1,14 @@
 import { Types } from "mongoose";
 import { connectDb, isDbConfigured, plain } from "@/lib/db/mongoose";
-import { BillingDocModel, PaymentModel, ClientModel, CounterModel } from "@/lib/db/models";
-import { computeTotals, financialYear, type Line } from "@/lib/billing";
+import { BillingDocModel, PaymentModel, ClientModel } from "@/lib/db/models";
+import { computeTotals, type Line } from "@/lib/billing";
 import type { Section } from "@/lib/billing-sections";
+import { nextNumber, type DocKind } from "@/lib/billing-numbering";
+
+export { nextNumber };
+export type { DocKind };
 import { getSiteConfig } from "@/lib/content/repo";
+import { site } from "@/lib/site.config";
 import type { PdfBiz } from "@/lib/pdf/InvoiceDoc";
 
 /* ==========================================================================
@@ -14,8 +19,6 @@ import type { PdfBiz } from "@/lib/pdf/InvoiceDoc";
    plausible-looking invoice from stale data would be worse than showing an
    error, so every function here requires a live connection and says so.
    ========================================================================== */
-
-export type DocKind = "quotation" | "invoice" | "proposal" | "agreement";
 
 export class BillingUnavailable extends Error {
   constructor() {
@@ -161,48 +164,15 @@ export async function billingIdentity(): Promise<PdfBiz> {
     city: cfg.address.locality,
     region: cfg.address.region,
     postalCode: cfg.address.postalCode,
-    gstin: extra.gstin,
-    udyam: extra.udyam,
-    pan: extra.pan,
+    /* Per-field fallback to the committed defaults, the same way the rest of
+       the business identity resolves: a value cleared in the admin returns to
+       what is in site.config rather than vanishing off the document. */
+    gstin: extra.gstin || site.registration.gstin || undefined,
+    udyam: extra.udyam || site.registration.udyam || undefined,
+    pan: extra.pan || site.registration.pan || undefined,
     bankName: extra.bankName,
     bankAccount: extra.bankAccount,
     bankIfsc: extra.bankIfsc,
     upi: extra.upi,
-  };
-}
-
-const PREFIX = {
-  quotation: "QT",
-  invoice: "INV",
-  proposal: "PROP",
-  agreement: "MSA",
-} as const;
-
-/**
- * Reserve the next number for a kind and financial year.
- *
- * Atomic `$inc` with upsert, so two simultaneous creates get 7 and 8 rather
- * than both getting 7. Counting existing documents instead would race, and a
- * duplicate invoice number is not something you can quietly fix later.
- *
- * The number is consumed even if the caller then fails — a gap is a far
- * smaller problem than a repeat, and the alternative (releasing numbers) is
- * how you end up with two invoices sharing one.
- */
-export async function nextNumber(
-  kind: DocKind,
-  fy = financialYear(),
-): Promise<{ number: string; seq: number; fy: string }> {
-  const counter = await CounterModel.findOneAndUpdate(
-    { key: `${kind}-${fy}` },
-    { $inc: { seq: 1 } },
-    { new: true, upsert: true, setDefaultsOnInsert: true },
-  ).lean();
-
-  const seq = Number((counter as { seq?: number } | null)?.seq ?? 1);
-  return {
-    number: `ABM/${PREFIX[kind]}/${fy}/${String(seq).padStart(3, "0")}`,
-    seq,
-    fy,
   };
 }

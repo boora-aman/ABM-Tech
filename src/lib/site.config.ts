@@ -34,6 +34,18 @@ export const site = {
   locale: "en_IN",
   founded: "2024",
 
+  /* Registration numbers printed on quotations, invoices, proposals and
+     agreements. Committed here as the default so a document is correct before
+     anyone opens the admin; Business details overrides them per environment.
+     GSTIN stays empty until the business actually registers — an empty GSTIN
+     is what makes a document print as "Invoice" rather than "Tax Invoice",
+     charge no tax, and carry the line saying so. */
+  registration: {
+    udyam: or(process.env.NEXT_PUBLIC_UDYAM, "UDYAM-TS-25-0055497"),
+    gstin: or(process.env.NEXT_PUBLIC_GSTIN, ""),
+    pan: or(process.env.NEXT_PUBLIC_PAN, ""),
+  },
+
   contact: {
     email: or(process.env.NEXT_PUBLIC_CONTACT_EMAIL, "contact@abmtech.in"),
     phoneE164: or(process.env.NEXT_PUBLIC_PHONE_E164, "+919119756710"),

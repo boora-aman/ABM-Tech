@@ -210,6 +210,12 @@ A few decisions worth knowing before changing anything here:
   (`src/lib/content/services.ts`), rather than a second price list kept beside
   it. Two lists of prices drift, and the one on the invoice is the one the
   client holds you to.
+- **Sample data.** `npm run seed:billing` writes four clients and fourteen
+  documents across all four kinds, with part payments, an overdue invoice and a
+  settled one, so the screens and the receivables total have something real in
+  them. Every row it writes is tagged; `npm run seed:billing -- --clear`
+  deletes exactly what the tag matches. The numbers it consumes are not reused
+  when it clears — an issued number is spent.
 - **Terms are ticked, not typed.** `src/lib/billing-terms.ts` holds the clause
   library; the editor shows them as checkboxes and the server composes the
   numbered block from what was ticked. The composed TEXT is stored on the
