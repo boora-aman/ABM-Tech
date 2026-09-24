@@ -12,6 +12,10 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // The Remotion project is separate, with its own dependencies. On the VPS
+    // they are never installed, so linting or typechecking it from here fails
+    // on its imports and takes the site build down with it.
+    "video/**",
   ]),
 ]);
 

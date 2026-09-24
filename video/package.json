@@ -1,0 +1,24 @@
+{
+  "name": "abm-tech-video",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "studio": "remotion studio",
+    "render": "remotion render BrandReel out/abm-tech-brand-reel.mp4",
+    "render:square": "remotion render BrandReelSquare out/abm-tech-brand-reel-square.mp4",
+    "cover": "remotion still BrandReel out/abm-tech-brand-reel-cover.jpg --frame=75 --image-format=jpeg --jpeg-quality=92",
+    "render:all": "npm run render && npm run render:square && npm run cover",
+    "typecheck": "tsc --noEmit -p ."
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.528",
+    "@remotion/google-fonts": "4.0.528",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "remotion": "4.0.528"
+  },
+  "devDependencies": {
+    "@types/react": "^19",
+    "typescript": "^5"
+  }
+}
