@@ -159,6 +159,36 @@ export default async function ServicePage({ params }: RouteParams) {
 
       <Rule />
 
+      {/* The CRM ships with its Android app. Said here, on the page people
+          compare CRMs on, rather than only on the app's own page. */}
+      {s.slug === "crm" && (
+        <>
+          <section className="page-x py-12">
+            <div className="bay">
+              <Reveal>
+                <Link
+                  href="/abm-crm"
+                  className="group grid gap-5 rounded-sm border border-line bg-surface p-6 transition-colors hover:border-brand/40 sm:grid-cols-[1fr_auto] sm:items-center sm:p-7"
+                >
+                  <div>
+                    <Label className="mb-3">Included: the Android app</Label>
+                    <p className="font-display text-xl leading-snug tracking-[-0.015em]">
+                      Calls that log themselves, recordings on the lead, one-tap WhatsApp and GPS
+                      site visits — on every rep&apos;s phone.
+                    </p>
+                  </div>
+                  <span className="inline-flex items-center gap-2 text-[0.875rem] font-medium text-brand-ink">
+                    See the ABM CRM app
+                    <Arrow />
+                  </span>
+                </Link>
+              </Reveal>
+            </div>
+          </section>
+          <Rule />
+        </>
+      )}
+
       {/* ---------------------------- Deliverables ----------------------- */}
       <section className="page-x py-16 sm:py-20">
         <div className="bay">

@@ -42,3 +42,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# App binaries are served by nginx on the VPS, never committed: every APK
+# version would otherwise stay in the repository's history for good.
+public/downloads/
+*.apk

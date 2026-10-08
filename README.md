@@ -233,6 +233,46 @@ Emailing a document needs `RESEND_API_KEY` and a `RESEND_FROM` address on a
 domain verified in Resend. `sentAt` is written only after the send actually
 succeeds.
 
+## ABM CRM app download
+
+`/abm-crm` offers the Android APK. The file is **not** in git or in `public/`:
+a 49 MB binary would stay in the repository's history for every version ever
+shipped. nginx on the VPS serves it directly from its own folder:
+
+```nginx
+# Inside the 443 server block for abmtech.in in
+# /etc/nginx/sites-available/abmtech.in, above `location / {`.
+location /downloads/ {
+    alias /var/www/abmtech-downloads/;
+    types { application/vnd.android.package-archive apk; }
+    default_type application/octet-stream;
+    autoindex off;
+    add_header Content-Disposition "attachment" always;
+    add_header Cache-Control "public, max-age=86400" always;
+    # Repeated on purpose: an add_header in a location stops nginx inheriting
+    # the server block's headers, so without these the download URL would be
+    # served without HSTS and nosniff.
+    add_header X-Content-Type-Options nosniff always;
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+}
+```
+
+Releasing a new build:
+
+1. Copy it to the server: `scp ABM-CRM-<version>.apk <user>@<vps>:/var/www/abmtech-downloads/abm-crm-<version>.apk`
+2. Update `apk` in `src/lib/content/crm-app.ts` — version, versionCode, size in
+   bytes and SHA-256 (`sha256sum`). The page prints the hash so users can check
+   the download, so a stale one is worse than none.
+3. Deploy. Keep the previous APK on the server for a while; links to it may be
+   shared in WhatsApp.
+
+`NEXT_PUBLIC_CRM_APK_URL` overrides the download URL per environment.
+
+The screenshots in `public/crm/` were taken from the app on a phone and show
+no customer data. Re-shoot with demo data before adding any screen that lists
+leads, a lead's details, the team or a check-in — those show real names,
+phone numbers, emails and the phone's GPS position.
+
 ## SEO
 
 One connected `@graph` per page (`Organization`, `WebSite`, `Service` + `Offer`,
