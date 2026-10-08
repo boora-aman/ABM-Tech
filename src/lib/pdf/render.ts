@@ -1,6 +1,8 @@
 import { renderToBuffer, type DocumentProps } from "@react-pdf/renderer";
 import { createElement, type ReactElement } from "react";
 import { InvoiceDoc, type PdfBiz, type PdfDoc } from "./InvoiceDoc";
+import { ReceiptDoc } from "./ReceiptDoc";
+import type { ReceiptData } from "@/lib/billing-repo";
 
 /**
  * Render a billing document to a PDF buffer. Node runtime only.
@@ -12,6 +14,12 @@ import { InvoiceDoc, type PdfBiz, type PdfDoc } from "./InvoiceDoc";
  */
 export async function renderDocPdf(doc: PdfDoc, biz: PdfBiz): Promise<Buffer> {
   const el = createElement(InvoiceDoc, { doc, biz }) as unknown as ReactElement<DocumentProps>;
+  return renderToBuffer(el);
+}
+
+/** Render one payment's receipt. Same cast, same reason as renderDocPdf. */
+export async function renderReceiptPdf(receipt: ReceiptData, biz: PdfBiz): Promise<Buffer> {
+  const el = createElement(ReceiptDoc, { receipt, biz }) as unknown as ReactElement<DocumentProps>;
   return renderToBuffer(el);
 }
 

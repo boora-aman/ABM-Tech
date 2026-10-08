@@ -2,7 +2,14 @@ import { requireSession } from "@/lib/auth";
 import { plain } from "@/lib/db/mongoose";
 import { BillingDocModel, PaymentModel } from "@/lib/db/models";
 import { paymentWriteSchema } from "@/lib/validators";
-import { listPayments, syncStatus, getDoc, requireDb, BillingUnavailable } from "@/lib/billing-repo";
+import {
+  listPayments,
+  syncStatus,
+  getDoc,
+  ensureReceiptNumber,
+  requireDb,
+  BillingUnavailable,
+} from "@/lib/billing-repo";
 import { ok, fail } from "@/lib/api";
 
 export const runtime = "nodejs";
@@ -47,14 +54,19 @@ export async function POST(req: Request, { params }: Ctx) {
   const parsed = paymentWriteSchema.safeParse(body);
   if (!parsed.success) return fail("Validation failed.", 422, parsed.error.issues);
 
-  await PaymentModel.create({ ...parsed.data, docId: id });
+  const created = await PaymentModel.create({ ...parsed.data, docId: id });
+  /* Numbered now, in the order money arrives, so receipt numbers follow the
+     sequence the payments actually came in. */
+  await ensureReceiptNumber(String(created._id));
   /* A draft that has been paid against is no longer a draft, and syncStatus
      deliberately leaves drafts alone — so lift it here before recomputing. */
   if (doc.status === "draft")
     await BillingDocModel.updateOne({ _id: id }, { $set: { status: "sent" } });
   await syncStatus(id);
 
-  return ok(await getDoc(id), { status: 201 });
+  /* paymentId lets the caller go straight on to the receipt — preview it, or
+     email it — without re-listing payments to find the one just made. */
+  return ok({ ...(await getDoc(id)), paymentId: String(created._id) }, { status: 201 });
 }
 
 export async function DELETE(req: Request, { params }: Ctx) {

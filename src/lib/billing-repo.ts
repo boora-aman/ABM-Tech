@@ -97,7 +97,17 @@ export async function listPayments(docId: string) {
   const rows = await PaymentModel.find({ docId: toObjectId(docId) })
     .sort({ date: -1 })
     .lean();
-  return plain<{ id: string; amount: number; date: string; method: string; reference?: string; note?: string }>(rows);
+  return plain<{
+    id: string;
+    amount: number;
+    date: string;
+    method: string;
+    reference?: string;
+    note?: string;
+    number?: string;
+    receiptSentAt?: string;
+    receiptSentTo?: string;
+  }>(rows);
 }
 
 export async function listClients() {
@@ -174,5 +184,108 @@ export async function billingIdentity(): Promise<PdfBiz> {
     bankAccount: extra.bankAccount,
     bankIfsc: extra.bankIfsc,
     upi: extra.upi,
+  };
+}
+
+/* ==========================================================================
+   RECEIPTS
+   ========================================================================== */
+
+export type ReceiptData = {
+  /** ABM/RCT/26-27/001 */
+  number: string;
+  date: string;
+  amount: number;
+  method: string;
+  reference?: string;
+  note?: string;
+  invoice: {
+    id: string;
+    number: string;
+    issueDate: string;
+    dueDate?: string;
+    total: number;
+    client: Record<string, string | undefined>;
+  };
+  /** Received against this invoice before this payment. */
+  paidBefore: number;
+  /** Including this payment. */
+  paidToDate: number;
+  /** Left to pay once this payment is counted. */
+  balanceAfter: number;
+  sentAt?: string;
+  sentTo?: string;
+};
+
+/**
+ * Give a payment its receipt number if it has none.
+ *
+ * Payments recorded before receipts existed have no number. Rather than a
+ * migration that numbers them all at once — in whatever order the database
+ * happens to return them — each gets the next number the first time a receipt
+ * is asked for. The conditional update means two simultaneous requests cannot
+ * both assign one: the loser's number is simply spent, which is the same rule
+ * the documents follow.
+ */
+export async function ensureReceiptNumber(paymentId: string): Promise<string | null> {
+  await requireDb();
+  const current = await PaymentModel.findById(paymentId).lean();
+  if (!current) return null;
+  if (current.number) return current.number as string;
+
+  const { number } = await nextNumber("receipt");
+  await PaymentModel.updateOne(
+    { _id: paymentId, number: { $exists: false } },
+    { $set: { number } },
+  );
+  const after = await PaymentModel.findById(paymentId).lean();
+  return (after?.number as string) ?? null;
+}
+
+/**
+ * Everything a receipt prints, as of the moment that payment was made.
+ *
+ * A receipt is a snapshot. If three part payments arrive and the first
+ * receipt is reprinted after the third, it must still say what the balance
+ * was after the FIRST payment — not today's balance. So "before" and "after"
+ * are worked out from the payments that precede this one, in the order they
+ * were received, and never from the invoice's current state.
+ */
+export async function getReceipt(docId: string, paymentId: string): Promise<ReceiptData | null> {
+  await requireDb();
+  const doc = await getDoc(docId);
+  if (!doc || doc.kind !== "invoice") return null;
+
+  const number = await ensureReceiptNumber(paymentId);
+  const all = await PaymentModel.find({ docId: toObjectId(docId) })
+    .sort({ date: 1, createdAt: 1, _id: 1 })
+    .lean();
+  const at = all.findIndex((p) => String(p._id) === paymentId);
+  if (at === -1 || !number) return null;
+
+  const pay = all[at];
+  const paidBefore = all.slice(0, at).reduce((sum, p) => sum + Number(p.amount), 0);
+  const paidToDate = paidBefore + Number(pay.amount);
+
+  return {
+    number,
+    date: pay.date as string,
+    amount: Number(pay.amount),
+    method: pay.method as string,
+    reference: (pay.reference as string) || undefined,
+    note: (pay.note as string) || undefined,
+    invoice: {
+      id: doc.id,
+      number: doc.number,
+      issueDate: doc.issueDate,
+      dueDate: doc.dueDate,
+      total: doc.totals.total,
+      client: doc.client,
+    },
+    paidBefore,
+    paidToDate,
+    balanceAfter: Math.max(0, Math.round((doc.totals.total - paidToDate) * 100) / 100),
+    sentAt: pay.receiptSentAt ? new Date(pay.receiptSentAt as Date).toISOString() : undefined,
+    sentTo: (pay.receiptSentTo as string) || undefined,
   };
 }

@@ -19,6 +19,7 @@ const PREFIX = {
   invoice: "INV",
   proposal: "PROP",
   agreement: "MSA",
+  receipt: "RCT",
 } as const;
 
 /**
@@ -33,7 +34,7 @@ const PREFIX = {
  * how you end up with two invoices sharing one.
  */
 export async function nextNumber(
-  kind: DocKind,
+  kind: DocKind | "receipt",
   fy = financialYear(),
 ): Promise<{ number: string; seq: number; fy: string }> {
   const counter = await CounterModel.findOneAndUpdate(

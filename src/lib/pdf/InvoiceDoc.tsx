@@ -10,7 +10,7 @@ import { SectionBlock, SignatureBlock, FactsTable } from "@/lib/pdf/Blocks";
    are WinAnsi-encoded and have no ₹ — printing one produced a stray superscript
    glyph on the total line. "Rs." is what the encoding can actually draw, and is
    unambiguous on an Indian invoice. */
-const RUPEE = "Rs. ";
+export const RUPEE = "Rs. ";
 
 /* ==========================================================================
    PDF DOCUMENT
@@ -25,12 +25,12 @@ const RUPEE = "Rs. ";
    The brand shows in the layout and the one accent colour instead.
    ========================================================================== */
 
-const BRAND = "#D6400F";
-const INK = "#14161A";
-const DIM = "#4A5058";
-const FAINT = "#8A9099";
-const LINE = "#DCD9D2";
-const PAPER = "#F4F2ED";
+export const BRAND = "#D6400F";
+export const INK = "#14161A";
+export const DIM = "#4A5058";
+export const FAINT = "#8A9099";
+export const LINE = "#DCD9D2";
+export const PAPER = "#F4F2ED";
 
 /* The three bar fills and the apex datum of the real mark. Drawn as vector
    primitives rather than loaded as an image: an <Image> is a file read (or a
@@ -43,7 +43,7 @@ const MID = "#FF6A00";
 const WARM = "#FF8C00";
 const TEAL = "#00F5D4";
 
-function Mark({ size = 26 }: { size?: number }) {
+export function Mark({ size = 26 }: { size?: number }) {
   return (
     <Svg width={size} height={size} viewBox="0 0 40 40">
       <Path d="M4 31.5 L9.2 31.5 L13.4 20.5 L8.2 20.5 Z" fill={HOT} />
@@ -55,7 +55,7 @@ function Mark({ size = 26 }: { size?: number }) {
   );
 }
 
-const s = StyleSheet.create({
+export const s = StyleSheet.create({
   /* paddingBottom reserves the footer's band. The footer is absolutely
      positioned, so without the reservation a long terms block runs underneath
      it and the two overprint. */
@@ -103,6 +103,7 @@ const s = StyleSheet.create({
   metaRow: { flexDirection: "row", justifyContent: "flex-end", marginTop: 4 },
   metaLabel: { fontSize: 7, color: FAINT, letterSpacing: 0.7, fontFamily: "Helvetica-Bold" },
   metaValue: { fontSize: 8.5, color: DIM, width: 74, textAlign: "right" },
+  metaValueWide: { width: "auto", marginLeft: 10 },
 
   headRule: { height: 0.5, backgroundColor: LINE, marginTop: 16, marginBottom: 18 },
 
@@ -223,13 +224,143 @@ export type PdfDoc = {
   sowRef?: string;
 };
 
-const dateIn = (v?: string) => {
+export const dateIn = (v?: string) => {
   if (!v) return "";
   const d = new Date(v);
   return Number.isNaN(d.getTime())
     ? v
     : d.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
 };
+
+/** Address, web host and registration numbers, derived once from the identity. */
+export function bizLines(biz: PdfBiz) {
+  const bizAddrParts = [
+    biz.line1,
+    [biz.city, biz.region].filter(Boolean).join(", "),
+    biz.postalCode,
+  ].filter(Boolean);
+  return {
+    bizAddr: bizAddrParts.join("\n"),
+    bizAddrOneLine: bizAddrParts.join(", "),
+    /* The scheme is noise on paper — nobody types it and it lengthens the
+       line. A trailing slash likewise. */
+    webHost: (biz.url ?? "").replace(/^https?:\/\//, "").replace(/\/$/, ""),
+    regs: [
+      biz.gstin ? { label: "GSTIN", value: biz.gstin } : null,
+      biz.udyam ? { label: "UDYAM / MSME", value: biz.udyam } : null,
+      biz.pan ? { label: "PAN", value: biz.pan } : null,
+    ].filter(Boolean) as { label: string; value: string }[],
+  };
+}
+
+/**
+ * The top of every document: brand rule, lockup, contact block, the title and
+ * its facts on the right, then the registration strip.
+ *
+ * Shared by invoices, quotations, proposals, agreements and receipts, so a
+ * receipt cannot drift into looking like it came from a different company.
+ */
+export function Letterhead({
+  biz,
+  title,
+  number,
+  meta,
+}: {
+  biz: PdfBiz;
+  title: string;
+  number: string;
+  /** Label/value rows under the number, in order. */
+  meta: [string, string][];
+}) {
+  const { bizAddr, webHost, regs } = bizLines(biz);
+  return (
+    <>
+      <View style={s.topRule}>
+        <View style={s.topRuleA} />
+        <View style={s.topRuleB} />
+        <View style={s.topRuleC} />
+      </View>
+
+      <View style={s.head}>
+        <View>
+          <View style={s.lockup}>
+            <Mark size={28} />
+            <View style={s.lockupText}>
+              <Text style={s.bizName}>{biz.legalName || biz.name}</Text>
+              {biz.tagline ? (
+                <Text style={s.bizTagline}>{biz.tagline.toUpperCase()}</Text>
+              ) : null}
+            </View>
+          </View>
+
+          {bizAddr ? <Text style={s.bizLine}>{bizAddr}</Text> : null}
+          <Text style={s.bizLine}>
+            {[biz.phoneDisplay, biz.email].filter(Boolean).join("  ·  ")}
+          </Text>
+          {webHost ? <Text style={s.bizLine}>{webHost}</Text> : null}
+        </View>
+
+        <View>
+          <Text style={s.docTitle}>{title}</Text>
+          <Text style={s.docNumber}>{number}</Text>
+          {meta.map(([k, v]) => (
+            <View key={k} style={s.metaRow}>
+              <Text style={s.metaLabel}>{k}</Text>
+              {/* The 74pt column is sized for a date. A longer value — the
+                  invoice number on a receipt — overprinted its label, so it
+                  gets its own width and a gap instead. Dates keep the fixed
+                  column, which leaves every existing document unchanged. */}
+              <Text style={v.length > 12 ? [s.metaValue, s.metaValueWide] : s.metaValue}>{v}</Text>
+            </View>
+          ))}
+        </View>
+      </View>
+
+      {regs.length ? (
+        <View style={s.regs}>
+          {regs.map((r) => (
+            <View key={r.label} style={s.reg}>
+              <Text style={s.regLabel}>{r.label}</Text>
+              <Text style={s.regValue}>{r.value}</Text>
+            </View>
+          ))}
+        </View>
+      ) : null}
+
+      <View style={s.headRule} />
+    </>
+  );
+}
+
+/**
+ * The foot of every page. `fixed` repeats it: a second sheet with no contact
+ * details is a sheet nobody can act on, and the number rides along so a page
+ * separated from the rest still says which document it belongs to.
+ */
+export function Footer({ biz, number }: { biz: PdfBiz; number: string }) {
+  const { bizAddrOneLine, webHost } = bizLines(biz);
+  return (
+    <View style={s.foot} fixed>
+      <View style={s.footTop}>
+        <View style={s.footLockup}>
+          <Mark size={12} />
+          <Text style={s.footName}>{biz.legalName || biz.name}</Text>
+        </View>
+        <Text
+          style={s.footText}
+          render={({ pageNumber, totalPages }) =>
+            `${number}   ·   Page ${pageNumber} of ${totalPages}`
+          }
+        />
+      </View>
+      <Text style={s.footDetail}>
+        {[bizAddrOneLine, webHost, biz.email, biz.phoneDisplay]
+          .filter(Boolean)
+          .join("   ·   ")}
+      </Text>
+    </View>
+  );
+}
 
 export function InvoiceDoc({ doc, biz }: { doc: PdfDoc; biz: PdfBiz }) {
   const t = computeTotals(doc.lines, doc.discountPct, doc.taxRate, doc.taxMode);
@@ -263,27 +394,16 @@ export function InvoiceDoc({ doc, biz }: { doc: PdfDoc; biz: PdfBiz }) {
   const paid = Number(doc.amountPaid ?? 0);
   const due = Math.max(0, t.total - paid);
 
-  const bizAddrParts = [
-    biz.line1,
-    [biz.city, biz.region].filter(Boolean).join(", "),
-    biz.postalCode,
-  ].filter(Boolean);
-  const bizAddr = bizAddrParts.join("\n");
-  const bizAddrOneLine = bizAddrParts.join(", ");
-  /* The scheme is noise on paper — nobody types it and it lengthens the line.
-     A trailing slash likewise. */
-  const webHost = (biz.url ?? "").replace(/^https?:\/\//, "").replace(/\/$/, "");
-
-  const regs = [
-    biz.gstin ? { label: "GSTIN", value: biz.gstin } : null,
-    biz.udyam ? { label: "UDYAM / MSME", value: biz.udyam } : null,
-    biz.pan ? { label: "PAN", value: biz.pan } : null,
-  ].filter(Boolean) as { label: string; value: string }[];
+  const { bizAddr } = bizLines(biz);
 
   const terms = (doc.terms ?? "")
     .split("\n")
     .map((l) => l.trim())
     .filter(Boolean);
+
+  const meta: [string, string][] = [["DATED", dateIn(doc.issueDate)]];
+  if (isQuote && doc.validUntil) meta.push(["VALID UNTIL", dateIn(doc.validUntil)]);
+  if (!isQuote && doc.dueDate) meta.push(["DUE", dateIn(doc.dueDate)]);
 
   const cl = doc.client;
   const clientAddr = [cl.line1, cl.line2, [cl.city, cl.state].filter(Boolean).join(", "), cl.postalCode]
@@ -320,65 +440,7 @@ export function InvoiceDoc({ doc, biz }: { doc: PdfDoc; biz: PdfBiz }) {
       subject={`${title} for ${cl.company || cl.name || "client"}`}
     >
       <Page size="A4" style={s.page}>
-        <View style={s.topRule}>
-          <View style={s.topRuleA} />
-          <View style={s.topRuleB} />
-          <View style={s.topRuleC} />
-        </View>
-
-        <View style={s.head}>
-          <View>
-            <View style={s.lockup}>
-              <Mark size={28} />
-              <View style={s.lockupText}>
-                <Text style={s.bizName}>{biz.legalName || biz.name}</Text>
-                {biz.tagline ? (
-                  <Text style={s.bizTagline}>{biz.tagline.toUpperCase()}</Text>
-                ) : null}
-              </View>
-            </View>
-
-            {bizAddr ? <Text style={s.bizLine}>{bizAddr}</Text> : null}
-            <Text style={s.bizLine}>
-              {[biz.phoneDisplay, biz.email].filter(Boolean).join("  ·  ")}
-            </Text>
-            {webHost ? <Text style={s.bizLine}>{webHost}</Text> : null}
-          </View>
-
-          <View>
-            <Text style={s.docTitle}>{title}</Text>
-            <Text style={s.docNumber}>{doc.number}</Text>
-            <View style={s.metaRow}>
-              <Text style={s.metaLabel}>DATED</Text>
-              <Text style={s.metaValue}>{dateIn(doc.issueDate)}</Text>
-            </View>
-            {isQuote && doc.validUntil ? (
-              <View style={s.metaRow}>
-                <Text style={s.metaLabel}>VALID UNTIL</Text>
-                <Text style={s.metaValue}>{dateIn(doc.validUntil)}</Text>
-              </View>
-            ) : null}
-            {!isQuote && doc.dueDate ? (
-              <View style={s.metaRow}>
-                <Text style={s.metaLabel}>DUE</Text>
-                <Text style={s.metaValue}>{dateIn(doc.dueDate)}</Text>
-              </View>
-            ) : null}
-          </View>
-        </View>
-
-        {regs.length ? (
-          <View style={s.regs}>
-            {regs.map((r) => (
-              <View key={r.label} style={s.reg}>
-                <Text style={s.regLabel}>{r.label}</Text>
-                <Text style={s.regValue}>{r.value}</Text>
-              </View>
-            ))}
-          </View>
-        ) : null}
-
-        <View style={s.headRule} />
+        <Letterhead biz={biz} title={title} number={doc.number} meta={meta} />
 
         <View style={s.panels}>
           <View style={s.panel}>
@@ -560,31 +622,7 @@ export function InvoiceDoc({ doc, biz }: { doc: PdfDoc; biz: PdfBiz }) {
           />
         ) : null}
 
-        {/* `fixed` repeats this on every page. A two-page invoice whose second
-            sheet carries no contact details is a second sheet nobody can act
-            on. */}
-        <View style={s.foot} fixed>
-          <View style={s.footTop}>
-            <View style={s.footLockup}>
-              <Mark size={12} />
-              <Text style={s.footName}>{biz.legalName || biz.name}</Text>
-            </View>
-            {/* The number rides in the footer so that a second sheet, separated
-                from the first in somebody's pile of paper, still says which
-                document it belongs to. */}
-            <Text
-              style={s.footText}
-              render={({ pageNumber, totalPages }) =>
-                `${doc.number}   ·   Page ${pageNumber} of ${totalPages}`
-              }
-            />
-          </View>
-          <Text style={s.footDetail}>
-            {[bizAddrOneLine, webHost, biz.email, biz.phoneDisplay]
-              .filter(Boolean)
-              .join("   ·   ")}
-          </Text>
-        </View>
+        <Footer biz={biz} number={doc.number} />
       </Page>
     </Document>
   );

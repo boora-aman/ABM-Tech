@@ -406,6 +406,13 @@ const PaymentSchema = new Schema(
     },
     reference: String,
     note: String,
+    /* Each payment is its own receipt, numbered from its own sequence
+       (ABM/RCT/26-27/001). Assigned when the payment is recorded; payments
+       recorded before receipts existed get one the first time a receipt is
+       asked for. Sparse because those older rows have none yet. */
+    number: { type: String, unique: true, sparse: true, index: true },
+    receiptSentAt: Date,
+    receiptSentTo: String,
   },
   timestamps,
 );

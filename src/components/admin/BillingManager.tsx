@@ -63,7 +63,34 @@ type Payment = {
   method: string;
   reference?: string;
   note?: string;
+  /** Receipt number, ABM/RCT/26-27/001. */
+  number?: string;
+  receiptSentAt?: string;
+  receiptSentTo?: string;
 };
+
+type PayForm = {
+  docId: string;
+  amount: string;
+  date: string;
+  method: string;
+  reference: string;
+  note: string;
+  sendReceipt: boolean;
+  emailTo: string;
+};
+
+const METHODS: [string, string][] = [
+  ["upi", "UPI"],
+  ["neft", "NEFT"],
+  ["imps", "IMPS"],
+  ["rtgs", "RTGS"],
+  ["cash", "Cash"],
+  ["cheque", "Cheque"],
+  ["card", "Card"],
+  ["other", "Other"],
+];
+const methodLabel = (m: string) => METHODS.find(([k]) => k === m)?.[1] ?? m;
 
 type Draft = {
   id?: string;
@@ -172,6 +199,7 @@ export function BillingManager() {
   const [busy, setBusy] = useState(false);
   const [draft, setDraft] = useState<Draft | null>(null);
   const [open, setOpen] = useState<string | null>(null);
+  const [payForm, setPayForm] = useState<PayForm | null>(null);
   const [payments, setPayments] = useState<Record<string, Payment[]>>({});
   const [msg, setMsg] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
 
@@ -330,30 +358,100 @@ export function BillingManager() {
     );
   }
 
-  async function recordPayment(doc: Doc) {
-    const raw = window.prompt(
-      `Amount received against ${doc.number}.\nOutstanding: Rs. ${inrMoney(doc.balance)}`,
-      String(doc.balance),
-    );
-    if (!raw) return;
-    const amount = Number(raw);
+  /* A form, not a chain of browser prompts. Three prompts in a row gave no
+     way to see the outstanding balance while typing the amount, no way to
+     pick a method except by spelling it, and no way back from a typo short
+     of cancelling and starting again. */
+  function recordPayment(doc: Doc) {
+    setOpen(doc.id);
+    if (!payments[doc.id]) void loadPayments(doc.id);
+    setPayForm({
+      docId: doc.id,
+      amount: String(doc.balance),
+      date: today(),
+      method: "upi",
+      reference: "",
+      note: "",
+      sendReceipt: Boolean(doc.client.email),
+      emailTo: doc.client.email ?? "",
+    });
+  }
+
+  async function submitPayment(doc: Doc) {
+    if (!payForm) return;
+    const amount = Number(payForm.amount);
     if (!Number.isFinite(amount) || amount <= 0) {
-      setMsg({ kind: "err", text: "That is not an amount." });
+      setMsg({ kind: "err", text: "Enter the amount received." });
       return;
     }
-    const method =
-      window.prompt("Method — upi, neft, imps, rtgs, cash, cheque, card, other", "upi") ?? "upi";
-    const reference = window.prompt("Reference / UTR (optional)", "") ?? "";
-    await call(
+    /* Overpayment is allowed — it happens — but never by accident. */
+    if (
+      amount > doc.balance + 0.005 &&
+      !window.confirm(
+        `Rs. ${inrMoney(amount)} is more than the Rs. ${inrMoney(doc.balance)} still due on ${doc.number}. Record it anyway?`,
+      )
+    )
+      return;
+
+    const made = await call(
       `/api/admin/billing/docs/${doc.id}/payments`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ amount, date: today(), method, reference }),
+        body: JSON.stringify({
+          amount,
+          date: payForm.date,
+          method: payForm.method,
+          reference: payForm.reference,
+          note: payForm.note,
+        }),
       },
-      `Rs. ${inrMoney(amount)} recorded against ${doc.number}.`,
     );
-    if (open === doc.id) await loadPayments(doc.id);
+    if (!made) return;
+
+    const paymentId = (made as { paymentId?: string }).paymentId;
+    let text = `Rs. ${inrMoney(amount)} recorded against ${doc.number}.`;
+
+    /* Sending is a second step on purpose. If email fails the payment is
+       still recorded — money that arrived must never be lost because a mail
+       server was down — and the receipt can be sent again from the list. */
+    if (payForm.sendReceipt && payForm.emailTo.trim() && paymentId) {
+      const res = await fetch(`/api/admin/billing/docs/${doc.id}/payments/${paymentId}/receipt`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ to: payForm.emailTo.trim() }),
+      });
+      const json = await res.json().catch(() => ({ ok: false, error: "No response." }));
+      text += json.ok
+        ? ` Receipt ${json.data.number} emailed to ${payForm.emailTo.trim()}.`
+        : ` The receipt was NOT emailed: ${json.error} You can send it from the payment list.`;
+      setMsg({ kind: json.ok ? "ok" : "err", text });
+    } else {
+      setMsg({ kind: "ok", text });
+    }
+
+    setPayForm(null);
+    await loadPayments(doc.id);
+  }
+
+  async function emailReceipt(doc: Doc, p: Payment) {
+    const to = window.prompt(
+      `Email receipt ${p.number ?? ""} to which address?`,
+      p.receiptSentTo || doc.client.email || "",
+    );
+    if (!to) return;
+    const sent = await call(
+      `/api/admin/billing/docs/${doc.id}/payments/${p.id}/receipt`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ to }),
+      },
+    );
+    if (sent) {
+      setMsg({ kind: "ok", text: `Receipt ${(sent as { number: string }).number} emailed to ${to}.` });
+      await loadPayments(doc.id);
+    }
   }
 
   async function convert(doc: Doc) {
@@ -973,20 +1071,186 @@ export function BillingManager() {
                   {doc.kind === "invoice" && (payments[doc.id]?.length ?? 0) > 0 && (
                     <div className="mb-4">
                       <Label className="mb-2" tick={false}>
-                        Payments
+                        Payments &amp; receipts
                       </Label>
-                      <ul className="grid gap-1.5 text-[0.8125rem]">
+                      <ul className="grid gap-2 text-[0.8125rem]">
                         {payments[doc.id].map((p) => (
-                          <li key={p.id} className="flex justify-between gap-4">
-                            <span className="text-ink-dim">
-                              {p.date} · {p.method}
-                              {p.reference ? ` · ${p.reference}` : ""}
-                            </span>
-                            <span className="tabular-nums">{inrMoney(p.amount)}</span>
+                          <li
+                            key={p.id}
+                            className="grid gap-2 rounded-sm border border-line px-3 py-2.5 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center"
+                          >
+                            <div className="min-w-0">
+                              <p className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5">
+                                <span className="font-mono text-[0.8125rem]">
+                                  {p.number ?? "receipt no. on first view"}
+                                </span>
+                                <span className="font-semibold tabular-nums">
+                                  Rs. {inrMoney(p.amount)}
+                                </span>
+                              </p>
+                              <p className="mt-0.5 text-[0.75rem] text-ink-dim">
+                                {p.date} · {methodLabel(p.method)}
+                                {p.reference ? ` · ${p.reference}` : ""}
+                                {p.receiptSentTo
+                                  ? ` · receipt emailed to ${p.receiptSentTo}`
+                                  : ""}
+                              </p>
+                            </div>
+                            <div className="flex flex-wrap gap-1.5">
+                              <a
+                                className="inline-flex items-center rounded-sm border border-line px-2.5 py-1 text-[0.75rem] hover:border-line-strong"
+                                href={`/api/admin/billing/docs/${doc.id}/payments/${p.id}/receipt`}
+                                target="_blank"
+                                rel="noreferrer"
+                              >
+                                Receipt
+                              </a>
+                              <a
+                                className="inline-flex items-center rounded-sm border border-line px-2.5 py-1 text-[0.75rem] hover:border-line-strong"
+                                href={`/api/admin/billing/docs/${doc.id}/payments/${p.id}/receipt?download=1`}
+                              >
+                                Download
+                              </a>
+                              <button
+                                type="button"
+                                className="inline-flex items-center rounded-sm border border-line px-2.5 py-1 text-[0.75rem] hover:border-line-strong disabled:opacity-50"
+                                onClick={() => emailReceipt(doc, p)}
+                                disabled={busy}
+                              >
+                                {p.receiptSentAt ? "Email again" : "Email"}
+                              </button>
+                            </div>
                           </li>
                         ))}
                       </ul>
                     </div>
+                  )}
+
+                  {payForm?.docId === doc.id && (
+                    <Card raised className="mb-4 p-4">
+                      <div className="mb-3 flex items-center justify-between gap-3">
+                        <p className="text-[0.875rem] font-medium">
+                          Record payment against {doc.number}
+                        </p>
+                        <span className="text-[0.75rem] text-ink-dim">
+                          Still due Rs. {inrMoney(doc.balance)}
+                        </span>
+                      </div>
+
+                      <div className="grid gap-3 sm:grid-cols-3">
+                        <Field label="Amount received">
+                          <input
+                            className={input}
+                            type="number"
+                            min={0}
+                            step="any"
+                            inputMode="decimal"
+                            value={payForm.amount}
+                            onChange={(e) => setPayForm({ ...payForm, amount: e.target.value })}
+                          />
+                        </Field>
+                        <Field label="Date received">
+                          <input
+                            className={input}
+                            type="date"
+                            value={payForm.date}
+                            onChange={(e) => setPayForm({ ...payForm, date: e.target.value })}
+                          />
+                        </Field>
+                        <Field label="Method">
+                          <select
+                            className={input}
+                            value={payForm.method}
+                            onChange={(e) => setPayForm({ ...payForm, method: e.target.value })}
+                          >
+                            {METHODS.map(([k, label]) => (
+                              <option key={k} value={k}>
+                                {label}
+                              </option>
+                            ))}
+                          </select>
+                        </Field>
+                      </div>
+
+                      {/* Quick picks for the two amounts that are almost always
+                          the answer: the whole balance, or half of it. */}
+                      <div className="mt-2 flex flex-wrap gap-1.5">
+                        {[
+                          ["Full balance", doc.balance],
+                          ["Half", Math.round(doc.balance / 2)],
+                        ].map(([label, v]) => (
+                          <button
+                            key={String(label)}
+                            type="button"
+                            className="rounded-full border border-line px-2.5 py-0.5 text-[0.75rem] text-ink-dim hover:border-line-strong"
+                            onClick={() => setPayForm({ ...payForm, amount: String(v) })}
+                          >
+                            {label} · {inrMoney(Number(v))}
+                          </button>
+                        ))}
+                      </div>
+
+                      <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                        <Field label="Reference / UTR / cheque no.">
+                          <input
+                            className={input}
+                            value={payForm.reference}
+                            onChange={(e) => setPayForm({ ...payForm, reference: e.target.value })}
+                          />
+                        </Field>
+                        <Field label="Note on the receipt" hint="Optional. Printed on the receipt.">
+                          <input
+                            className={input}
+                            value={payForm.note}
+                            onChange={(e) => setPayForm({ ...payForm, note: e.target.value })}
+                          />
+                        </Field>
+                      </div>
+
+                      <label className="mt-3 flex items-center gap-2.5 text-[0.8125rem]">
+                        <input
+                          type="checkbox"
+                          className="size-4 accent-[var(--color-brand)]"
+                          checked={payForm.sendReceipt}
+                          onChange={(e) => setPayForm({ ...payForm, sendReceipt: e.target.checked })}
+                        />
+                        Email the receipt to
+                        <input
+                          className={cn(input, "w-auto min-w-0 flex-1")}
+                          type="email"
+                          value={payForm.emailTo}
+                          disabled={!payForm.sendReceipt}
+                          onChange={(e) => setPayForm({ ...payForm, emailTo: e.target.value })}
+                        />
+                      </label>
+
+                      {(() => {
+                        const a = Number(payForm.amount);
+                        if (!Number.isFinite(a) || a <= 0) return null;
+                        const left = Math.max(0, doc.balance - a);
+                        return (
+                          <p className="mt-3 text-[0.75rem] text-ink-dim">
+                            {left <= 0.005
+                              ? "This settles the invoice. The receipt will say paid in full."
+                              : `Part payment. Rs. ${inrMoney(left)} will still be due after this.`}
+                          </p>
+                        );
+                      })()}
+
+                      <div className="mt-4 flex gap-2">
+                        <Button
+                          variant="primary"
+                          size="sm"
+                          onClick={() => submitPayment(doc)}
+                          disabled={busy}
+                        >
+                          {busy ? "Saving…" : "Record payment"}
+                        </Button>
+                        <Button variant="ghost" size="sm" onClick={() => setPayForm(null)}>
+                          Cancel
+                        </Button>
+                      </div>
+                    </Card>
                   )}
 
                   {doc.sentAt && (
@@ -1014,7 +1278,10 @@ export function BillingManager() {
                     <Button variant="outline" size="sm" onClick={() => emailDoc(doc)} disabled={busy}>
                       Email
                     </Button>
-                    {doc.kind === "invoice" && doc.balance > 0 && doc.status !== "cancelled" && (
+                    {doc.kind === "invoice" &&
+                      doc.balance > 0 &&
+                      doc.status !== "cancelled" &&
+                      payForm?.docId !== doc.id && (
                       <Button variant="primary" size="sm" onClick={() => recordPayment(doc)} disabled={busy}>
                         Record payment
                       </Button>
