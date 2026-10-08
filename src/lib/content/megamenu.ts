@@ -38,11 +38,14 @@ export async function getMenuPanels(): Promise<MenuPanel[]> {
   const serviceColumns: MenuColumn[] = pillars
     .map((p) => ({
       title: p.name,
-      links: byPillar(p.key).map((s) => ({
-        href: `/services/${s.slug}`,
-        label: s.title,
-        note: s.short,
-      })),
+      links: byPillar(p.key).flatMap((s) => {
+        const link = { href: `/services/${s.slug}`, label: s.title, note: s.short };
+        /* The Android app is listed directly under the CRM it ships with, so
+           someone browsing for a CRM finds the app in the same glance. */
+        return s.slug === "crm"
+          ? [link, { href: "/abm-crm", label: "ABM CRM Android app", note: "Included" }]
+          : [link];
+      }),
     }))
     .filter((c) => c.links.length > 0);
 

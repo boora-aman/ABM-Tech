@@ -103,10 +103,12 @@ export function Header({
             aria-label={`${site.name} — home`}
             className="flex min-w-0 shrink items-center transition-opacity hover:opacity-75"
           >
-            <span className="hidden sm:block">
+            {/* The compact mark between lg and xl too: the tagline is wider
+                than the name, and at 1024px it ran under the eight-item menu. */}
+            <span className="hidden sm:block lg:hidden xl:block">
               <Wordmark size={28} />
             </span>
-            <span className="sm:hidden">
+            <span className="sm:hidden lg:block xl:hidden">
               <Wordmark size={26} compact />
             </span>
           </Link>
@@ -129,7 +131,10 @@ export function Header({
                       aria-expanded={panel ? isOpen : undefined}
                       onFocus={() => openMenu(item.href)}
                       className={cn(
-                        "relative flex items-center gap-1.5 rounded-sm px-3.5 py-2 text-[0.875rem] font-medium",
+                        /* nowrap: a two-word item ("CRM App") otherwise breaks onto
+                           two lines when the bar is tight. Padding steps down at
+                           lg so eight items still fit at 1024px. */
+                        "relative flex items-center gap-1.5 whitespace-nowrap rounded-sm px-2 py-2 text-[0.875rem] font-medium xl:px-3.5",
                         "transition-colors duration-200",
                         active(item.href) || isOpen
                           ? "text-brand-ink"
@@ -166,9 +171,12 @@ export function Header({
           </nav>
 
           <div className="ml-auto flex shrink-0 items-center gap-2 lg:ml-4">
+            {/* 2xl, not xl: with eight menu items the bar runs out of room
+                below 1536px and the logo slid under the menu. The number is
+                still in the mobile menu, the footer and on /contact. */}
             <a
               href={`tel:${contact.phoneE164}`}
-              className="hidden text-[0.8125rem] font-medium text-ink-dim transition-colors hover:text-brand-ink xl:block"
+              className="hidden text-[0.8125rem] font-medium text-ink-dim transition-colors hover:text-brand-ink 2xl:block"
             >
               {contact.phoneDisplay}
             </a>

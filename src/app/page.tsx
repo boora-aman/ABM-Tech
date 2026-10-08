@@ -8,6 +8,7 @@ import { Shifts } from "@/components/sections/Shifts";
 import { Approach } from "@/components/sections/Approach";
 import { Faq } from "@/components/sections/Faq";
 import { Cta } from "@/components/sections/Cta";
+import { CrmAppBand } from "@/components/sections/CrmAppBand";
 import { Rule } from "@/components/ui/Panel";
 import { JsonLd } from "@/components/seo/JsonLd";
 import {
@@ -29,6 +30,7 @@ import { site } from "@/lib/site.config";
      Systems   — here are the six, pick the one that hurts
      Industries— and here is what they are called in your sector
      Services  — here is what each one costs
+     CRM app   — and here is the product that comes with the CRM
      Shifts    — here is what changes, without inventing a percentage
      Showcase  — here is one we built
      Approach  — here is how we work
@@ -94,6 +96,8 @@ export default async function HomePage() {
       />
       <Rule />
       <ServiceGrid services={services} initial={6} settings={settings} />
+      <Rule />
+      <CrmAppBand />
       <Rule />
       <Shifts />
       <Showcase slides={slides} />

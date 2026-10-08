@@ -174,10 +174,14 @@ export function isPlaceholder(v: string | number | null | undefined) {
 
 export const nav = [
   { href: "/services", label: "Services", index: "01" },
-  { href: "/industries", label: "Industries", index: "02" },
-  { href: "/pricing", label: "Pricing", index: "03" },
-  { href: "/work", label: "Work", index: "04" },
-  { href: "/blog", label: "Journal", index: "05" },
-  { href: "/about", label: "About", index: "06" },
-  { href: "/contact", label: "Contact", index: "07" },
+  /* The product, second only to the services it ships with. A top-level item
+     rather than a line inside the Services panel because the mobile menu
+     lists these items only, and the app is what a phone visitor most wants. */
+  { href: "/abm-crm", label: "CRM App", index: "02" },
+  { href: "/industries", label: "Industries", index: "03" },
+  { href: "/pricing", label: "Pricing", index: "04" },
+  { href: "/work", label: "Work", index: "05" },
+  { href: "/blog", label: "Journal", index: "06" },
+  { href: "/about", label: "About", index: "07" },
+  { href: "/contact", label: "Contact", index: "08" },
 ] as const;

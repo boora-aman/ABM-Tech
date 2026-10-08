@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { PageHead } from "@/components/sections/PageHead";
 import { ServiceCatalogue } from "@/components/sections/ServiceCatalogue";
 import { Cta } from "@/components/sections/Cta";
+import { CrmAppBand } from "@/components/sections/CrmAppBand";
 import { Faq } from "@/components/sections/Faq";
 import { Card, Rule } from "@/components/ui/Panel";
 import { ButtonLink, Arrow } from "@/components/ui/Button";
@@ -88,6 +89,8 @@ export default async function ServicesPage() {
         }
       />
 
+      <Rule />
+      <CrmAppBand />
       <Rule />
       <ServiceCatalogue services={services} pillars={pillars} />
       <Rule />
